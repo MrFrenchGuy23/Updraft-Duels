@@ -160,6 +160,9 @@ With PlaceholderAPI installed, use `%updraftduels_<placeholder>%` in messages/sc
 
 - **Players get teleported to the wrong world / can't be hit during duels** – enable `duel.debug: true` in
   `config.yml` and check the `[DuelDebug]` console lines for the arena's spawn world vs. its `boxX/boxZ` bounds.
+- **A player falls through the arena / a "fake body" stays where they fell** – players who drop below the
+  arena floor are now pulled back up to their spawn automatically. Tune `duel.arena-floor-pull-margin`
+  (blocks below the arena before the pull kicks in). Sumo/spleef rulesets are exempt on purpose.
 - **Arena boundary warnings while standing inside** – ensure `pos1`/`pos2` horizontally cover your spawn points.
 
 ## License

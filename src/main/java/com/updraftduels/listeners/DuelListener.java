@@ -222,10 +222,10 @@ public class DuelListener implements Listener {
                     + "' | world=" + world + " | to=" + fmtLoc(event.getTo())
                     + " | arena=" + (arena == null ? "NOT_FOUND" : arena.getName() + " configured=" + arena.isConfigured()));
         }
-        enforceArenaBoundary(event, player, arena);
+        enforceArenaBoundary(event, player, arena, duel);
     }
 
-    private void enforceArenaBoundary(PlayerMoveEvent event, Player player, Arena arena) {
+    private void enforceArenaBoundary(PlayerMoveEvent event, Player player, Arena arena, Duel duel) {
         if (arena == null || !arena.isConfigured()) {
             if (duelDebug()) plugin.getLogger().info("[DuelDebug] " + player.getName() + " boundary skipped: arena null/not configured");
             return;
@@ -247,21 +247,51 @@ public class DuelListener implements Listener {
         double maxX = Math.max(pos1.getX(), pos2.getX());
         double minZ = Math.min(pos1.getZ(), pos2.getZ());
         double maxZ = Math.max(pos1.getZ(), pos2.getZ());
+        double minY = Math.min(pos1.getY(), pos2.getY());
 
-        // Only enforce horizontally. Y is ignored so jumping/falling/standing never
-        // triggers the boundary (arena corners are set at eye level, feet are below it).
-        if (to.getX() >= minX && to.getX() <= maxX && to.getZ() >= minZ && to.getZ() <= maxZ) return;
+        // Falling through the arena floor is the intended loss condition for
+        // sumo/knockback and spleef-style rulesets, so never yank those players back.
+        Ruleset ruleset = plugin.getRulesetManager().getRuleset(duel.getRulesetId());
+        boolean fallingIsLoss = ruleset != null && (ruleset.isNoDamage() || ruleset.isBreakableFloor());
+        double floorPullMargin = plugin.getConfig().getDouble("duel.arena-floor-pull-margin", 3.0);
+        boolean belowFloor = !fallingIsLoss && to.getY() < minY - floorPullMargin;
+
+        // Only enforce horizontally for normal movement. Y is only checked against the
+        // arena floor so players who fall through it (broken blocks) get pulled back up
+        // instead of falling into the void and leaving a "fake body" behind.
+        if (to.getX() >= minX && to.getX() <= maxX && to.getZ() >= minZ && to.getZ() <= maxZ && !belowFloor) return;
 
         Location safe = to.clone();
         safe.setX(Math.min(Math.max(to.getX(), minX), maxX));
         safe.setZ(Math.min(Math.max(to.getZ(), minZ), maxZ));
+
+        if (belowFloor) {
+            Location spawn = arena.getSpawn(duel.getTeamIndex(player.getUniqueId()));
+            if (spawn == null) spawn = arena.getCenter();
+            if (spawn != null) {
+                safe = spawn.clone();
+                safe.setYaw(to.getYaw());
+                safe.setPitch(to.getPitch());
+            }
+            player.setFallDistance(0);
+            player.setVelocity(new org.bukkit.util.Vector(0, 0, 0));
+        }
+
         event.setTo(safe);
 
+        // A setTo() correction alone only sends a move update to the falling player.
+        // For a large correction (falling through the arena) send a real teleport packet
+        // so every client re-syncs and no "fake body" is left behind.
+        if (belowFloor || to.distanceSquared(safe) > 16.0) {
+            player.teleport(safe);
+        }
+
         if (duelDebug()) {
-            plugin.getLogger().info("[DuelDebug] " + player.getName() + " CLAMPED outside arena '" + arena.getName()
-                    + "' | to=" + fmtLoc(to)
+            plugin.getLogger().info("[DuelDebug] " + player.getName() + (belowFloor ? " PULLED UP from below arena '" : " CLAMPED outside arena '")
+                    + arena.getName() + "' | to=" + fmtLoc(to)
                     + " | box X[" + String.format("%.1f", minX) + ".." + String.format("%.1f", maxX) + "]"
                     + " Z[" + String.format("%.1f", minZ) + ".." + String.format("%.1f", maxZ) + "]"
+                    + " Y>=" + String.format("%.1f", minY - floorPullMargin)
                     + " | new=" + fmtLoc(safe));
         }
 

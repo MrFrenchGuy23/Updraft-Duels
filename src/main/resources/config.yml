@@ -13,6 +13,10 @@ duel:
   # Set to true to log arena boundary checks and duel teleports to the console.
   # Use this to debug players getting teleported to the wrong world or "can't leave arena" issues.
   debug: false
+  # How far a player may fall below the arena before being pulled back up to their
+  # spawn. Prevents falling through the arena into the void (and the "fake body" glitch).
+  # Not applied to sumo/knockback or spleef rulesets where falling is the loss condition.
+  arena-floor-pull-margin: 3
 
 arena:
   # Arenas where players may freely break/place blocks during a duel.

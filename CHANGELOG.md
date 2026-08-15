@@ -11,6 +11,10 @@ Releases are also published automatically to GitHub Releases when a `v*` tag is 
 - FFA feature (command, manager, model, config, permissions).
 
 ### Fixed
+- Players who fall through the arena floor are pulled back up to their spawn instead of dropping into
+  the void (configurable via `duel.arena-floor-pull-margin`); the teleport forces a client re-sync so
+  other players no longer see a "fake body" where the player fell. Sumo/spleef rulesets are exempt
+  (falling is the loss condition there).
 - Anti-spam cooldowns now also apply to the kit-GUI duel flow, `/friend duel`, and the RTP queue.
 - Knockback/no-damage rulesets (e.g. sumo) can now end: void damage is no longer cancelled.
 - Game mode and flight state are saved/restored across duels (creative/spectator players are no longer forced to survival).
