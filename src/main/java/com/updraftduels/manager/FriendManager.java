@@ -122,10 +122,12 @@ public class FriendManager {
         plugin.getDatabase().getFriends(uuid).thenAccept(friends -> {
             friendsCache.put(uuid, friends);
             if (plugin.getConfig().getBoolean("friends.notify-online", true)) {
-                Player player = Bukkit.getPlayer(uuid);
-                if (player != null && player.isOnline()) {
-                    notifyFriendOnline(player);
-                }
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    Player player = Bukkit.getPlayer(uuid);
+                    if (player != null && player.isOnline()) {
+                        notifyFriendOnline(player);
+                    }
+                });
             }
         });
         plugin.getDatabase().getAutoAccepted(uuid).thenAccept(auto -> {
