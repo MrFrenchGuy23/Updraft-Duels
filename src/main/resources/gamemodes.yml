@@ -1,0 +1,80 @@
+# Gamemode Config
+# Each gamemode has one kit and one or more arenas.
+# Click a gamemode in the queue → joins directly with that kit.
+
+Sword:
+  kit: Sword
+  icon: DIAMOND_SWORD
+  arenas:
+    - Arena1
+    - Arena2
+
+Axe:
+  kit: Axe
+  icon: DIAMOND_AXE
+  arenas:
+    - Arena1
+    - Arena2
+
+Mace:
+  kit: Mace
+  icon: MACE
+  arenas:
+    - Arena1
+    - Arena2
+
+Pot:
+  kit: Pot
+  icon: SPLASH_POTION
+  arenas:
+    - Arena1
+    - Arena2
+
+Spear:
+  kit: Spear
+  icon: NETHERITE_SPEAR
+  arenas:
+    - Arena1
+    - Arena2
+
+UHC:
+  kit: UHC
+  icon: GOLDEN_APPLE
+  arenas:
+    - Arena1
+    - Arena2
+
+SMP:
+  kit: SMP
+  icon: SHIELD
+  arenas:
+    - Arena1
+    - Arena2
+
+Dimsmp:
+  kit: Dimsmp
+  icon: CHORUS_FRUIT
+  arenas:
+    - Arena1
+    - Arena2
+
+Nethpot:
+  kit: Nethpot
+  icon: NETHERITE_CHESTPLATE
+  arenas:
+    - Arena1
+    - Arena2
+
+Cart:
+  kit: Cart
+  icon: TNT_MINECART
+  arenas:
+    - Arena1
+    - Arena2
+
+Crystal:
+  kit: Crystal
+  icon: END_CRYSTAL
+  arenas:
+    - Arena1
+    - Arena2

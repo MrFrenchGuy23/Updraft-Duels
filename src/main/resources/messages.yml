@@ -1,0 +1,258 @@
+# UpdraftDuels Messages
+# All messages support & color codes and PlaceholderAPI placeholders
+
+# ===========================
+# Duel Messages
+# ===========================
+duel:
+  request-sent: "&aDuel request sent to &f%player%&a."
+  request-received: "&f%player% &achallenged you to a duel. Click to accept or &c/duel deny"
+  request-accepted: "&aYou accepted the duel from &f%player%&a."
+  request-denied: "&cYou denied the duel from &f%player%&c."
+  request-expired: "&7Your duel request to &f%player% &7expired."
+  already-in-duel: "&cYou are already in a duel."
+  target-in-duel: "&cThat player is already in a duel."
+  no-leaving-arena: "&cYou cannot leave the arena."
+  target-in-queue: "&cThat player is in a queue."
+  cannot-duel-self: "&cYou cannot duel yourself."
+  no-pending-requests: "&7You have no pending duel requests."
+  duel-cancelled: "&cThe duel was cancelled."
+  opponent-offline: "&cYour opponent went offline. Duel cancelled."
+  teleporting: "&7Teleporting in &f%delay% &7seconds."
+  countdown: "&f%count%"
+  duel-started: "&aDuel started. Good luck!"
+  you-won: "&aYou won the duel."
+  you-lost: "&cYou lost the duel."
+  draw: "&7The duel ended in a draw."
+  stats-updated: "&7Wins: &a%wins% &7| Losses: &c%losses% &7| ELO: &f%elo%"
+  request-max-reached: "&cYou have too many pending duel requests. Wait for some to expire."
+
+# ===========================
+# Arena Messages
+# ===========================
+arena:
+  created: "&aArena &f%name% &acreated."
+  deleted: "&aArena &f%name% &adeleted."
+  not-found: "&cArena &f%name% &cnot found."
+  pos1-set: "&aArena &f%name% &apos1 set."
+  pos2-set: "&aArena &f%name% &apos2 set."
+  spawn-set: "&aTeam &f%team% &aspawn set for arena &f%name%&a."
+  full: "&cArena &f%name% &cis full."
+  in-use: "&cArena &f%name% &cis in use."
+  list-header: "&fArenas:"
+  list-entry: "&7- &f%name% &7(%status%)"
+  regeneration: "&7Regenerating arena &f%name%&7."
+  no-arenas: "&cNo arenas available."
+
+# ===========================
+# Kit Messages
+# ===========================
+kit:
+  created: "&aKit &f%name% &acreated."
+  edited: "&aKit &f%name% &aupdated."
+  deleted: "&aKit &f%name% &adeleted."
+  not-found: "&cKit &f%name% &cnot found."
+  equipped: "&aEquipped kit &f%name%&a."
+  public-created: "&aPublic kit &f%name% &acreated."
+  public-edited: "&aPublic kit &f%name% &aupdated."
+  public-deleted: "&aPublic kit &f%name% &adeleted."
+  no-access: "&cYou don't have access to this kit."
+  inventory-saved: "&aInventory saved to kit &f%name%&a."
+  already-exists: "&cA kit with that name already exists."
+  kit-list-header: "&fKits:"
+  kit-list-personal: "&fPersonal: &f%kits%"
+  kit-list-public: "&fPublic: &f%kits%"
+
+# ===========================
+# Party Messages
+# ===========================
+party:
+  created: "&aParty created. Use &f/party invite <player> &ato add members."
+  invite-sent: "&aInvited &f%player% &ato your party."
+  invite-received: "&f%player% &ainvited you to a party. Click to accept or &c/party leave"
+  invite-accepted: "&f%player% &ajoined your party."
+  invite-declined: "&c%player% &cdeclined your party invite."
+  already-in-party: "&cYou are already in a party."
+  not-in-party: "&cYou are not in a party."
+  party-full: "&cYour party is full."
+  left: "&7You left the party."
+  member-left: "&f%player% &7left the party."
+  disbanded: "&7The party was disbanded."
+  kicked: "&cYou were kicked from the party."
+  kicked-player: "&aYou kicked &f%player% &afrom the party."
+  leader-changed: "&f%player% &ais now the party leader."
+  party-list: "&fParty: &f%leader% &7(Leader) - &f%members%"
+  chat-prefix: "&9[Party] &f"
+  wrong-size: "&cParties must be the same size to duel."
+  ready-check: "&eReady check. Type &f/party ready &eto confirm."
+  ready-check-complete: "&aAll party members are ready. Duel starting."
+  member-not-ready: "&c%player% &cis not ready."
+  member-disconnected: "&c%player% &cdisconnected. Duel forfeited."
+  party-duel-challenge: "&f%party% &achallenged your party to a duel."
+  party-duel-accepted: "&aParty duel accepted. Teleporting."
+  party-duel-declined: "&cParty duel declined."
+  duel-failed: "&cThe party duel could not start."
+  cannot-invite-self: "&cYou cannot invite yourself."
+
+# ===========================
+# Friend Messages
+# ===========================
+friend:
+  added: "&aYou are now friends with &f%player%&a."
+  add-self: "&cYou cannot add yourself as a friend."
+  already-friends: "&cYou are already friends with &f%player%&c."
+  removed: "&7You removed &f%player% &7from your friends."
+  not-friends: "&cYou are not friends with &f%player%&c."
+  list-header: "&fFriends Online:"
+  list-online: "&a- &f%player%"
+  list-offline: "&c- &f%player% &7(Offline)"
+  friend-online: "&a%player% &ais now online."
+  friend-offline: "&7%player% &7went offline."
+  friend-duel-request: "&f%player% &achallenged you. Click to accept."
+  auto-accept-toggled: "&7Auto-accept from friends: &f%state%"
+  max-friends: "&cYou reached the maximum number of friends."
+
+# ===========================
+# Spectator Messages
+# ===========================
+spectator:
+  now-spectating: "&7Now spectating &f%player%&7."
+  stopped-spectating: "&7You stopped spectating."
+  cannot-spectate: "&cYou cannot spectate this duel."
+  player-not-in-duel: "&cThat player is not in a duel."
+
+# ===========================
+# Profile Messages
+# ===========================
+profile:
+  header: "&f%player%'s Profile"
+  wins: "&aWins: &f%wins%"
+  losses: "&cLosses: &f%losses%"
+  win-rate: "&7Win Rate: &f%winrate%"
+  elo: "&7ELO: &f%elo%"
+  rank: "&7Rank: &f%rank%"
+  kills: "&aKills: &f%kills%"
+  win-streak: "&7Win Streak: &f%winstreak%"
+  best-streak: "&7Best Streak: &f%beststreak%"
+  games-played: "&7Games Played: &f%games%"
+
+# ===========================
+# Leaderboard
+# ===========================
+leaderboard:
+  header: "&fDuel Leaderboard"
+  entry: "&7#%position% &f%player% &7- ELO: &f%elo% &7| W: &a%wins% &7| L: &c%losses%"
+  no-data: "&7No leaderboard data available."
+  your-rank: "&7Your rank: &f#%rank%"
+
+# ===========================
+# Rules Messages
+# ===========================
+rules:
+  selected: "&aRuleset set to &f%ruleset%&a."
+  not-found: "&cRuleset &f%ruleset% &cnot found."
+  list-header: "&fAvailable Rulesets:"
+  list-entry: "&7- &f%name% &7: &f%description%"
+  sumo: "Knockback only, push your opponent off."
+  boxing: "Fists only, no weapons."
+  uhc: "No natural regeneration."
+  spleef: "Break the floor to make opponents fall."
+  no-ender-pearls: "&cEnder pearls are not allowed in this duel."
+  no-chorus-fruit: "&cChorus fruit is not allowed in this duel."
+
+# ===========================
+# Queue Messages
+# ===========================
+queue:
+  joined: "&aYou joined the queue for &f%arena%&a."
+  joined-gamemode: "&aYou joined the &f%gamemode_queue% &aqueue. &7(/leave to exit)"
+  left: "&7You left the queue."
+  queue-full: "&cThe queue for this arena is full."
+  match-found: "&aMatch found. Teleporting to &f%arena%&a."
+  queue-info: "&7Queue for &f%arena%&7: &f%players% &7players"
+  queue-created: "&aQueue sign created for arena &f%arena%&a."
+  rtp-joined: "&aYou joined the RTP queue. Waiting for a match."
+  rtp-match: "&aMatch found. Teleporting to &f%arena%&a."
+  already-in-queue: "&cYou are already in a queue. Use &f/queue leave &cto leave."
+  not-in-queue: "&cYou are not in a queue."
+
+# ===========================
+# Gate Messages
+# ===========================
+gate:
+  pos1-set: "&aGate position 1 set at &f%x%, %y%, %z%&a."
+  pos2-set: "&aGate position 2 set at &f%x%, %y%, %z%&a."
+  not-set: "&cGate positions not set. Use &f/uduels setpos1 &cand &f/uduels setpos2 &cin the arena world."
+
+# ===========================
+# Lobby Messages
+# ===========================
+lobby:
+  set: "&aLobby location set at &f%x%, %y%, %z% &ain &f%world%&a."
+  not-set: "&cLobby location not set. Ask an admin to run &f/uduels setlobby"
+  teleported: "&aTeleported to the lobby."
+
+# ===========================
+# General
+# ===========================
+general:
+  no-permission: "&cYou don't have permission to do that."
+  player-not-found: "&cPlayer &f%player% &cnot found."
+  player-offline: "&cPlayer &f%player% &cis offline."
+  reload: "&aConfiguration reloaded."
+  error: "&cAn error occurred. Please try again."
+  usage: "&cUsage: %usage%"
+  inventory-restore: "&7Your inventory was restored."
+  frozen: "&cYou are frozen during the countdown."
+
+# ===========================
+# Tournament Messages
+# ===========================
+tournament:
+  created: "&aTournament &f%name% &acreated. Max &f%players% &aplayers."
+  joined: "&aYou joined tournament &f%name%&a. (&f%players% &aplayers)"
+  left: "&7You left tournament &f%name%&7."
+  started: "&aTournament &f%name% &astarted with &f%players% &aplayers."
+  started-winner: "&6Tournament Winner: &f%winner%"
+  eliminated: "&cYou were eliminated from &f%name% &cin round &f%round%&c."
+  match-found: "&fTournament Match: &f%opponent% &fin &f%round% &fof &f%name%"
+  forfeit: "&cYour opponent &f%opponent% &cforfeited. You advance."
+  opponent-forfeit: "&aYou advance. &f%opponent% &cforfeited."
+  finished-winner: "&6Tournament &f%name% &6finished. Winner: &f%winner%"
+  info: "&7Tournament: &f%name% &7| Players: &f%players%/%max% &7| Round: &f%round%/%total%"
+  announcement: "&f%name%\n&7Players: &f%players%&7/&f%max%\n&7Gamemode: &f%gamemode%\n&7Type: &f%type%\n&7Status: &f%status%\n&aClick to join"
+  click-to-join: "&eClick to join &f%name%&e."
+
+# ===========================
+# Voting Messages
+# ===========================
+voting:
+  vote-started: "&7Arena vote started. Options: &f%options% &7(%time%&s)"
+  vote-resolved: "&aVoting complete. Arena: &f%arena%"
+  player-voted: "&f%player% &7voted for &f%arena% &7(&f%votes% &7votes)"
+  already-voted: "&cYou already voted."
+
+# ===========================
+# Season Messages
+# ===========================
+season:
+  info: "&7Season &f%season% &7| Remaining: &f%time%"
+  new-season: "&aSeason %season% began. All ELO was reset."
+  new-season-started: "&aSeason &f%season% &astarted."
+  decay-notice: "&7Your ELO decayed by &f%amount% &7due to inactivity."
+
+# ===========================
+# Sign Messages
+# ===========================
+signs:
+  created: "&aQueue sign created. Type: &f%type%"
+  clicked-rtp: "&aJoining RTP queue."
+  clicked-arena: "&aJoining queue for &f%arena%&a."
+
+# ===========================
+# Spectator Enhanced Messages
+# ===========================
+spectator:
+  following: "&7Now following &f%player%&7."
+  free-cam-toggle: "&7Free-cam toggled."
+  vanish-toggle: "&7Vanish toggled."

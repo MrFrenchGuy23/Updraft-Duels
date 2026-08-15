@@ -1,0 +1,132 @@
+name: UpdraftDuels
+version: ${project.version}
+main: com.updraftduels.UpdraftDuels
+api-version: '1.21'
+description: A comprehensive duel plugin with arenas, kits, parties, friends, and more.
+softdepend: [PlaceholderAPI]
+authors: [UpdraftDuels]
+
+commands:
+  duel:
+    description: Main duel command
+    usage: /duel <player|accept|deny|spectate|leaderboard>
+    aliases: [duels]
+  duelarena:
+    description: Arena management command
+    usage: /duelarena <create|delete|setpos1|setpos2|setspawn|list|info>
+    aliases: [arena]
+  kit:
+    description: Kit management command
+    usage: /kit <create|edit|delete|list> or /k1-/k9
+    aliases: [kits, k1, k2, k3, k4, k5, k6, k7, k8, k9]
+  pk:
+    description: Public kit management command
+    usage: /pk <create|edit|delete|list>
+  party:
+    description: Party management command
+    usage: /party <create|invite|accept|leave|disband|duel|list|chat>
+    aliases: [p]
+  friend:
+    description: Friends management command
+    usage: /friend <add|remove|list|duel|toggleautoaccept>
+    aliases: [friends]
+  profile:
+    description: View a player's duel profile
+    usage: /profile [player]
+  uduels:
+    description: UpdraftDuels admin commands
+    usage: /uduels <setlobby|lobby|reload|setpos1|setpos2|gateinfo>
+    aliases: [updraftduels]
+  tournament:
+    description: Tournament management
+    usage: /tournament <create|join|leave|start|info|list>
+    aliases: [tourney]
+  cosmetics:
+    description: Duel cosmetics
+    usage: /cosmetics [kill|victory|trail|deathmsg|gui]
+  season:
+    description: Season info and management
+    usage: /season [info|startnew|resetelo]
+  queue:
+    description: Join the duel queue
+    usage: /queue <kit> [leave|ranked] or /queue <create|join|info>
+    aliases: [q, leave]
+  rtpqueue:
+    description: Join the random teleport queue
+    usage: /rtpqueue
+  ranked:
+    description: Open the ranked queue
+    usage: /ranked
+  settings:
+    description: View your duel settings and rulesets
+    usage: /settings [rules] or /settings set <ruleset>
+  ffa:
+    description: FFA game management
+    usage: /ffa <create|join|leave|list|info|delete>
+    aliases: [freeforall]
+  leaderboard:
+    description: View leaderboards
+    usage: /leaderboard [kills|deaths|playtime]
+    aliases: [lb, top]
+  refill:
+    description: Refill hunger and armor
+    usage: /refill
+  anvil:
+    description: Open an anvil
+    usage: /anvil
+
+permissions:
+  updraftduels.duel:
+    description: Send duel requests
+    default: true
+  updraftduels.duel.spectate:
+    description: Spectate ongoing duels
+    default: true
+  updraftduels.arena.create:
+    description: Create arenas
+    default: op
+  updraftduels.arena.manage:
+    description: Manage arenas
+    default: op
+  updraftduels.kit.create:
+    description: Create personal kits
+    default: true
+  updraftduels.kit.createpublic:
+    description: Create pre-made kits
+    default: op
+  updraftduels.kit.managepublic:
+    description: Manage pre-made kits
+    default: op
+  updraftduels.party:
+    description: Use party system
+    default: true
+  updraftduels.friend:
+    description: Use friends system
+    default: true
+  updraftduels.admin:
+    description: Admin commands
+    default: op
+  updraftduels.tournament:
+    description: Join tournaments
+    default: true
+  updraftduels.tournament.create:
+    description: Create tournaments
+    default: op
+  updraftduels.tourney.bc:
+    description: VIP tournament broadcast permission
+    default: false
+  updraftduels.ffa:
+    description: Join FFA games
+    default: true
+  updraftduels.ffa.create:
+    description: Create FFA games
+    default: true
+  updraftduels.cosmetics:
+    description: Use duel cosmetics
+    default: true
+  updraftduels.signs.create:
+    description: Create duel queue signs
+    default: op
+  updraftduels.kit.public.<name>:
+    description: Access a specific pre-made kit
+    default: op

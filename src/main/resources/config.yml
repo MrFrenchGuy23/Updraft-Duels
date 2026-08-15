@@ -1,0 +1,251 @@
+general:
+  default-elo: 1000
+  min-elo: 0
+  combat-logger-timeout: 100
+  freeze-on-countdown: true
+  prevent-clip: false
+
+duel:
+  ranked-time-limit-seconds: 300
+  allowed-team-sizes: [1, 2, 3, 4]
+  countdown-seconds: 3
+  win-condition: LAST_TEAM_STANDING
+  max-pending-requests: 5
+  # Set to true to log arena boundary checks and duel teleports to the console.
+  # Use this to debug players getting teleported to the wrong world or "can't leave arena" issues.
+  debug: false
+
+lobby:
+
+anti-spam:
+  duel-request-cooldown-seconds: 5
+  queue-join-cooldown-seconds: 3
+  tournament-join-cooldown-seconds: 10
+  message-cooldown-seconds: 2
+
+gate:
+  enabled: true
+  material: IRON_BARS
+  animation-enabled: true
+  animation-speed-ticks: 2
+  pos1: {}
+  pos2: {}
+
+rtpqueue:
+  # World(s) players are randomly teleported to when an RTP match is found.
+  # A world is picked randomly per match. Leave empty to disable RTP queueing.
+  # Single world: "rtp_world"
+  # Multiple worlds:
+  world:
+    - "rtp_world_1"
+    - "rtp_world_2"
+  # Maximum distance from world origin (0,0) a player can be teleported.
+  radius: 1000
+  # Minimum distance between the two matched players.
+  min-distance: 100
+  # Countdown before the match starts.
+  countdown-seconds: 5
+  # Shown above the hotbar when a match is found. %world% = the RTP world.
+  match-message: "&aMatch Found &7| &fTeleporting to the RTP world"
+
+titles:
+  match-found:
+    title: "&aMatch Found"
+    subtitle: "&7Teleporting to &f%arena%"
+    fade-in: 10
+    stay: 40
+    fade-out: 10
+    color: GREEN
+
+database:
+  type: SQLITE
+  sqlite-file: data.db
+  mysql:
+    host: localhost
+    port: 3306
+    database: updraftduels
+    username: root
+    password: ""
+    use-ssl: false
+
+party:
+  max-size: 10
+  leader-accepts: true
+  items:
+    party:
+      slot: 0
+      material: PLAYER_HEAD
+      name: "&fParty Menu"
+      lore:
+        - "&7Click to open the party menu"
+      command: "party gui"
+    settings:
+      slot: 1
+      material: NETHER_STAR
+      name: "&fDuel Settings"
+      lore:
+        - "&7Click to open the settings menu"
+      command: "settings"
+  broadcast:
+    join: true
+    leave: true
+    kick: true
+    promote: true
+    duel-challenge: true
+
+friends:
+  max-friends: 100
+  notify-online: true
+  auto-accept-from-friends: false
+
+placeholder-api:
+  no-data: "N/A"
+
+tournament:
+  reward-command: "give %player% diamond 3"
+  min-players: 4
+  default-team-size: 1
+  require-tourney-permission: true
+  tourney-permission: "updraftduels.tourney.bc"
+  countdown-seconds: 15
+  announce-interval-seconds: 4
+
+ffa:
+  default-max-players: 10
+  respawn-delay-ticks: 40
+  enabled: true
+
+divisions:
+  enabled: true
+  start-matches: 10
+  increase-per-rank: 0
+  ranks:
+    0:
+      name: "Leather"
+      color: "&6"
+      material: LEATHER_HELMET
+    1:
+      name: "Chainmail"
+      color: "&7"
+      material: CHAINMAIL_HELMET
+    2:
+      name: "Iron"
+      color: "&f"
+      material: IRON_HELMET
+    3:
+      name: "Gold"
+      color: "&e"
+      material: GOLDEN_HELMET
+    4:
+      name: "Diamond"
+      color: "&b"
+      material: DIAMOND_HELMET
+    5:
+      name: "Emerald"
+      color: "&a"
+      material: EMERALD_BLOCK
+    6:
+      name: "Netherite"
+      color: "&8"
+      material: NETHERITE_HELMET
+    7:
+      name: "Master"
+      color: "&d"
+      material: NETHER_STAR
+    8:
+      name: "Legend"
+      color: "&4"
+      material: DRAGON_HEAD
+    9:
+      name: "Mythic"
+      color: "&5"
+      material: SHULKER_BOX
+
+season:
+  current-season: 1
+  length-days: 30
+  start-time: 0
+  end-time: 0
+  decay-enabled: true
+  decay-days-inactive: 14
+  decay-amount: 50
+
+voting:
+  vote-time-seconds: 15
+  require-all-votes: false
+
+anticheat:
+  bypass-during-duel: true
+
+cosmetics:
+  kill-effects-enabled: true
+  victory-animations-enabled: true
+  trails-enabled: true
+  death-messages-enabled: true
+
+death-messages:
+  enabled: true
+  killed: "&7%victim% was killed by %killer%"
+  killed-item: "&7%victim% was killed by %killer% using %item%"
+  fall: "&7%victim% fell to their death"
+  lava: "&7%victim% burned to death"
+  drown: "&7%victim% drowned"
+  void: "&7%victim% fell out of the world"
+  explosion: "&7%victim% blew up"
+  cacti: "&7%victim% was pricked to death"
+  starve: "&7%victim% starved to death"
+  magic: "&7%victim% was killed by magic"
+  default: "&7%victim% died"
+
+rulesets: {}
+
+ranks:
+  order:
+    - redstone
+    - ruby
+    - copper
+    - iron
+    - gold
+    - diamond
+    - netherite
+    - elite
+  redstone:
+    color: "&4"
+    elo-iii: 675
+    elo-ii: 750
+    elo-i: 825
+  ruby:
+    color: "&c"
+    elo-iii: 900
+    elo-ii: 975
+    elo-i: 1050
+  copper:
+    color: "&6"
+    elo-iii: 1125
+    elo-ii: 1200
+    elo-i: 1275
+  iron:
+    color: "&7"
+    elo-iii: 1350
+    elo-ii: 1425
+    elo-i: 1500
+  gold:
+    color: "&e"
+    elo-iii: 1575
+    elo-ii: 1650
+    elo-i: 1725
+  diamond:
+    color: "&b"
+    elo-iii: 1800
+    elo-ii: 1875
+    elo-i: 1950
+  netherite:
+    color: "&8"
+    elo-iii: 2025
+    elo-ii: 2100
+    elo-i: 2175
+  elite:
+    color: "&d"
+    elo-iii: 2250
+    elo-ii: 2325
+    elo-i: 2400
