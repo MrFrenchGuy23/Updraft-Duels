@@ -200,10 +200,10 @@ public class DuelManager {
 
     public boolean startPartyDuel(Party party1, Party party2, Arena arena, String rulesetId, int rounds) {
         for (UUID member : party1.getMembers()) {
-            if (isInDuel(member) || isInQueue(member) || isInFFA(member)) return false;
+            if (isInDuel(member) || isInQueue(member)) return false;
         }
         for (UUID member : party2.getMembers()) {
-            if (isInDuel(member) || isInQueue(member) || isInFFA(member)) return false;
+            if (isInDuel(member) || isInQueue(member)) return false;
         }
         DuelType type = DuelType.fromTeamSize(party1.getSize());
         if (type == null) return false;
@@ -601,15 +601,6 @@ public class DuelManager {
 
     public void checkWinConditions(Duel duel) {
         if (duel.getState() != DuelState.IN_PROGRESS) return;
-
-        if (duel.getType().isFFA()) {
-            List<UUID> alive = duel.getAllAlive();
-            if (alive.size() <= 1) {
-                UUID winner = alive.isEmpty() ? null : alive.get(0);
-                endDuel(duel, winner != null ? duel.getTeamOf(winner) != null ? duel.getTeamIndex(winner) : null : null);
-            }
-            return;
-        }
 
         List<UUID> aliveA = duel.getTeam(0) != null ? duel.getTeam(0).getAliveMembers() : new ArrayList<>();
         List<UUID> aliveB = duel.getTeam(1) != null ? duel.getTeam(1).getAliveMembers() : new ArrayList<>();
@@ -1172,10 +1163,6 @@ public class DuelManager {
 
     private boolean isInQueue(UUID uuid) {
         return plugin.getQueueManager().isInQueue(uuid);
-    }
-
-    private boolean isInFFA(UUID uuid) {
-        return plugin.getFFAManager().isInFFA(uuid);
     }
 
     public Duel getDuelOf(UUID uuid) {

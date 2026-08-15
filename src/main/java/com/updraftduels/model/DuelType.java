@@ -21,8 +21,7 @@ public enum DuelType {
     SOLO(1),
     DUO(2),
     TRIO(3),
-    QUAD(4),
-    FFA(0);
+    QUAD(4);
 
     private final int teamSize;
 
@@ -35,11 +34,7 @@ public enum DuelType {
     }
 
     public boolean isTeamDuel() {
-        return this != FFA;
-    }
-
-    public boolean isFFA() {
-        return this == FFA;
+        return true;
     }
 
     public static DuelType fromTeamSize(int size) {

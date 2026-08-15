@@ -60,10 +60,6 @@ commands:
   settings:
     description: View your duel settings and rulesets
     usage: /settings [rules] or /settings set <ruleset>
-  ffa:
-    description: FFA game management
-    usage: /ffa <create|join|leave|list|info|delete>
-    aliases: [freeforall]
   leaderboard:
     description: View leaderboards
     usage: /leaderboard [kills|deaths|playtime]
@@ -115,12 +111,6 @@ permissions:
   updraftduels.tourney.bc:
     description: VIP tournament broadcast permission
     default: false
-  updraftduels.ffa:
-    description: Join FFA games
-    default: true
-  updraftduels.ffa.create:
-    description: Create FFA games
-    default: true
   updraftduels.cosmetics:
     description: Use duel cosmetics
     default: true

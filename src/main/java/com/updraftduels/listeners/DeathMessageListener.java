@@ -43,7 +43,7 @@ public class DeathMessageListener implements Listener {
         if (!plugin.getConfig().getBoolean("death-messages.enabled", true)) return;
 
         Player victim = event.getEntity();
-        if (plugin.getDuelManager().isInDuel(victim.getUniqueId()) || plugin.getFFAManager().isInFFA(victim.getUniqueId())) {
+        if (plugin.getDuelManager().isInDuel(victim.getUniqueId())) {
             return;
         }
 

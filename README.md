@@ -1,7 +1,7 @@
 # UpdraftDuels
 
 A comprehensive Minecraft duels plugin for Paper 1.21+ featuring arenas, kits, parties, friends,
-ranked queues, tournaments, FFA, and more.
+ranked queues, tournaments, and more.
 
 ## Features
 
@@ -13,7 +13,6 @@ ranked queues, tournaments, FFA, and more.
 - **Friends** – Add/remove friends, auto-accept duel requests, online notifications
 - **Ranked ladder** – ELO, ranks, divisions, seasons, and inactivity decay
 - **Tournaments** – Create, join, bracket-style eliminations
-- **FFA** – Free-for-all games with join/leave
 - **Cosmetics** – Kill effects, victory animations, trails, death messages
 - **Spectating** – Follow ongoing duels, free-cam, vanish
 - **PlaceholderAPI** – Expansion with stats, rank, and season placeholders
@@ -66,7 +65,6 @@ The shaded jar is written to `target/UpdraftDuels-1.0.0.jar`. Drop it into your 
 | `/rtpqueue` | Join the random-teleport queue |
 | `/ranked` | Open the ranked queue |
 | `/tournament <create\|join\|leave\|start\|info\|list>` | Tournaments |
-| `/ffa <create\|join\|leave\|list\|info\|delete>` | FFA games |
 | `/cosmetics` | Kill effects, trails, victory animations, death messages |
 | `/leaderboard [kills\|deaths\|playtime]` | Leaderboards |
 | `/season [info\|startnew\|resetelo]` | Season management |
@@ -84,7 +82,6 @@ The shaded jar is written to `target/UpdraftDuels-1.0.0.jar`. Drop it into your 
 | `updraftduels.party` | everyone | Use the party system |
 | `updraftduels.friend` | everyone | Use the friends system |
 | `updraftduels.tournament` | everyone | Join tournaments |
-| `updraftduels.ffa` | everyone | Join FFA games |
 | `updraftduels.cosmetics` | everyone | Use cosmetics |
 | `updraftduels.arena.create` | op | Create arenas |
 | `updraftduels.arena.manage` | op | Manage arenas |

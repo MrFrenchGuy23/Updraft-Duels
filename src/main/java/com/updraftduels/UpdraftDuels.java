@@ -62,7 +62,6 @@ public class UpdraftDuels extends JavaPlugin {
     private HistoryManager historyManager;
     private GUIManager guiManager;
     private AntiSpamManager antiSpamManager;
-    private FFAManager ffaManager;
     private RankManager rankManager;
     private PlaytimeManager playtimeManager;
     private GateManager gateManager;
@@ -104,7 +103,6 @@ public class UpdraftDuels extends JavaPlugin {
         spectatorManager = new SpectatorManager(this);
         historyManager = new HistoryManager(this);
         antiSpamManager = new AntiSpamManager(this);
-        ffaManager = new FFAManager(this);
         rankManager = new RankManager(this);
         playtimeManager = new PlaytimeManager(this);
         gateManager = new GateManager(this);
@@ -224,10 +222,6 @@ public class UpdraftDuels extends JavaPlugin {
         RankedCommand rankedCmd = new RankedCommand(this);
         getCommand("ranked").setExecutor(rankedCmd);
 
-        FFACommand ffaCmd = new FFACommand(this);
-        getCommand("ffa").setExecutor(ffaCmd);
-        getCommand("ffa").setTabCompleter(ffaCmd);
-
         LeaderboardCommand leaderboardCmd = new LeaderboardCommand(this);
         getCommand("leaderboard").setExecutor(leaderboardCmd);
         getCommand("leaderboard").setTabCompleter(leaderboardCmd);
@@ -303,7 +297,6 @@ public class UpdraftDuels extends JavaPlugin {
     public SpectatorManager getSpectatorManager() { return spectatorManager; }
     public HistoryManager getHistoryManager() { return historyManager; }
     public AntiSpamManager getAntiSpamManager() { return antiSpamManager; }
-    public FFAManager getFFAManager() { return ffaManager; }
     public RankManager getRankManager() { return rankManager; }
     public PlaytimeManager getPlaytimeManager() { return playtimeManager; }
 

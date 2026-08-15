@@ -8,7 +8,7 @@ Releases are also published automatically to GitHub Releases when a `v*` tag is 
 ## [1.0.0] - 2026-08-15
 
 ### Added
-- Initial release: duel plugin with arenas, kits, parties, queues, ranked ladder, tournaments, FFA, and more.
+- Initial release: duel plugin with arenas, kits, parties, queues, ranked ladder, tournaments, and more.
 - RTP queue with configurable world list and countdown.
 - CI build workflow (`.github/workflows/build.yml`).
 - Auto-release workflow with changelog generation (`.github/workflows/release.yml`).

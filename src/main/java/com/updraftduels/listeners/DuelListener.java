@@ -60,14 +60,6 @@ public class DuelListener implements Listener {
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
 
-        if (plugin.getFFAManager().isInFFA(player.getUniqueId())) {
-            plugin.getFFAManager().onPlayerDeath(player.getUniqueId());
-            event.getDrops().clear();
-            event.setDroppedExp(0);
-            event.setDeathMessage(null);
-            return;
-        }
-
         Duel duel = plugin.getDuelManager().getDuelOf(player.getUniqueId());
         if (duel == null || duel.getState() != DuelState.IN_PROGRESS) return;
 
@@ -183,7 +175,6 @@ public class DuelListener implements Listener {
     public void onPlayerDisconnect(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         plugin.getQueueManager().onPlayerDisconnect(player.getUniqueId());
-        plugin.getFFAManager().onPlayerDisconnect(player.getUniqueId());
         plugin.getDuelManager().onPlayerDisconnect(player.getUniqueId());
     }
 
@@ -217,10 +208,6 @@ public class DuelListener implements Listener {
 
         Duel duel = plugin.getDuelManager().getDuelOf(player.getUniqueId());
         if (duel == null) {
-            FFAGame ffaGame = plugin.getFFAManager().getGameOf(player.getUniqueId());
-            if (ffaGame != null && ffaGame.getState() == FFAGame.State.IN_PROGRESS) {
-                enforceArenaBoundary(event, player, plugin.getArenaManager().getArena(ffaGame.getArenaName()));
-            }
             return;
         }
         if (duel.getState() != DuelState.IN_PROGRESS && duel.getState() != DuelState.COUNTDOWN) return;
@@ -326,14 +313,6 @@ public class DuelListener implements Listener {
                 }
             }
             return;
-        }
-
-        FFAGame ffaGame = plugin.getFFAManager().getGameOf(player.getUniqueId());
-        if (ffaGame != null && ffaGame.getState() == FFAGame.State.IN_PROGRESS) {
-            Arena ffaArena = plugin.getArenaManager().getArena(ffaGame.getArenaName());
-            if (ffaArena != null && ffaArena.getCenter() != null) {
-                event.setRespawnLocation(ffaArena.getCenter());
-            }
         }
     }
 

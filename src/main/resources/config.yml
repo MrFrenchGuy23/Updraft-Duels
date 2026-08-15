@@ -110,11 +110,6 @@ tournament:
   countdown-seconds: 15
   announce-interval-seconds: 4
 
-ffa:
-  default-max-players: 10
-  respawn-delay-ticks: 40
-  enabled: true
-
 divisions:
   enabled: true
   start-matches: 10

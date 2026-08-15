@@ -79,7 +79,6 @@ public class PlaytimeManager implements Listener {
         plugin.getFriendManager().loadFriends(player.getUniqueId());
         plugin.getDatabase().getOrCreateStats(player.getUniqueId(), player.getName());
         plugin.getDuelManager().restoreOfflinePlayer(player);
-        plugin.getFFAManager().restoreSavedState(player);
         plugin.getDatabase().loadCosmetics(player.getUniqueId(), plugin.getCosmeticsManager());
     }
 
