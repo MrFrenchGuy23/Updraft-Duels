@@ -27,10 +27,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RulesetManager {
     private final UpdraftDuels plugin;
     private final Map<String, Ruleset> rulesets;
+    private final Map<UUID, String> selectedRulesets;
 
     public RulesetManager(UpdraftDuels plugin) {
         this.plugin = plugin;
         this.rulesets = new ConcurrentHashMap<>();
+        this.selectedRulesets = new ConcurrentHashMap<>();
         registerDefaultRulesets();
         loadCustomRulesets();
     }
@@ -160,5 +162,21 @@ public class RulesetManager {
 
     public boolean hasRuleset(String id) {
         return rulesets.containsKey(id);
+    }
+
+    public String getSelectedRuleset(UUID playerUUID) {
+        return selectedRulesets.get(playerUUID);
+    }
+
+    public void setSelectedRuleset(UUID playerUUID, String rulesetId) {
+        if (rulesetId != null) {
+            selectedRulesets.put(playerUUID, rulesetId);
+        } else {
+            selectedRulesets.remove(playerUUID);
+        }
+    }
+
+    public void clearSelectedRuleset(UUID playerUUID) {
+        selectedRulesets.remove(playerUUID);
     }
 }

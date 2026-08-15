@@ -53,7 +53,7 @@ public class PlaytimeManager implements Listener {
         if (elapsed < 0) return;
 
         plugin.getDatabase().getOrCreateStats(uuid, name).thenAccept(stats -> {
-            if (stats != null && !sessionStart.containsKey(uuid)) {
+            if (stats != null) {
                 stats.setPlaytime(stats.getPlaytime() + elapsed);
                 plugin.getDatabase().saveStats(stats);
             }

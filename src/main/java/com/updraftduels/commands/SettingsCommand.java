@@ -69,6 +69,7 @@ public class SettingsCommand implements CommandExecutor, TabCompleter {
             player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("rules.not-found", "%ruleset%", args[args.length - 1])));
             return;
         }
+        plugin.getRulesetManager().setSelectedRuleset(player.getUniqueId(), rulesetId);
         player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("rules.selected", "%ruleset%", args[args.length - 1])));
     }
 

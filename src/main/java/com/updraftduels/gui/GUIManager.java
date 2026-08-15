@@ -587,14 +587,19 @@ public class GUIManager {
     public void openRulesetsGUI(Player player) {
         Inventory gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(RULESETS_TITLE));
 
+        String selected = plugin.getRulesetManager().getSelectedRuleset(player.getUniqueId());
         int slot = 0;
         for (Ruleset ruleset : plugin.getRulesetManager().getAllRulesets()) {
             if (slot >= 45) break;
             Material material = Material.matchMaterial(ruleset.getId().toUpperCase() + "_BANNER");
             if (material == null) material = Material.MAP;
+            boolean isSelected = ruleset.getId().equals(selected);
             gui.setItem(slot++, new ItemBuilder(material)
                     .name("&f" + ruleset.getDisplayName())
-                    .lore("&7" + ruleset.getDescription())
+                    .lore("&7" + ruleset.getDescription(),
+                            "",
+                            isSelected ? "&aSelected" : "&7Click to select",
+                            "&8Shift-click for details")
                     .build());
         }
 

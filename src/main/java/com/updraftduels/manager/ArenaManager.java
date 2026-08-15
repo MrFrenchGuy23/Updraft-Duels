@@ -28,6 +28,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ArenaManager {
+    private static final int BLOCKS_PER_TICK = 4096;
+
     private final UpdraftDuels plugin;
     private final Map<String, Arena> arenas;
 
@@ -56,8 +58,9 @@ public class ArenaManager {
                     spawnB.setYaw(((Float) data.get("spawn_b_yaw")));
                     arena.setSpawn(com.updraftduels.model.Team.TEAM_B, spawnB);
 
-                    snapshotArena(arena);
+                    arena.setRegenerating(true);
                     arenas.put(arena.getName(), arena);
+                    snapshotArenaAsync(arena, () -> arena.setRegenerating(false));
                 }
                 plugin.getLogger().info("Loaded " + arenas.size() + " arenas.");
             });
@@ -96,7 +99,7 @@ public class ArenaManager {
 
     public Arena getRandomAvailableArena() {
         List<Arena> available = arenas.values().stream()
-                .filter(a -> a.isConfigured() && !a.isInUse())
+                .filter(a -> a.isConfigured() && !a.isInUse() && !a.isRegenerating())
                 .toList();
         if (available.isEmpty()) return null;
         return available.get(new Random().nextInt(available.size()));
@@ -109,7 +112,7 @@ public class ArenaManager {
             List<Arena> assigned = new ArrayList<>();
             for (String name : assignedNames) {
                 Arena arena = arenas.get(name);
-                if (arena != null && arena.isConfigured() && !arena.isInUse()) {
+                if (arena != null && arena.isConfigured() && !arena.isInUse() && !arena.isRegenerating()) {
                     assigned.add(arena);
                 }
             }
@@ -122,7 +125,7 @@ public class ArenaManager {
 
     public Arena getRandomAvailableArenaForSize(int teamSize) {
         List<Arena> available = arenas.values().stream()
-                .filter(a -> a.isConfigured() && !a.isInUse())
+                .filter(a -> a.isConfigured() && !a.isInUse() && !a.isRegenerating())
                 .toList();
         if (available.isEmpty()) return null;
         return available.get(new Random().nextInt(available.size()));
@@ -175,16 +178,70 @@ public class ArenaManager {
         }
     }
 
-    public void regenerateArena(Arena arena) {
+    public void snapshotArenaAsync(Arena arena, Runnable done) {
+        if (arena.getPos1() == null || arena.getPos2() == null) {
+            if (done != null) done.run();
+            return;
+        }
         World world = arena.getWorld();
-        if (world == null) return;
-
-        for (Arena.BlockSnapshot snapshot : arena.getOriginalBlocks()) {
-            Block block = world.getBlockAt(snapshot.getX(), snapshot.getY(), snapshot.getZ());
-            block.setBlockData(snapshot.getBlockData(), false);
+        if (world == null) {
+            if (done != null) done.run();
+            return;
         }
 
-        snapshotArena(arena);
+        int minX = (int) Math.min(arena.getPos1().getX(), arena.getPos2().getX());
+        int minY = (int) Math.min(arena.getPos1().getY(), arena.getPos2().getY());
+        int minZ = (int) Math.min(arena.getPos1().getZ(), arena.getPos2().getZ());
+        int maxX = (int) Math.max(arena.getPos1().getX(), arena.getPos2().getX());
+        int maxY = (int) Math.max(arena.getPos1().getY(), arena.getPos2().getY());
+        int maxZ = (int) Math.max(arena.getPos1().getZ(), arena.getPos2().getZ());
+
+        arena.getOriginalBlocks().clear();
+
+        int[] pos = {minX, minY, minZ};
+        int[] taskId = new int[1];
+        taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            int processed = 0;
+            while (processed < BLOCKS_PER_TICK && pos[0] <= maxX) {
+                arena.getOriginalBlocks().add(new Arena.BlockSnapshot(
+                        pos[0], pos[1], pos[2], world.getBlockAt(pos[0], pos[1], pos[2]).getBlockData()));
+                processed++;
+                pos[2]++;
+                if (pos[2] > maxZ) {
+                    pos[2] = minZ;
+                    pos[1]++;
+                }
+                if (pos[1] > maxY) {
+                    pos[1] = minY;
+                    pos[0]++;
+                }
+            }
+            if (pos[0] > maxX) {
+                Bukkit.getScheduler().cancelTask(taskId[0]);
+                if (done != null) done.run();
+            }
+        }, 1L, 1L);
+    }
+
+    public void regenerateArena(Arena arena) {
+        World world = arena.getWorld();
+        if (world == null || arena.getOriginalBlocks().isEmpty()) return;
+        arena.setRegenerating(true);
+
+        Iterator<Arena.BlockSnapshot> it = new ArrayList<>(arena.getOriginalBlocks()).iterator();
+        int[] taskId = new int[1];
+        taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            int processed = 0;
+            while (it.hasNext() && processed < BLOCKS_PER_TICK) {
+                Arena.BlockSnapshot snap = it.next();
+                world.getBlockAt(snap.getX(), snap.getY(), snap.getZ()).setBlockData(snap.getBlockData(), false);
+                processed++;
+            }
+            if (!it.hasNext()) {
+                Bukkit.getScheduler().cancelTask(taskId[0]);
+                snapshotArenaAsync(arena, () -> arena.setRegenerating(false));
+            }
+        }, 1L, 1L);
     }
 
     public int getArenaCount() {

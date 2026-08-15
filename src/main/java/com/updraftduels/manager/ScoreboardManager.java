@@ -26,8 +26,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class ScoreboardManager {
     private final UpdraftDuels plugin;
+    private final Map<UUID, Set<String>> lastEntries = new ConcurrentHashMap<>();
     private int taskId = -1;
 
     public ScoreboardManager(UpdraftDuels plugin) {
@@ -71,38 +75,53 @@ public class ScoreboardManager {
         }
 
         Objective obj = board.getObjective("updraftduels_duel");
-        if (obj != null) obj.unregister();
+        if (obj == null) {
+            obj = board.registerNewObjective("updraftduels_duel", Criteria.DUMMY,
+                    com.updraftduels.util.ColorUtil.colorize("&fDuel"));
+            obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+        }
+        final Objective objective = obj;
 
-        Objective newObj = board.registerNewObjective("updraftduels_duel", Criteria.DUMMY,
-                com.updraftduels.util.ColorUtil.colorize("&fDuel"));
-        newObj.setDisplaySlot(DisplaySlot.SIDEBAR);
-        final Objective sidebar = newObj;
-
+        LinkedHashMap<String, Integer> rows = new LinkedHashMap<>();
         int line = 7;
 
         for (int i = 0; i < duel.getTeams().size(); i++) {
             var team = duel.getTeams().get(i);
             String teamName = i == 0 ? "&aTeam A" : "&cTeam B";
-            sidebar.getScore(com.updraftduels.util.ColorUtil.colorize(teamName + " &7" + team.getAliveCount() + "/" + team.getSize()))
-                    .setScore(line--);
+            rows.put(com.updraftduels.util.ColorUtil.colorize(teamName + " &7" + team.getAliveCount() + "/" + team.getSize()), line--);
         }
 
-        sidebar.getScore(" ").setScore(line--);
+        rows.put(" ", line--);
+        rows.put(com.updraftduels.util.ColorUtil.colorize("&7Arena: &f" + duel.getArenaName()), line--);
+        rows.put(com.updraftduels.util.ColorUtil.colorize("&7Duration: &f" + duel.getFormattedDuration()), line--);
+        rows.put(com.updraftduels.util.ColorUtil.colorize("&7Ruleset: &f" + (duel.getRulesetId() != null ? duel.getRulesetId() : "default")), line--);
+        rows.put("  ", line--);
 
-        sidebar.getScore(com.updraftduels.util.ColorUtil.colorize("&7Arena: &f" + duel.getArenaName())).setScore(line--);
-        sidebar.getScore(com.updraftduels.util.ColorUtil.colorize("&7Duration: &f" + duel.getFormattedDuration())).setScore(line--);
-        sidebar.getScore(com.updraftduels.util.ColorUtil.colorize("&7Ruleset: &f" + (duel.getRulesetId() != null ? duel.getRulesetId() : "default"))).setScore(line--);
-
-        sidebar.getScore("  ").setScore(line--);
+        UUID uuid = player.getUniqueId();
+        Set<String> previous = lastEntries.getOrDefault(uuid, Collections.emptySet());
+        Set<String> next = new HashSet<>();
+        for (Map.Entry<String, Integer> entry : rows.entrySet()) {
+            objective.getScore(entry.getKey()).setScore(entry.getValue());
+            next.add(entry.getKey());
+        }
+        for (String key : previous) {
+            if (!next.contains(key)) {
+                try {
+                    board.resetScores(key);
+                } catch (IllegalStateException ignored) {
+                }
+            }
+        }
+        lastEntries.put(uuid, next);
 
         plugin.getDatabase().getOrCreateStats(player.getUniqueId(), player.getName()).thenAccept(stats -> {
             if (stats != null) {
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     Objective current = player.getScoreboard().getObjective("updraftduels_duel");
-                    if (current != sidebar) return;
+                    if (current != objective) return;
                     try {
-                        sidebar.getScore(com.updraftduels.util.ColorUtil.colorize("&7ELO: &f" + stats.getElo())).setScore(1);
-                        sidebar.getScore(com.updraftduels.util.ColorUtil.colorize("&7W/L: &f" + stats.getWins() + "-" + stats.getLosses())).setScore(0);
+                        objective.getScore(com.updraftduels.util.ColorUtil.colorize("&7ELO: &f" + stats.getElo())).setScore(1);
+                        objective.getScore(com.updraftduels.util.ColorUtil.colorize("&7W/L: &f" + stats.getWins() + "-" + stats.getLosses())).setScore(0);
                     } catch (IllegalStateException ignored) {
                     }
                 });
@@ -111,6 +130,7 @@ public class ScoreboardManager {
     }
 
     public void removeScoreboard(Player player) {
+        lastEntries.remove(player.getUniqueId());
         Scoreboard board = player.getScoreboard();
         if (board != null) {
             Objective obj = board.getObjective("updraftduels_duel");

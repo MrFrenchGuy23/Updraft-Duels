@@ -172,7 +172,7 @@ public class GUIListener implements Listener {
 
         if (title.equals(ColorUtil.colorize(GUIManager.RULESETS_TITLE))) {
             event.setCancelled(true);
-            handleRulesetsClick(player, event.getSlot(), event.getCurrentItem());
+            handleRulesetsClick(player, event.getSlot(), event.getCurrentItem(), event.isShiftClick());
             return;
         }
 
@@ -551,11 +551,18 @@ public class GUIListener implements Listener {
         }
     }
 
-    private void handleRulesetsClick(Player player, int slot, ItemStack item) {
+    private void handleRulesetsClick(Player player, int slot, ItemStack item, boolean shiftClick) {
         if (item == null || item.getType() == Material.AIR || item.getType() == Material.BLACK_STAINED_GLASS_PANE) return;
         List<Ruleset> rulesets = new ArrayList<>(plugin.getRulesetManager().getAllRulesets());
         if (slot < 0 || slot >= rulesets.size()) return;
-        plugin.getGuiManager().openRulesetDetailsGUI(player, rulesets.get(slot));
+        Ruleset ruleset = rulesets.get(slot);
+        if (shiftClick) {
+            plugin.getGuiManager().openRulesetDetailsGUI(player, ruleset);
+            return;
+        }
+        plugin.getRulesetManager().setSelectedRuleset(player.getUniqueId(), ruleset.getId());
+        player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("rules.selected", "%ruleset%", ruleset.getId())));
+        plugin.getGuiManager().openRulesetsGUI(player);
     }
 
     private void handlePartyClick(Player player, int slot) {

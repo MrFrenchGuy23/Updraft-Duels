@@ -274,6 +274,7 @@ public class TournamentManager {
             if (accepted) {
                 Duel duel = plugin.getDuelManager().getDuelOf(match.getPlayer1());
                 if (duel != null) {
+                    duel.setTournamentId(tournament.getId());
                     match.setDuelId(duel.getId());
                 }
             }

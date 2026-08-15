@@ -71,6 +71,10 @@ public class DuelManager {
     }
 
     public boolean sendDuelRequest(Player sender, Player target, String kitName, int rounds) {
+        if (kitName == null || kitName.isEmpty() || kitName.equals("default")) {
+            String selected = plugin.getRulesetManager().getSelectedRuleset(sender.getUniqueId());
+            if (selected != null && plugin.getRulesetManager().hasRuleset(selected)) kitName = selected;
+        }
         if (kitName == null || kitName.isEmpty()) kitName = "default";
         if (plugin.getAntiSpamManager().isOnCooldown(sender.getUniqueId(), "duel-request")) {
             plugin.getAntiSpamManager().sendCooldownMessage(sender, "duel-request");
@@ -174,7 +178,7 @@ public class DuelManager {
         Arena arena = request.getArenaName() != null
                 ? plugin.getArenaManager().getArena(request.getArenaName())
                 : plugin.getArenaManager().getRandomAvailableArena();
-        if (arena == null || arena.isInUse() || !arena.isConfigured()) {
+        if (arena == null || arena.isInUse() || arena.isRegenerating() || !arena.isConfigured()) {
             arena = plugin.getArenaManager().getRandomAvailableArena();
             if (arena == null) return false;
         }
@@ -275,39 +279,91 @@ public class DuelManager {
 
         int radius = plugin.getConfig().getInt("rtpqueue.radius", 1000);
         int minDistance = Math.max(10, plugin.getConfig().getInt("rtpqueue.min-distance", 100));
-        Location loc1 = findRandomRTPLocation(world, radius, null, 0);
-        Location loc2 = findRandomRTPLocation(world, radius, loc1, minDistance);
+        int countdown = Math.max(1, countdownSeconds);
 
-        p1.teleport(loc1);
-        p2.teleport(loc2);
-        p1.setFallDistance(0);
-        p2.setFallDistance(0);
-
-        startCountdown(duel, null, Math.max(1, countdownSeconds), true);
+        findRandomRTPLocationAsync(world, radius, null, 0).whenComplete((loc1, ex) ->
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    final Location first = loc1 != null ? loc1 : world.getSpawnLocation();
+                    findRandomRTPLocationAsync(world, radius, first, minDistance).whenComplete((loc2, ex2) ->
+                            Bukkit.getScheduler().runTask(plugin, () -> {
+                                if (!activeDuels.containsKey(duel.getId())) return;
+                                Player a = Bukkit.getPlayer(player1UUID);
+                                Player b = Bukkit.getPlayer(player2UUID);
+                                if (a == null || b == null) return;
+                                Location second = loc2 != null ? loc2 : world.getSpawnLocation();
+                                a.teleport(first);
+                                b.teleport(second);
+                                a.setFallDistance(0);
+                                b.setFallDistance(0);
+                                startCountdown(duel, null, countdown, true);
+                            }));
+                }));
         return true;
     }
 
-    private Location findRandomRTPLocation(World world, int radius, Location avoid, double minDistance) {
-        for (int attempt = 0; attempt < 40; attempt++) {
-            double angle = Math.random() * 2 * Math.PI;
-            double dist = radius * Math.sqrt(Math.random());
-            int x = (int) Math.round(Math.cos(angle) * dist);
-            int z = (int) Math.round(Math.sin(angle) * dist);
-            if (avoid != null) {
-                double dx = x - avoid.getX();
-                double dz = z - avoid.getZ();
-                if (dx * dx + dz * dz < minDistance * minDistance) continue;
-            }
-            int y = world.getHighestBlockYAt(x, z);
-            if (y <= 0) continue;
-            org.bukkit.block.Block below = world.getBlockAt(x, y - 1, z);
-            org.bukkit.Material belowType = below.getType();
-            if (belowType.isSolid() && belowType != org.bukkit.Material.WATER
-                    && belowType != org.bukkit.Material.LAVA && belowType != org.bukkit.Material.LAVA_CAULDRON) {
-                return new Location(world, x + 0.5, y + 1, z + 0.5);
+    private CompletableFuture<Location> findRandomRTPLocationAsync(World world, int radius, Location avoid, double minDistance) {
+        CompletableFuture<Location> future = new CompletableFuture<>();
+        tryNextRTPCandidate(world, radius, avoid, minDistance, 0, future);
+        return future;
+    }
+
+    private void tryNextRTPCandidate(World world, int radius, Location avoid, double minDistance,
+                                     int attempt, CompletableFuture<Location> future) {
+        if (attempt >= 40) {
+            future.complete(world.getSpawnLocation());
+            return;
+        }
+
+        double angle = Math.random() * 2 * Math.PI;
+        double dist = radius * Math.sqrt(Math.random());
+        int x = (int) Math.round(Math.cos(angle) * dist);
+        int z = (int) Math.round(Math.sin(angle) * dist);
+        if (avoid != null) {
+            double dx = x - avoid.getX();
+            double dz = z - avoid.getZ();
+            if (dx * dx + dz * dz < minDistance * minDistance) {
+                tryNextRTPCandidate(world, radius, avoid, minDistance, attempt + 1, future);
+                return;
             }
         }
-        return world.getSpawnLocation();
+
+        int cx = x >> 4;
+        int cz = z >> 4;
+        if (world.isChunkLoaded(cx, cz)) {
+            Location loc = resolveRTPLocation(world, x, z);
+            if (loc != null) {
+                future.complete(loc);
+            } else {
+                tryNextRTPCandidate(world, radius, avoid, minDistance, attempt + 1, future);
+            }
+            return;
+        }
+
+        world.getChunkAtAsync(cx, cz).whenComplete((chunk, ex) ->
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    if (ex != null) {
+                        tryNextRTPCandidate(world, radius, avoid, minDistance, attempt + 1, future);
+                        return;
+                    }
+                    Location loc = resolveRTPLocation(world, x, z);
+                    if (loc != null) {
+                        future.complete(loc);
+                    } else {
+                        tryNextRTPCandidate(world, radius, avoid, minDistance, attempt + 1, future);
+                    }
+                }));
+    }
+
+    private Location resolveRTPLocation(World world, int x, int z) {
+        int y = world.getHighestBlockYAt(x, z);
+        if (y <= 0) return null;
+        org.bukkit.block.Block below = world.getBlockAt(x, y - 1, z);
+        org.bukkit.Material belowType = below.getType();
+        if (belowType.isSolid() && belowType != org.bukkit.Material.WATER
+                && belowType != org.bukkit.Material.LAVA && belowType != org.bukkit.Material.LAVA_CAULDRON) {
+            return new Location(world, x + 0.5, y + 1, z + 0.5);
+        }
+        return null;
     }
 
     private void savePlayerState(Player player, Duel duel) {
@@ -1134,6 +1190,11 @@ public class DuelManager {
         }
         Duel duel = getDuelOf(uuid);
         if (duel == null) return;
+
+        if (duel.getState() == DuelState.WAITING) {
+            cancelDuel(duel);
+            return;
+        }
 
         if (duel.getState() == DuelState.COUNTDOWN) {
             cancelDuel(duel);

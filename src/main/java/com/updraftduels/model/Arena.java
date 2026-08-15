@@ -29,6 +29,7 @@ public class Arena {
     private final Map<Team, Location> spawns;
     private final List<BlockSnapshot> originalBlocks;
     private boolean inUse;
+    private boolean regenerating;
     private UUID currentDuelId;
 
     public Arena(String name) {
@@ -36,6 +37,7 @@ public class Arena {
         this.spawns = new EnumMap<>(Team.class);
         this.originalBlocks = new ArrayList<>();
         this.inUse = false;
+        this.regenerating = false;
         this.currentDuelId = null;
     }
 
@@ -49,6 +51,8 @@ public class Arena {
     public Location getSpawn(Team team) { return spawns.get(team); }
     public boolean isInUse() { return inUse; }
     public void setInUse(boolean inUse) { this.inUse = inUse; }
+    public boolean isRegenerating() { return regenerating; }
+    public void setRegenerating(boolean regenerating) { this.regenerating = regenerating; }
     public UUID getCurrentDuelId() { return currentDuelId; }
     public void setCurrentDuelId(UUID currentDuelId) { this.currentDuelId = currentDuelId; }
     public List<BlockSnapshot> getOriginalBlocks() { return originalBlocks; }

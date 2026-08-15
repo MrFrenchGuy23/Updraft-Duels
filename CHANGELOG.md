@@ -23,6 +23,15 @@ Releases are also published automatically to GitHub Releases when a `v*` tag is 
 - Kit editor blocks shift/drag clicks and clears the cursor on close (closes duplication vector).
 - Duplicate `spectator:` message keys merged (spectator messages no longer show raw keys).
 - Database writes drain gracefully on shutdown instead of being silently dropped.
+- Tournament matches now record their tournament id, so draws advance the bracket instead of hanging.
+- `/settings set <ruleset>` now actually stores your preferred ruleset (used for duels without an explicit ruleset).
+- Playtime is no longer discarded when a player rejoins before the previous session finishes saving.
+- Arena snapshots/regeneration are processed in chunks so big arenas no longer freeze the server thread.
+- Duel scoreboards no longer flicker (objective is kept instead of recreated every second).
+- RTP matches load chunks asynchronously before teleporting (no more server freeze on match start).
+
+### Added
+- `arena.block-edit-whitelist` config option: arenas where players may freely break/place blocks during a duel.
 
 ## [1.0.0] - 2026-08-15
 

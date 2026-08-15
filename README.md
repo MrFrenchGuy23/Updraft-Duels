@@ -117,6 +117,26 @@ rtpqueue:
   countdown-seconds: 5
 ```
 
+### Block editing in arenas
+
+During duels, players can't break or place blocks by default (unless the active ruleset allows it,
+e.g. `buildpvp`/`breakable-floor`). To let players freely edit blocks in specific arenas, whitelist
+them:
+
+```yaml
+arena:
+  block-edit-whitelist:
+    - "mybuildarena"
+    - "practice_arena"
+```
+
+Add the arena names exactly as created with `/duelarena create`.
+
+### Ruleset preference
+
+`/settings set <ruleset>` (or clicking a ruleset in `/settings rules`) stores your preferred ruleset.
+Duels started without an explicit ruleset use it instead of `default`.
+
 ### Database
 
 ```yaml

@@ -9,11 +9,16 @@ duel:
   ranked-time-limit-seconds: 300
   allowed-team-sizes: [1, 2, 3, 4]
   countdown-seconds: 3
-  win-condition: LAST_TEAM_STANDING
   max-pending-requests: 5
   # Set to true to log arena boundary checks and duel teleports to the console.
   # Use this to debug players getting teleported to the wrong world or "can't leave arena" issues.
   debug: false
+
+arena:
+  # Arenas where players may freely break/place blocks during a duel.
+  # These bypass the default block-edit restriction (useful for buildpvp-style arenas).
+  # Add the arena name exactly as created with /arena create.
+  block-edit-whitelist: []
 
 lobby:
 
