@@ -16,12 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -35,7 +35,7 @@ jobs:
         shell: bash
         run: |
           TAG="${{ github.ref_name }}"
-          PREV=$(git tag --sort=-creatordate | head -n 2 | tail -n 1 || true)
+          PREV=$(git tag --sort=-creatordate | awk 'NR==2 {print}')
           if [ -z "$PREV" ]; then
             RANGE="HEAD"
           else
