@@ -32,12 +32,20 @@ public class DatabaseManager {
     private final UpdraftDuels plugin;
     private Connection connection;
     private final ExecutorService executor;
+    private final java.util.concurrent.Executor gracefulExecutor;
     private final boolean useMySQL;
     private final Map<UUID, DuelPlayerStats> statsCache = new ConcurrentHashMap<>();
 
     public DatabaseManager(UpdraftDuels plugin) {
         this.plugin = plugin;
         this.executor = Executors.newSingleThreadExecutor();
+        this.gracefulExecutor = command -> {
+            if (executor.isShutdown()) {
+                command.run();
+            } else {
+                executor.execute(command);
+            }
+        };
         this.useMySQL = plugin.getConfig().getString("database.type", "SQLITE").equalsIgnoreCase("MYSQL");
     }
 
@@ -205,7 +213,7 @@ public class DatabaseManager {
                 e.printStackTrace();
                 return null;
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<DuelPlayerStats> getOrCreateStats(UUID uuid, String name) {
@@ -258,7 +266,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<List<DuelPlayerStats>> getTopPlayers(int limit) {
@@ -293,7 +301,7 @@ public class DatabaseManager {
                 e.printStackTrace();
             }
             return top;
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<List<DuelPlayerStats>> getTopPlayersByStat(String statColumn, int limit) {
@@ -333,7 +341,7 @@ public class DatabaseManager {
                 e.printStackTrace();
             }
             return top;
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Integer> getPlayerRank(UUID uuid) {
@@ -352,7 +360,7 @@ public class DatabaseManager {
                 e.printStackTrace();
                 return 0;
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Void> saveFriend(UUID uuid, UUID friendUUID, boolean autoAccept) {
@@ -368,7 +376,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Void> removeFriend(UUID uuid, UUID friendUUID) {
@@ -383,7 +391,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Set<UUID>> getFriends(UUID uuid) {
@@ -406,7 +414,7 @@ public class DatabaseManager {
                 e.printStackTrace();
             }
             return friends;
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Boolean> isFriend(UUID uuid, UUID friendUUID) {
@@ -425,7 +433,7 @@ public class DatabaseManager {
                 e.printStackTrace();
                 return false;
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Set<UUID>> getAutoAccepted(UUID uuid) {
@@ -448,7 +456,7 @@ public class DatabaseManager {
                 e.printStackTrace();
             }
             return autoAccepted;
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Boolean> getAutoAccept(UUID uuid, UUID friendUUID) {
@@ -467,7 +475,7 @@ public class DatabaseManager {
                 e.printStackTrace();
                 return false;
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Void> toggleAutoAccept(UUID uuid, UUID friendUUID) {
@@ -482,7 +490,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Void> saveKit(String id, String name, UUID ownerUUID, boolean isPublic, String contentsJson, String armorJson, String offHandJson, String permissionNode, String prefix, String iconMaterial, int slot) {
@@ -507,7 +515,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Void> deleteKit(String id) {
@@ -520,7 +528,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<List<Map<String, Object>>> loadKits(UUID ownerUUID, boolean publicOnly) {
@@ -558,7 +566,7 @@ public class DatabaseManager {
                 e.printStackTrace();
             }
             return kits;
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Void> saveArena(String name, String world, double p1x, double p1y, double p1z, double p2x, double p2y, double p2z,
@@ -581,7 +589,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Void> deleteArena(String name) {
@@ -594,7 +602,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<List<Map<String, Object>>> loadArenas() {
@@ -629,7 +637,7 @@ public class DatabaseManager {
                 e.printStackTrace();
             }
             return arenas;
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public Connection getConnection() {
@@ -651,7 +659,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Void> loadCosmetics(UUID uuid, com.updraftduels.manager.CosmeticsManager cosmeticsManager) {
@@ -672,7 +680,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<Void> saveDuelHistory(String id, String duelId, String arena, String ruleset,
@@ -704,7 +712,7 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }, executor);
+        }, gracefulExecutor);
     }
 
     public CompletableFuture<List<com.updraftduels.model.DuelHistoryEntry>> getDuelHistory(UUID playerUUID, int limit) {
@@ -743,7 +751,7 @@ public class DatabaseManager {
                 e.printStackTrace();
             }
             return history;
-        }, executor);
+        }, gracefulExecutor);
     }
 }
 

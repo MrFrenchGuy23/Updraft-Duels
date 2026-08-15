@@ -161,7 +161,8 @@ public class DuelListener implements Listener {
 
         if (ruleset != null && ruleset.isNoDamage()) {
             if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK &&
-                    event.getCause() != EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK) {
+                    event.getCause() != EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK &&
+                    event.getCause() != EntityDamageEvent.DamageCause.VOID) {
                 event.setCancelled(true);
             }
         }
@@ -176,6 +177,7 @@ public class DuelListener implements Listener {
         Player player = event.getPlayer();
         plugin.getQueueManager().onPlayerDisconnect(player.getUniqueId());
         plugin.getDuelManager().onPlayerDisconnect(player.getUniqueId());
+        plugin.getSpectatorManager().onPlayerQuit(player.getUniqueId());
         plugin.getAntiSpamManager().clearAll(player.getUniqueId());
     }
 

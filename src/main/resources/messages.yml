@@ -120,6 +120,9 @@ spectator:
   stopped-spectating: "&7You stopped spectating."
   cannot-spectate: "&cYou cannot spectate this duel."
   player-not-in-duel: "&cThat player is not in a duel."
+  following: "&7Now following &f%player%&7."
+  free-cam-toggle: "&7Free-cam toggled."
+  vanish-toggle: "&7Vanish toggled."
 
 # ===========================
 # Profile Messages
@@ -248,11 +251,3 @@ signs:
   created: "&aQueue sign created. Type: &f%type%"
   clicked-rtp: "&aJoining RTP queue."
   clicked-arena: "&aJoining queue for &f%arena%&a."
-
-# ===========================
-# Spectator Enhanced Messages
-# ===========================
-spectator:
-  following: "&7Now following &f%player%&7."
-  free-cam-toggle: "&7Free-cam toggled."
-  vanish-toggle: "&7Vanish toggled."

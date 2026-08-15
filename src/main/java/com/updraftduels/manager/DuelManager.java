@@ -130,7 +130,10 @@ public class DuelManager {
         request.setAccepted(true);
 
         if (!startDuel(request)) {
-            request.setAccepted(false);
+            request.setProcessed(true);
+            pendingRequests.remove(request.getRequestId());
+            outgoingRequests.getOrDefault(request.getSenderUUID(), new ArrayList<>()).remove(request);
+            incomingRequests.getOrDefault(request.getReceiverUUID(), new ArrayList<>()).remove(request);
             return false;
         }
 
@@ -171,7 +174,7 @@ public class DuelManager {
         Arena arena = request.getArenaName() != null
                 ? plugin.getArenaManager().getArena(request.getArenaName())
                 : plugin.getArenaManager().getRandomAvailableArena();
-        if (arena == null || arena.isInUse()) {
+        if (arena == null || arena.isInUse() || !arena.isConfigured()) {
             arena = plugin.getArenaManager().getRandomAvailableArena();
             if (arena == null) return false;
         }
@@ -192,6 +195,9 @@ public class DuelManager {
         duel.addTeam(teamB);
 
         activeDuels.put(duel.getId(), duel);
+
+        plugin.getQueueManager().leaveQueue(senderUUID);
+        plugin.getQueueManager().leaveQueue(receiverUUID);
 
         savePlayerState(sender, duel);
         savePlayerState(receiver, duel);
@@ -312,6 +318,9 @@ public class DuelManager {
         duel.getOriginalEnderChestContents().put(player.getUniqueId(), player.getEnderChest().getContents());
         duel.getOriginalHealth().put(player.getUniqueId(), player.getHealth());
         duel.getOriginalFoodLevel().put(player.getUniqueId(), player.getFoodLevel());
+        duel.getOriginalGameModes().put(player.getUniqueId(), player.getGameMode());
+        duel.getOriginalAllowFlight().put(player.getUniqueId(), player.getAllowFlight());
+        duel.getOriginalFlying().put(player.getUniqueId(), player.isFlying());
     }
 
     private void startCountdown(Duel duel, Arena arena, int seconds) {
@@ -342,19 +351,23 @@ public class DuelManager {
                     int memberIndex = team != null ? team.getMembers().indexOf(uuid) : 0;
                     Location offset = spawn.clone().add(memberIndex * 0.75, 0, 0);
                     player.teleport(offset);
-                    if (duelDebug()) plugin.getLogger().info("[DuelDebug] " + player.getName()
-                            + " teleported to arena spawn | arena=" + arena.getName()
-                            + " team=" + (teamIndex != null ? teamIndex.name() : "?")
-                            + " world=" + (offset.getWorld() != null ? offset.getWorld().getName() : "null")
-                            + " x=" + String.format("%.1f", offset.getX())
-                            + " y=" + String.format("%.1f", offset.getY())
-                            + " z=" + String.format("%.1f", offset.getZ())
-                            + " | boxX[" + String.format("%.1f", Math.min(arena.getPos1().getX(), arena.getPos2().getX()))
-                            + ".." + String.format("%.1f", Math.max(arena.getPos1().getX(), arena.getPos2().getX())) + "]"
-                            + " boxZ[" + String.format("%.1f", Math.min(arena.getPos1().getZ(), arena.getPos2().getZ()))
-                            + ".." + String.format("%.1f", Math.max(arena.getPos1().getZ(), arena.getPos2().getZ())) + "]"
-                            + " boxY[" + String.format("%.1f", Math.min(arena.getPos1().getY(), arena.getPos2().getY()))
-                            + ".." + String.format("%.1f", Math.max(arena.getPos1().getY(), arena.getPos2().getY())) + "]");
+                    if (duelDebug()) {
+                        String box = (arena.getPos1() != null && arena.getPos2() != null)
+                                ? " | boxX[" + String.format("%.1f", Math.min(arena.getPos1().getX(), arena.getPos2().getX()))
+                                + ".." + String.format("%.1f", Math.max(arena.getPos1().getX(), arena.getPos2().getX())) + "]"
+                                + " boxZ[" + String.format("%.1f", Math.min(arena.getPos1().getZ(), arena.getPos2().getZ()))
+                                + ".." + String.format("%.1f", Math.max(arena.getPos1().getZ(), arena.getPos2().getZ())) + "]"
+                                + " boxY[" + String.format("%.1f", Math.min(arena.getPos1().getY(), arena.getPos2().getY()))
+                                + ".." + String.format("%.1f", Math.max(arena.getPos1().getY(), arena.getPos2().getY())) + "]"
+                                : " | box=unset";
+                        plugin.getLogger().info("[DuelDebug] " + player.getName()
+                                + " teleported to arena spawn | arena=" + arena.getName()
+                                + " team=" + (teamIndex != null ? teamIndex.name() : "?")
+                                + " world=" + (offset.getWorld() != null ? offset.getWorld().getName() : "null")
+                                + " x=" + String.format("%.1f", offset.getX())
+                                + " y=" + String.format("%.1f", offset.getY())
+                                + " z=" + String.format("%.1f", offset.getZ()) + box);
+                    }
                 } else {
                     if (duelDebug()) plugin.getLogger().info("[DuelDebug] " + player.getName()
                             + " teleport FAILED: arena '" + arena.getName() + "' has no spawn and no center");
@@ -477,6 +490,9 @@ public class DuelManager {
     private void beginDuel(Duel duel, Arena arena, Ruleset ruleset, boolean rtpMode) {
         if (!rtpMode) {
             plugin.getGateManager().openGate(() -> {
+                if (duel.getState() != DuelState.COUNTDOWN || !activeDuels.containsKey(duel.getId())) {
+                    return;
+                }
                 beginDuelCore(duel, arena, ruleset);
             });
             return;
@@ -855,8 +871,12 @@ public class DuelManager {
             Player spectator = Bukkit.getPlayer(spectatorUUID);
             if (spectator != null) {
                 plugin.getSpectatorManager().stopSpectating(spectator);
-                spectator.teleport(spectator.getWorld().getSpawnLocation());
-                spectator.setGameMode(GameMode.SURVIVAL);
+                org.bukkit.Location lobby = plugin.getLobbyLocation();
+                if (lobby != null) {
+                    spectator.teleport(lobby);
+                } else {
+                    spectator.teleport(spectator.getWorld().getSpawnLocation());
+                }
                 spectator.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix("&7Spectating ended."));
             }
         }
@@ -1086,7 +1106,14 @@ public class DuelManager {
             player.setFoodLevel(originalFood);
         }
 
-        player.setGameMode(GameMode.SURVIVAL);
+        org.bukkit.GameMode originalMode = duel.getOriginalGameModes().get(uuid);
+        player.setGameMode(originalMode != null ? originalMode : GameMode.SURVIVAL);
+        Boolean originalAllowFlight = duel.getOriginalAllowFlight().get(uuid);
+        player.setAllowFlight(originalAllowFlight != null ? originalAllowFlight : false);
+        Boolean originalFlying = duel.getOriginalFlying().get(uuid);
+        if (originalFlying != null) {
+            player.setFlying(originalFlying);
+        }
         player.setWalkSpeed(0.2f);
         player.setFlySpeed(0.1f);
         player.setFireTicks(0);
@@ -1099,6 +1126,8 @@ public class DuelManager {
 
     public void onPlayerDisconnect(UUID uuid) {
         pendingDuelSelections.remove(uuid);
+        pendingRespawnLocations.remove(uuid);
+        lobbyTeleportAfterDuel.remove(uuid);
         denyAllIncoming(uuid);
         for (DuelRequest req : new ArrayList<>(outgoingRequests.getOrDefault(uuid, new ArrayList<>()))) {
             denyRequest(req.getRequestId(), uuid);

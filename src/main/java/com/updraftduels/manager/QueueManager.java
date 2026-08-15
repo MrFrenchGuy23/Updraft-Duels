@@ -94,7 +94,19 @@ public class QueueManager {
 
     private void matchGamemodePlayers(String queueKey, String gamemode) {
         Queue<UUID> queue = queues.get(queueKey);
-        if (queue == null || queue.size() < 2) return;
+        if (queue == null) return;
+
+        queue.removeIf(uuid -> {
+            if (Bukkit.getPlayer(uuid) == null || plugin.getDuelManager().isInDuel(uuid)) {
+                playerQueues.remove(uuid);
+                rankedPreferences.remove(uuid);
+                kitNames.remove(uuid);
+                return true;
+            }
+            return false;
+        });
+
+        if (queue.size() < 2) return;
 
         UUID player1 = queue.poll();
         UUID player2 = queue.poll();
@@ -118,6 +130,12 @@ public class QueueManager {
             queue.add(player2);
             playerQueues.put(player1, queueKey);
             playerQueues.put(player2, queueKey);
+            if (ranked) {
+                rankedPreferences.put(player1, true);
+                rankedPreferences.put(player2, true);
+            }
+            kitNames.put(player1, kitName);
+            kitNames.put(player2, kitName);
             return;
         }
 
@@ -151,19 +169,20 @@ public class QueueManager {
     private void requeueGamemodePlayers(String queueKey, String kitName, boolean ranked,
                                         UUID player1, UUID player2) {
         Queue<UUID> queue = queues.computeIfAbsent(queueKey, k -> new LinkedList<>());
-        if (player1 != null && Bukkit.getPlayer(player1) != null && !playerQueues.containsKey(player1)) {
+        if (player1 != null && Bukkit.getPlayer(player1) != null
+                && !plugin.getDuelManager().isInDuel(player1) && !playerQueues.containsKey(player1)) {
             queue.add(player1);
             playerQueues.put(player1, queueKey);
             rankedPreferences.put(player1, ranked);
             kitNames.put(player1, kitName);
         }
-        if (player2 != null && Bukkit.getPlayer(player2) != null && !playerQueues.containsKey(player2)) {
+        if (player2 != null && Bukkit.getPlayer(player2) != null
+                && !plugin.getDuelManager().isInDuel(player2) && !playerQueues.containsKey(player2)) {
             queue.add(player2);
             playerQueues.put(player2, queueKey);
             rankedPreferences.put(player2, ranked);
             kitNames.put(player2, kitName);
         }
-        matchGamemodePlayers(queueKey, kitName);
     }
 
     public void onPlayerDisconnect(UUID uuid) {

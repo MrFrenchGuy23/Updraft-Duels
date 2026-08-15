@@ -5,6 +5,25 @@ All notable changes to this project are documented here.
 Releases are also published automatically to GitHub Releases when a `v*` tag is pushed
 (see `.github/workflows/release.yml`).
 
+## Unreleased
+
+### Removed
+- FFA feature (command, manager, model, config, permissions).
+
+### Fixed
+- Anti-spam cooldowns now also apply to the kit-GUI duel flow, `/friend duel`, and the RTP queue.
+- Knockback/no-damage rulesets (e.g. sumo) can now end: void damage is no longer cancelled.
+- Game mode and flight state are saved/restored across duels (creative/spectator players are no longer forced to survival).
+- A disconnect during the gate-rise animation no longer resurrects a cancelled duel.
+- Duel start rejects unconfigured arenas on the explicit-name path (players no longer fight at the lobby).
+- Queue matchmaking no longer loops infinitely when a queued player is already in a duel; stale requests from failed matches are cleaned up.
+- Ranked/kit preference is preserved when a match requeues due to no available arena.
+- Spectators are cleaned up on quit and teleported to the lobby at duel end (no more stuck in the arena world).
+- Pending respawn locations are cleared on disconnect.
+- Kit editor blocks shift/drag clicks and clears the cursor on close (closes duplication vector).
+- Duplicate `spectator:` message keys merged (spectator messages no longer show raw keys).
+- Database writes drain gracefully on shutdown instead of being silently dropped.
+
 ## [1.0.0] - 2026-08-15
 
 ### Added

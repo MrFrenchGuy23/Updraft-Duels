@@ -36,6 +36,9 @@ public class Duel {
     private final Map<UUID, org.bukkit.inventory.ItemStack[]> originalEnderChestContents;
     private final Map<UUID, Double> originalHealth;
     private final Map<UUID, Integer> originalFoodLevel;
+    private final Map<UUID, org.bukkit.GameMode> originalGameModes;
+    private final Map<UUID, Boolean> originalAllowFlight;
+    private final Map<UUID, Boolean> originalFlying;
     private UUID winnerTeamIndex;
     private long startTime;
     private long endTime;
@@ -62,6 +65,9 @@ public class Duel {
         this.originalEnderChestContents = new HashMap<>();
         this.originalHealth = new HashMap<>();
         this.originalFoodLevel = new HashMap<>();
+        this.originalGameModes = new HashMap<>();
+        this.originalAllowFlight = new HashMap<>();
+        this.originalFlying = new HashMap<>();
     }
 
     public UUID getId() { return id; }
@@ -80,6 +86,9 @@ public class Duel {
     public Map<UUID, org.bukkit.inventory.ItemStack[]> getOriginalEnderChestContents() { return originalEnderChestContents; }
     public Map<UUID, Double> getOriginalHealth() { return originalHealth; }
     public Map<UUID, Integer> getOriginalFoodLevel() { return originalFoodLevel; }
+    public Map<UUID, org.bukkit.GameMode> getOriginalGameModes() { return originalGameModes; }
+    public Map<UUID, Boolean> getOriginalAllowFlight() { return originalAllowFlight; }
+    public Map<UUID, Boolean> getOriginalFlying() { return originalFlying; }
     public UUID getWinnerTeamIndex() { return winnerTeamIndex; }
     public void setWinnerTeamIndex(UUID winnerTeamIndex) { this.winnerTeamIndex = winnerTeamIndex; }
     public long getStartTime() { return startTime; }

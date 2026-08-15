@@ -75,6 +75,11 @@ public class GUIListener implements Listener {
 
         if (title.contains("Kit Editor")) {
             if (event.getClickedInventory() != event.getView().getTopInventory()) {
+                event.setCancelled(true);
+                return;
+            }
+            if (event.isShiftClick() || event.getClick().isCreativeAction() || event.getClick().isKeyboardClick()) {
+                event.setCancelled(true);
                 return;
             }
             int slot = event.getSlot();
@@ -483,6 +488,8 @@ public class GUIListener implements Listener {
         if (!(event.getPlayer() instanceof Player player)) return;
         String title = event.getView().getTitle();
         if (!title.contains("Kit Editor")) return;
+
+        player.setItemOnCursor(null);
 
         String kitName = title.substring(title.lastIndexOf(" - ") + 3);
         Kit kit = plugin.getKitManager().getKit(kitName);
