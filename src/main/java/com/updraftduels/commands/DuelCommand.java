@@ -67,12 +67,6 @@ public class DuelCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (plugin.getAntiSpamManager().isOnCooldown(sender.getUniqueId(), "duel-request")) {
-            int remaining = plugin.getAntiSpamManager().getRemainingSeconds(sender.getUniqueId(), "duel-request");
-            sender.sendMessage(ColorUtil.colorizePrefix("&cWait " + remaining + "s before sending another duel request."));
-            return;
-        }
-
         if (plugin.getDuelManager().isInDuel(sender.getUniqueId())) {
             sender.sendMessage(ColorUtil.colorize(plugin.getMessages().get("duel.already-in-duel")));
             return;

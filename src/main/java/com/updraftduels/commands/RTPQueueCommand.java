@@ -45,8 +45,11 @@ public class RTPQueueCommand implements CommandExecutor {
             return true;
         }
 
-        plugin.getQueueManager().joinRTPQueue(player.getUniqueId());
-        player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.rtp-joined")));
+        if (plugin.getQueueManager().joinRTPQueue(player.getUniqueId())) {
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.rtp-joined")));
+        } else {
+            player.sendMessage(ColorUtil.colorizePrefix("&cPlease wait a moment before joining a queue."));
+        }
         return true;
     }
 }

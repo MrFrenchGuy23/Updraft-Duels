@@ -176,6 +176,7 @@ public class DuelListener implements Listener {
         Player player = event.getPlayer();
         plugin.getQueueManager().onPlayerDisconnect(player.getUniqueId());
         plugin.getDuelManager().onPlayerDisconnect(player.getUniqueId());
+        plugin.getAntiSpamManager().clearAll(player.getUniqueId());
     }
 
     @EventHandler

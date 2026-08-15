@@ -70,8 +70,12 @@ public class DuelManager {
         pendingDuelSelections.remove(sender);
     }
 
-    public void sendDuelRequest(Player sender, Player target, String kitName, int rounds) {
+    public boolean sendDuelRequest(Player sender, Player target, String kitName, int rounds) {
         if (kitName == null || kitName.isEmpty()) kitName = "default";
+        if (plugin.getAntiSpamManager().isOnCooldown(sender.getUniqueId(), "duel-request")) {
+            plugin.getAntiSpamManager().sendCooldownMessage(sender, "duel-request");
+            return false;
+        }
         createRequest(sender.getUniqueId(), target.getUniqueId(), DuelType.SOLO, kitName, false, rounds);
         plugin.getAntiSpamManager().setCooldown(sender.getUniqueId(), "duel-request");
 
@@ -82,8 +86,10 @@ public class DuelManager {
 
         String acceptCmd = "/duel accept " + sender.getName();
         com.updraftduels.util.ChatUtil.sendClickable(target,
-                "&e" + sender.getName() + " &ahas challenged you! &eClick to accept.",
+                com.updraftduels.util.ColorUtil.colorize(
+                        plugin.getMessages().get("duel.request-received", "%player%", sender.getName())),
                 acceptCmd, "&aClick to accept duel!");
+        return true;
     }
 
     public DuelRequest createRequest(UUID sender, UUID receiver, DuelType type, String rulesetId) {

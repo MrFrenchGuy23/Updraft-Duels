@@ -61,9 +61,11 @@ public class QueueManager {
 
     public boolean joinRTPQueue(UUID uuid) {
         if (playerQueues.containsKey(uuid)) return false;
+        if (plugin.getAntiSpamManager().isOnCooldown(uuid, "queue-join")) return false;
 
         rtpQueue.add(uuid);
         playerQueues.put(uuid, "rtp");
+        plugin.getAntiSpamManager().setCooldown(uuid, "queue-join");
 
         matchRTPPlayers();
         return true;

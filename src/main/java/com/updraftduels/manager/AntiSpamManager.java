@@ -18,6 +18,7 @@
 package com.updraftduels.manager;
 
 import com.updraftduels.UpdraftDuels;
+import com.updraftduels.util.ColorUtil;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
@@ -67,6 +68,17 @@ public class AntiSpamManager {
 
     public void clearAll(UUID uuid) {
         cooldowns.remove(uuid);
+    }
+
+    public void sendCooldownMessage(Player player, String type) {
+        int remaining = getRemainingSeconds(player.getUniqueId(), type);
+        String message = switch (type) {
+            case "duel-request" -> "&cWait " + remaining + "s before sending another duel request.";
+            case "queue-join" -> "&cWait " + remaining + "s before joining a queue again.";
+            case "tournament-join" -> "&cWait " + remaining + "s before joining another tournament.";
+            default -> "&cWait " + remaining + "s before doing that again.";
+        };
+        player.sendMessage(ColorUtil.colorizePrefix(message));
     }
 
     public boolean checkAndSet(UUID uuid, String type) {

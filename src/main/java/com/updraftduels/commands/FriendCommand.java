@@ -135,8 +135,14 @@ public class FriendCommand implements CommandExecutor, TabCompleter {
         }
 
         boolean autoAccept = plugin.getFriendManager().shouldAutoAccept(target.getUniqueId(), player.getUniqueId());
+
+        if (plugin.getAntiSpamManager().isOnCooldown(player.getUniqueId(), "duel-request")) {
+            plugin.getAntiSpamManager().sendCooldownMessage(player, "duel-request");
+            return;
+        }
         DuelRequest request = plugin.getDuelManager().createRequest(player.getUniqueId(), target.getUniqueId(),
                 DuelType.SOLO, "default");
+        plugin.getAntiSpamManager().setCooldown(player.getUniqueId(), "duel-request");
 
         player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("duel.request-sent", "%player%", target.getName())));
 
