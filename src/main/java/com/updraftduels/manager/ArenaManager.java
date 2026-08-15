@@ -22,7 +22,6 @@ import com.updraftduels.model.Arena;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -154,30 +153,6 @@ public class ArenaManager {
                 sBx, sBy, sBz, sByaw);
     }
 
-    public void snapshotArena(Arena arena) {
-        if (arena.getPos1() == null || arena.getPos2() == null) return;
-        arena.getOriginalBlocks().clear();
-
-        World world = arena.getWorld();
-        if (world == null) return;
-
-        int minX = (int) Math.min(arena.getPos1().getX(), arena.getPos2().getX());
-        int minY = (int) Math.min(arena.getPos1().getY(), arena.getPos2().getY());
-        int minZ = (int) Math.min(arena.getPos1().getZ(), arena.getPos2().getZ());
-        int maxX = (int) Math.max(arena.getPos1().getX(), arena.getPos2().getX());
-        int maxY = (int) Math.max(arena.getPos1().getY(), arena.getPos2().getY());
-        int maxZ = (int) Math.max(arena.getPos1().getZ(), arena.getPos2().getZ());
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int y = minY; y <= maxY; y++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    Block block = world.getBlockAt(x, y, z);
-                    arena.getOriginalBlocks().add(new Arena.BlockSnapshot(x, y, z, block.getBlockData()));
-                }
-            }
-        }
-    }
-
     public void snapshotArenaAsync(Arena arena, Runnable done) {
         if (arena.getPos1() == null || arena.getPos2() == null) {
             if (done != null) done.run();
@@ -189,38 +164,9 @@ public class ArenaManager {
             return;
         }
 
-        int minX = (int) Math.min(arena.getPos1().getX(), arena.getPos2().getX());
-        int minY = (int) Math.min(arena.getPos1().getY(), arena.getPos2().getY());
-        int minZ = (int) Math.min(arena.getPos1().getZ(), arena.getPos2().getZ());
-        int maxX = (int) Math.max(arena.getPos1().getX(), arena.getPos2().getX());
-        int maxY = (int) Math.max(arena.getPos1().getY(), arena.getPos2().getY());
-        int maxZ = (int) Math.max(arena.getPos1().getZ(), arena.getPos2().getZ());
-
         arena.getOriginalBlocks().clear();
-
-        int[] pos = {minX, minY, minZ};
-        int[] taskId = new int[1];
-        taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            int processed = 0;
-            while (processed < BLOCKS_PER_TICK && pos[0] <= maxX) {
-                arena.getOriginalBlocks().add(new Arena.BlockSnapshot(
-                        pos[0], pos[1], pos[2], world.getBlockAt(pos[0], pos[1], pos[2]).getBlockData()));
-                processed++;
-                pos[2]++;
-                if (pos[2] > maxZ) {
-                    pos[2] = minZ;
-                    pos[1]++;
-                }
-                if (pos[1] > maxY) {
-                    pos[1] = minY;
-                    pos[0]++;
-                }
-            }
-            if (pos[0] > maxX) {
-                Bukkit.getScheduler().cancelTask(taskId[0]);
-                if (done != null) done.run();
-            }
-        }, 1L, 1L);
+        runChunkedArenaJob(arena, (w, x, y, z) ->
+                arena.getOriginalBlocks().add(new Arena.BlockSnapshot(x, y, z, w.getBlockAt(x, y, z).getBlockData())), done);
     }
 
     public void regenerateArena(Arena arena) {
@@ -228,18 +174,102 @@ public class ArenaManager {
         if (world == null || arena.getOriginalBlocks().isEmpty()) return;
         arena.setRegenerating(true);
 
-        Iterator<Arena.BlockSnapshot> it = new ArrayList<>(arena.getOriginalBlocks()).iterator();
-        int[] taskId = new int[1];
-        taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-            int processed = 0;
-            while (it.hasNext() && processed < BLOCKS_PER_TICK) {
-                Arena.BlockSnapshot snap = it.next();
-                world.getBlockAt(snap.getX(), snap.getY(), snap.getZ()).setBlockData(snap.getBlockData(), false);
-                processed++;
+        Map<Long, org.bukkit.block.data.BlockData> data = new HashMap<>();
+        for (Arena.BlockSnapshot snap : arena.getOriginalBlocks()) {
+            data.put(packCoord(snap.getX(), snap.getY(), snap.getZ()), snap.getBlockData());
+        }
+
+        runChunkedArenaJob(arena, (w, x, y, z) -> {
+            org.bukkit.block.data.BlockData blockData = data.get(packCoord(x, y, z));
+            if (blockData != null) {
+                w.getBlockAt(x, y, z).setBlockData(blockData, false);
             }
-            if (!it.hasNext()) {
+        }, () -> snapshotArenaAsync(arena, () -> arena.setRegenerating(false)));
+    }
+
+    private long packCoord(int x, int y, int z) {
+        return ((long) (x & 0xFFFFFF) << 40)
+                | ((long) (z & 0xFFFFFF) << 16)
+                | (y & 0xFFFF);
+    }
+
+    private interface ChunkBlockAction {
+        void apply(World world, int x, int y, int z);
+    }
+
+    private void runChunkedArenaJob(Arena arena, ChunkBlockAction action, Runnable done) {
+        World world = arena.getWorld();
+        if (world == null || arena.getPos1() == null || arena.getPos2() == null) {
+            if (done != null) done.run();
+            return;
+        }
+
+        int minX = (int) Math.min(arena.getPos1().getX(), arena.getPos2().getX());
+        int minY = (int) Math.min(arena.getPos1().getY(), arena.getPos2().getY());
+        int minZ = (int) Math.min(arena.getPos1().getZ(), arena.getPos2().getZ());
+        int maxX = (int) Math.max(arena.getPos1().getX(), arena.getPos2().getX());
+        int maxY = (int) Math.max(arena.getPos1().getY(), arena.getPos2().getY());
+        int maxZ = (int) Math.max(arena.getPos1().getZ(), arena.getPos2().getZ());
+
+        List<int[]> chunks = new ArrayList<>();
+        for (int cx = minX >> 4; cx <= maxX >> 4; cx++) {
+            for (int cz = minZ >> 4; cz <= maxZ >> 4; cz++) {
+                chunks.add(new int[]{cx, cz});
+            }
+        }
+
+        int[] chunkIdx = {0};
+        boolean[] loading = {false};
+        boolean[] loaded = {false};
+        int[] cur = {minX, minY, minZ};
+        int[] taskId = new int[1];
+
+        taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            if (chunkIdx[0] >= chunks.size()) {
                 Bukkit.getScheduler().cancelTask(taskId[0]);
-                snapshotArenaAsync(arena, () -> arena.setRegenerating(false));
+                if (done != null) done.run();
+                return;
+            }
+
+            int[] cc = chunks.get(chunkIdx[0]);
+            int cMinX = Math.max(minX, cc[0] * 16);
+            int cMaxX = Math.min(maxX, cc[0] * 16 + 15);
+            int cMinZ = Math.max(minZ, cc[1] * 16);
+            int cMaxZ = Math.min(maxZ, cc[1] * 16 + 15);
+
+            if (!loaded[0]) {
+                if (!loading[0]) {
+                    loading[0] = true;
+                    world.getChunkAtAsync(cc[0], cc[1]).whenComplete((chunk, ex) ->
+                            Bukkit.getScheduler().runTask(plugin, () -> {
+                                cur[0] = cMinX;
+                                cur[1] = minY;
+                                cur[2] = cMinZ;
+                                loaded[0] = true;
+                            }));
+                }
+                return;
+            }
+
+            int processed = 0;
+            while (processed < BLOCKS_PER_TICK) {
+                action.apply(world, cur[0], cur[1], cur[2]);
+                processed++;
+                cur[2]++;
+                if (cur[2] > cMaxZ) {
+                    cur[2] = cMinZ;
+                    cur[1]++;
+                }
+                if (cur[1] > maxY) {
+                    cur[1] = minY;
+                    cur[0]++;
+                    if (cur[0] > cMaxX) {
+                        chunkIdx[0]++;
+                        loaded[0] = false;
+                        loading[0] = false;
+                        break;
+                    }
+                }
             }
         }, 1L, 1L);
     }
