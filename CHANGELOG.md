@@ -37,6 +37,10 @@ Releases are also published automatically to GitHub Releases when a `v*` tag is 
 ### Added
 - `arena.block-edit-whitelist` config option: arenas where players may freely break/place blocks during a duel.
 
+### Changed
+- Party and spectator messages are now fully configurable via `messages.yml` (party chat toggle, ready confirmation,
+  party-duel accept/decline/challenge, free-cam and vanish toggles, plus various error messages).
+
 ## [1.0.0] - 2026-08-15
 
 ### Added

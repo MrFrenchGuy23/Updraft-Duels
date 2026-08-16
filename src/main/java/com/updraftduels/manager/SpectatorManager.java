@@ -96,16 +96,14 @@ public class SpectatorManager {
         if (freeCamEnabled.contains(uuid)) {
             freeCamEnabled.remove(uuid);
             spectator.setGameMode(GameMode.SPECTATOR);
-            spectator.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix(
-                    "&7Free-cam &cdisabled&7."));
+            spectator.sendMessage(plugin.getMessages().get("spectator.free-cam-disabled"));
         } else {
             freeCamEnabled.add(uuid);
             spectator.setGameMode(GameMode.CREATIVE);
             spectator.setAllowFlight(true);
             spectator.setFlying(true);
             spectator.setInvisible(true);
-            spectator.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix(
-                    "&7Free-cam &aenabled&7. &eFly around freely!"));
+            spectator.sendMessage(plugin.getMessages().get("spectator.free-cam-enabled"));
         }
     }
 
@@ -121,15 +119,13 @@ public class SpectatorManager {
                     online.hidePlayer(plugin, spectator);
                 }
             }
-            spectator.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix(
-                    "&7You are now &cinvisible&7 to other players."));
+            spectator.sendMessage(plugin.getMessages().get("spectator.vanish-enabled"));
         } else {
             vanishedSpectators.remove(spectator.getUniqueId());
             for (Player online : Bukkit.getOnlinePlayers()) {
                 online.showPlayer(plugin, spectator);
             }
-            spectator.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix(
-                    "&7You are now &avisible&7."));
+            spectator.sendMessage(plugin.getMessages().get("spectator.vanish-disabled"));
         }
     }
 

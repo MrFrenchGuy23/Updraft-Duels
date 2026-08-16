@@ -101,7 +101,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
                     plugin.getMessages().get("party.invite-received", "%player%", player.getName()),
                     acceptCmd, "&aClick to join the party!");
         } else {
-            player.sendMessage(ColorUtil.colorizePrefix("&cCouldn't invite that player."));
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.invite-failed")));
         }
     }
 
@@ -111,7 +111,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             if (plugin.getPartyManager().acceptChallenge(challenge.getChallengeId(), player.getUniqueId())) {
                 player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.duel-accepted")));
             } else {
-                player.sendMessage(ColorUtil.colorizePrefix("&cCouldn't accept the party duel."));
+                player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.duel-accept-failed")));
             }
             return;
         }
@@ -126,7 +126,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
                 }
             }
         } else {
-            player.sendMessage(ColorUtil.colorizePrefix("&cNo pending party invites."));
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.no-pending-invites")));
         }
     }
 
@@ -175,7 +175,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
 
         Party defender = plugin.getPartyManager().getParty(target.getUniqueId());
         if (defender == null) {
-            player.sendMessage(ColorUtil.colorizePrefix("&cThat player isn't in a party."));
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.target-not-in-party")));
             return;
         }
         challengeParty(player, defender);
@@ -184,17 +184,17 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
     public void challengeParty(Player player, Party defender) {
         Party challenger = plugin.getPartyManager().getParty(player.getUniqueId());
         if (challenger == null) {
-            player.sendMessage(ColorUtil.colorizePrefix("&cYou need to be in a party."));
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.not-in-party")));
             return;
         }
 
         if (!challenger.isLeader(player.getUniqueId())) {
-            player.sendMessage(ColorUtil.colorizePrefix("&cOnly the party leader can duel other parties."));
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.leader-only")));
             return;
         }
 
         if (plugin.getPartyManager().isPartyInFight(defender)) {
-            player.sendMessage(ColorUtil.colorizePrefix("&cThat party is currently in a fight."));
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.in-fight")));
             return;
         }
 
@@ -210,7 +210,8 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         }
 
         if (plugin.getPartyManager().createChallenge(player.getUniqueId(), defender.getLeaderUUID(), arena.getName(), "default")) {
-            player.sendMessage(ColorUtil.colorizePrefix("&aChallenge sent to " + nameOf(defender.getLeaderUUID()) + "'s party!"));
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.duel-challenge-sent",
+                    "%party%", nameOf(defender.getLeaderUUID()))));
 
             for (UUID memberUUID : defender.getMembers()) {
                 Player member = Bukkit.getPlayer(memberUUID);
@@ -254,7 +255,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             return;
         }
         party.getReadyMembers().add(player.getUniqueId());
-        player.sendMessage(ColorUtil.colorizePrefix("&aYou are ready!"));
+        player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.ready-confirmed")));
 
         if (party.isReadyCheckComplete()) {
             for (UUID uuid : party.getMembers()) {
@@ -275,7 +276,7 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
         if (args.length < 2) {
             boolean enabled = !plugin.getPartyManager().isPartyChatEnabled(player.getUniqueId());
             plugin.getPartyManager().setPartyChat(player.getUniqueId(), enabled);
-            player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aParty chat enabled." : "&7Party chat disabled."));
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get(enabled ? "party.chat-enabled" : "party.chat-disabled")));
             return;
         }
         String message = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
