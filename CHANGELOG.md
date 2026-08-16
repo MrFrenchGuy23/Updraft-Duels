@@ -2,9 +2,9 @@
 
 All notable changes to this project are documented here.
 
-Releases are published automatically: when a new version lands on `main`, a `v*` tag is created for it
-(see `.github/workflows/auto-release.yml`), and the tag push builds the plugin and publishes the GitHub
-Release with a changelog (see `.github/workflows/release.yml`).
+Releases are published automatically: when a new version lands on `main`, `auto-release.yml` tags it, builds
+the plugin, and publishes the GitHub Release without any manual steps. Manually pushed `v*` tags are still
+handled by `release.yml`.
 
 ## Unreleased
 
@@ -39,8 +39,8 @@ Release with a changelog (see `.github/workflows/release.yml`).
 
 ### Added
 - `arena.block-edit-whitelist` config option: arenas where players may freely break/place blocks during a duel.
-- Automatic releases: pushing a new version to `main` creates the release tag automatically when it isn't
-  released yet (`.github/workflows/auto-release.yml`), so the GitHub Release is generated without manual tagging.
+- Automatic releases: pushing a new version to `main` creates the release tag, builds the plugin, and publishes
+  the GitHub Release automatically (`.github/workflows/auto-release.yml`), so no manual tagging is needed.
 - Update checker: on startup the plugin checks the GitHub releases API for a newer version and logs the current
   version, the latest version, and a download link to the console. Admins are reminded on join when an update is
   available, and `/uduels update` performs a manual check (all configurable under `update-checker` in `config.yml`,
