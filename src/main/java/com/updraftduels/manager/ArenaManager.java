@@ -104,6 +104,12 @@ public class ArenaManager {
         return available.get(new Random().nextInt(available.size()));
     }
 
+    public List<Arena> getAvailableArenas() {
+        return arenas.values().stream()
+                .filter(a -> a.isConfigured() && !a.isInUse() && !a.isRegenerating())
+                .toList();
+    }
+
     public Arena getRandomAvailableArenaForGamemode(String gamemode) {
         org.bukkit.configuration.file.FileConfiguration config = plugin.getExtraConfig("gamemodes.yml");
         if (config != null && config.contains(gamemode + ".arenas")) {

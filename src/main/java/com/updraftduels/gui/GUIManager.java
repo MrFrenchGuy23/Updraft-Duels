@@ -19,6 +19,7 @@ package com.updraftduels.gui;
 
 import com.updraftduels.UpdraftDuels;
 import com.updraftduels.manager.RankManager;
+import com.updraftduels.manager.VotingManager;
 import com.updraftduels.model.Duel;
 import com.updraftduels.model.DuelPlayerStats;
 import com.updraftduels.model.DuelState;
@@ -74,6 +75,13 @@ public class GUIManager {
     public static final String DUEL_ROUNDS_TITLE = "Select Rounds";
     public static final String QUEUE_TITLE = "Queue";
     public static final String RANKED_QUEUE_TITLE = "Ranked Queue";
+    public static final String VOTE_TITLE = "Vote for Arena";
+
+    private static final Material[] VOTE_WOOL = {
+            Material.RED_WOOL, Material.ORANGE_WOOL, Material.YELLOW_WOOL,
+            Material.LIME_WOOL, Material.LIGHT_BLUE_WOOL, Material.MAGENTA_WOOL,
+            Material.PINK_WOOL, Material.PURPLE_WOOL, Material.GREEN_WOOL
+    };
 
     private static final List<Material> COMBAT_ITEMS = List.of(
             Material.DIAMOND_SWORD, Material.DIAMOND_AXE, Material.DIAMOND_PICKAXE,
@@ -914,6 +922,32 @@ public class GUIManager {
         }
 
         fillWithGlass(gui, targets.size());
+        player.openInventory(gui);
+    }
+
+    public void openVoteGUI(Player player, UUID duelId) {
+        VotingManager.VoteSession session = plugin.getVotingManager().getSession(duelId);
+        if (session == null || session.isResolved()) return;
+
+        Inventory gui = Bukkit.createInventory(null, 9, ColorUtil.colorize(VOTE_TITLE));
+
+        List<String> options = session.getOptions();
+        String playerVote = session.getParticipantVotes().get(player.getUniqueId());
+        for (int i = 0; i < options.size() && i < 9; i++) {
+            String arena = options.get(i);
+            int votes = session.getVoteCount(arena);
+            boolean votedThis = arena.equals(playerVote);
+            ItemBuilder builder = new ItemBuilder(VOTE_WOOL[i])
+                    .name("&f" + arena)
+                    .lore("",
+                            "&7Votes: &f" + votes,
+                            "",
+                            votedThis ? "&aYour vote" : "&7Click to vote");
+            if (votedThis) builder.glow();
+            gui.setItem(i, builder.build());
+        }
+
+        fillWithGlass(gui, options.size());
         player.openInventory(gui);
     }
 

@@ -24,7 +24,7 @@ import java.util.*;
 public class Duel {
     private final UUID id;
     private final DuelType type;
-    private final String arenaName;
+    private String arenaName;
     private DuelState state;
     private final List<DuelTeam> teams;
     private final List<UUID> spectators;
@@ -73,6 +73,7 @@ public class Duel {
     public UUID getId() { return id; }
     public DuelType getType() { return type; }
     public String getArenaName() { return arenaName; }
+    public void setArenaName(String arenaName) { this.arenaName = arenaName; }
     public DuelState getState() { return state; }
     public void setState(DuelState state) { this.state = state; }
     public List<DuelTeam> getTeams() { return teams; }

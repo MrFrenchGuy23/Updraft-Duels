@@ -36,6 +36,9 @@ Releases are also published automatically to GitHub Releases when a `v*` tag is 
 
 ### Added
 - `arena.block-edit-whitelist` config option: arenas where players may freely break/place blocks during a duel.
+- Arena voting for direct duels: with `duel.vote-for-arena` enabled and 2+ arenas available, fighters pick the
+  arena via a vote GUI before the countdown (`duel.vote-seconds` controls the timeout). Voting resolves early once
+  everyone has voted.
 
 ### Changed
 - Party and spectator messages are now fully configurable via `messages.yml` (party chat toggle, ready confirmation,

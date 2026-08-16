@@ -213,10 +213,69 @@ public class DuelManager {
 
         pendingRequests.remove(request.getRequestId());
 
+        boolean useVoting = voteEnabled() && request.getArenaName() == null
+                && plugin.getArenaManager().getAvailableArenas().size() >= 2;
+
         int countdown = plugin.getConfig().getInt("duel.countdown-seconds", 3);
-        startCountdown(duel, arena, countdown);
+        if (useVoting) {
+            startVotingPhase(duel);
+        } else {
+            startCountdown(duel, arena, countdown);
+        }
 
         return true;
+    }
+
+    private boolean voteEnabled() {
+        return plugin.getConfig().getBoolean("duel.vote-for-arena", false);
+    }
+
+    private void startVotingPhase(Duel duel) {
+        List<Arena> available = plugin.getArenaManager().getAvailableArenas();
+        if (available.size() < 2) {
+            Arena arena = available.isEmpty() ? null : available.get(0);
+            if (arena == null) {
+                cancelDuel(duel);
+                return;
+            }
+            duel.setArenaName(arena.getName());
+            int countdown = plugin.getConfig().getInt("duel.countdown-seconds", 3);
+            startCountdown(duel, arena, countdown);
+            return;
+        }
+
+        List<String> options = available.stream().map(Arena::getName).limit(9).toList();
+        List<UUID> participants = duel.getAllParticipants();
+
+        duel.setState(DuelState.WAITING);
+        for (UUID uuid : participants) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) {
+                frozenPlayers.put(uuid, System.currentTimeMillis());
+                player.setWalkSpeed(0f);
+                player.setFlySpeed(0f);
+                plugin.getGuiManager().openVoteGUI(player, duel.getId());
+            }
+        }
+
+        int voteSeconds = plugin.getConfig().getInt("duel.vote-seconds", 8);
+        plugin.getVotingManager().startVote(duel.getId(), participants, options, voteSeconds, winning -> {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (!activeDuels.containsKey(duel.getId())) return;
+                String chosen = winning;
+                if (chosen == null || plugin.getArenaManager().getArena(chosen) == null) {
+                    chosen = options.get(0);
+                }
+                Arena arena = plugin.getArenaManager().getArena(chosen);
+                if (arena == null) {
+                    cancelDuel(duel);
+                    return;
+                }
+                duel.setArenaName(chosen);
+                int countdown = plugin.getConfig().getInt("duel.countdown-seconds", 3);
+                startCountdown(duel, arena, countdown);
+            });
+        });
     }
 
     public boolean startPartyDuel(Party party1, Party party2, Arena arena, String rulesetId, int rounds) {
@@ -1247,6 +1306,7 @@ public class DuelManager {
             if (player != null) {
                 restorePlayerState(player, duel);
                 plugin.getScoreboardManager().removeScoreboard(player);
+                player.closeInventory();
                 player.sendTitle(ChatColor.RED + "Duel Cancelled", "", 10, 40, 10);
             } else {
                 saveOfflineRestore(duel, uuid);

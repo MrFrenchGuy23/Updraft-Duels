@@ -243,7 +243,7 @@ tournament:
 # Voting Messages
 # ===========================
 voting:
-  vote-started: "&7Arena vote started. Options: &f%options% &7(%time%&s)"
+  vote-started: "&7Arena vote started. Options: &f%options% &7(%time% seconds)"
   vote-resolved: "&aVoting complete. Arena: &f%arena%"
   player-voted: "&f%player% &7voted for &f%arena% &7(&f%votes% &7votes)"
   already-voted: "&cYou already voted."

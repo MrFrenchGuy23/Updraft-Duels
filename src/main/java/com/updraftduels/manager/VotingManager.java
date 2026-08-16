@@ -24,6 +24,7 @@ import org.bukkit.entity.Player;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class VotingManager {
     private final UpdraftDuels plugin;
@@ -35,7 +36,15 @@ public class VotingManager {
     }
 
     public void startVote(UUID duelId, List<UUID> participants, List<String> arenaOptions) {
-        VoteSession session = new VoteSession(duelId, arenaOptions, participants);
+        startVote(duelId, participants, arenaOptions, 15, null);
+    }
+
+    public void startVote(UUID duelId, List<UUID> participants, List<String> arenaOptions, Consumer<String> onComplete) {
+        startVote(duelId, participants, arenaOptions, 15, onComplete);
+    }
+
+    public void startVote(UUID duelId, List<UUID> participants, List<String> arenaOptions, int timeSeconds, Consumer<String> onComplete) {
+        VoteSession session = new VoteSession(duelId, arenaOptions, participants, Math.max(3, timeSeconds), onComplete);
         activeSessions.put(duelId, session);
 
         for (UUID uuid : participants) {
@@ -70,6 +79,10 @@ public class VotingManager {
                         "%votes%", String.valueOf(session.getVoteCount(arenaName))));
             }
         }
+
+        if (session.getParticipantVotes().size() >= session.getAllParticipants().size()) {
+            resolveVote(duelId);
+        }
         return true;
     }
 
@@ -94,6 +107,9 @@ public class VotingManager {
         }
 
         session.setWinningArena(winner);
+        if (session.getOnComplete() != null) {
+            session.getOnComplete().accept(winner);
+        }
     }
 
     public String getVotedArena(UUID duelId) {
@@ -114,14 +130,16 @@ public class VotingManager {
         private boolean resolved;
         private String winningArena;
         private final int timeSeconds;
+        private final Consumer<String> onComplete;
 
-        public VoteSession(UUID duelId, List<String> options, List<UUID> participants) {
+        public VoteSession(UUID duelId, List<String> options, List<UUID> participants, int timeSeconds, Consumer<String> onComplete) {
             this.duelId = duelId;
             this.options = options;
             this.participantVotes = new ConcurrentHashMap<>();
             this.participants = participants;
             this.resolved = false;
-            this.timeSeconds = 15;
+            this.timeSeconds = timeSeconds;
+            this.onComplete = onComplete;
         }
 
         public UUID getDuelId() { return duelId; }
@@ -131,6 +149,7 @@ public class VotingManager {
         public String getWinningArena() { return winningArena; }
         public void setWinningArena(String arena) { this.winningArena = arena; }
         public int getTimeSeconds() { return timeSeconds; }
+        public Consumer<String> getOnComplete() { return onComplete; }
 
         public void vote(UUID uuid, String arena) { participantVotes.put(uuid, arena); }
         public boolean hasVoted(UUID uuid) { return participantVotes.containsKey(uuid); }

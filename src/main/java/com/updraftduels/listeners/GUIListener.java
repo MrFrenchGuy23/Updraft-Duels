@@ -19,7 +19,9 @@ package com.updraftduels.listeners;
 
 import com.updraftduels.UpdraftDuels;
 import com.updraftduels.gui.GUIManager;
+import com.updraftduels.manager.VotingManager;
 import com.updraftduels.model.Duel;
+import com.updraftduels.model.DuelState;
 import com.updraftduels.model.Kit;
 import com.updraftduels.model.Party;
 import com.updraftduels.model.PendingDuelSelection;
@@ -179,6 +181,12 @@ public class GUIListener implements Listener {
         if (title.equals(ColorUtil.colorize(GUIManager.RULESET_DETAILS_TITLE))) {
             event.setCancelled(true);
             if (event.getSlot() == 18) plugin.getGuiManager().openRulesetsGUI(player);
+            return;
+        }
+
+        if (title.equals(ColorUtil.colorize(GUIManager.VOTE_TITLE))) {
+            event.setCancelled(true);
+            handleVoteClick(player, event.getSlot());
             return;
         }
 
@@ -487,6 +495,22 @@ public class GUIListener implements Listener {
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!(event.getPlayer() instanceof Player player)) return;
         String title = event.getView().getTitle();
+
+        if (title.equals(ColorUtil.colorize(GUIManager.VOTE_TITLE))) {
+            Duel duel = plugin.getDuelManager().getDuelOf(player.getUniqueId());
+            if (duel != null && duel.getState() == DuelState.WAITING) {
+                VotingManager.VoteSession session = plugin.getVotingManager().getSession(duel.getId());
+                if (session != null && !session.isResolved()) {
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        if (player.isOnline() && duel.getState() == DuelState.WAITING) {
+                            plugin.getGuiManager().openVoteGUI(player, duel.getId());
+                        }
+                    }, 1L);
+                }
+            }
+            return;
+        }
+
         if (!title.contains("Kit Editor")) return;
 
         player.setItemOnCursor(null);
@@ -508,6 +532,28 @@ public class GUIListener implements Listener {
         }
         plugin.getKitManager().updateKit(kitName, player.getUniqueId(), contents, kit.getArmorContents(), kit.getOffHand());
         player.sendMessage(ColorUtil.colorizePrefix("&aKit &f" + kitName + " &ahas been saved!"));
+    }
+
+    private void handleVoteClick(Player player, int slot) {
+        Duel duel = plugin.getDuelManager().getDuelOf(player.getUniqueId());
+        if (duel == null || duel.getState() != DuelState.WAITING) {
+            player.closeInventory();
+            return;
+        }
+        VotingManager.VoteSession session = plugin.getVotingManager().getSession(duel.getId());
+        if (session == null || session.isResolved()) {
+            player.closeInventory();
+            return;
+        }
+        List<String> options = session.getOptions();
+        if (slot < 0 || slot >= options.size()) return;
+
+        if (plugin.getVotingManager().castVote(duel.getId(), player.getUniqueId(), options.get(slot))) {
+            plugin.getGuiManager().openVoteGUI(player, duel.getId());
+        } else {
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("voting.already-voted")));
+            plugin.getGuiManager().openVoteGUI(player, duel.getId());
+        }
     }
 
     private void handleKitRoomClick(Player player, int slot, ItemStack item, String title) {

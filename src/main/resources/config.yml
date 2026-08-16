@@ -17,6 +17,11 @@ duel:
   # spawn. Prevents falling through the arena into the void (and the "fake body" glitch).
   # Not applied to sumo/knockback or spleef rulesets where falling is the loss condition.
   arena-floor-pull-margin: 3
+  # When true, direct duels (/duel <player>) with at least 2 available arenas let the
+  # fighters vote on which arena to use before the countdown starts.
+  vote-for-arena: true
+  # How long the arena vote stays open (in seconds) if not everyone votes.
+  vote-seconds: 8
 
 arena:
   # Arenas where players may freely break/place blocks during a duel.
