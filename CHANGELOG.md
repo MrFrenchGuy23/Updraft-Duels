@@ -36,6 +36,10 @@ Releases are also published automatically to GitHub Releases when a `v*` tag is 
 
 ### Added
 - `arena.block-edit-whitelist` config option: arenas where players may freely break/place blocks during a duel.
+- Update checker: on startup the plugin checks the GitHub releases API for a newer version and logs the current
+  version, the latest version, and a download link to the console. Admins are reminded on join when an update is
+  available, and `/uduels update` performs a manual check (all configurable under `update-checker` in `config.yml`,
+  messages in `messages.yml`).
 - Arena voting for direct duels: with `duel.vote-for-arena` enabled and 2+ arenas available, fighters pick the
   arena via a vote GUI before the countdown (`duel.vote-seconds` controls the timeout). Voting resolves early once
   everyone has voted.

@@ -51,6 +51,7 @@ public class UduelsCommand implements CommandExecutor, TabCompleter {
             case "setpos1" -> handleGatePos(player, true);
             case "setpos2" -> handleGatePos(player, false);
             case "gateinfo" -> handleGateInfo(player);
+            case "update" -> handleUpdate(player);
             default -> sendHelp(player);
         }
         return true;
@@ -109,6 +110,14 @@ public class UduelsCommand implements CommandExecutor, TabCompleter {
         plugin.getGateManager().showInfo(player);
     }
 
+    private void handleUpdate(Player player) {
+        if (!player.hasPermission("updraftduels.admin")) {
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("general.no-permission")));
+            return;
+        }
+        plugin.getUpdateChecker().check(player);
+    }
+
     private void sendHelp(Player player) {
         player.sendMessage(ColorUtil.colorizePrefix("&fUpdraftDuels Admin Commands:"));
         player.sendMessage(ColorUtil.colorizePrefix("&e/uduels setlobby &7- Set lobby teleport location"));
@@ -117,12 +126,13 @@ public class UduelsCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(ColorUtil.colorizePrefix("&e/uduels setpos1 &7- Set gate position 1"));
         player.sendMessage(ColorUtil.colorizePrefix("&e/uduels setpos2 &7- Set gate position 2"));
         player.sendMessage(ColorUtil.colorizePrefix("&e/uduels gateinfo &7- Show gate region"));
+        player.sendMessage(ColorUtil.colorizePrefix("&e/uduels update &7- Check for plugin updates"));
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filter(List.of("setlobby", "lobby", "reload", "setpos1", "setpos2", "gateinfo"), args[0]);
+            return filter(List.of("setlobby", "lobby", "reload", "setpos1", "setpos2", "gateinfo", "update"), args[0]);
         }
         return Collections.emptyList();
     }

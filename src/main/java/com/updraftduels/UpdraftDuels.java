@@ -30,6 +30,7 @@ import com.updraftduels.model.Duel;
 import com.updraftduels.placeholder.DuelPlaceholderExpansion;
 import com.updraftduels.storage.DatabaseManager;
 import com.updraftduels.util.MessageManager;
+import com.updraftduels.util.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -66,6 +67,7 @@ public class UpdraftDuels extends JavaPlugin {
     private PlaytimeManager playtimeManager;
     private GateManager gateManager;
     private MessageManager messages;
+    private UpdateChecker updateChecker;
     private QueueCommand queueCommand;
     private PartyCommand partyCommand;
 
@@ -107,6 +109,7 @@ public class UpdraftDuels extends JavaPlugin {
         playtimeManager = new PlaytimeManager(this);
         gateManager = new GateManager(this);
         guiManager = new GUIManager(this);
+        updateChecker = new UpdateChecker(this);
 
         registerCommands();
         registerListeners();
@@ -128,6 +131,10 @@ public class UpdraftDuels extends JavaPlugin {
         long decayHours = Math.max(1, getConfig().getInt("season.decay-check-hours", 24));
         long decayInterval = decayHours * 60 * 60 * 20L;
         Bukkit.getScheduler().runTaskTimer(this, () -> seasonManager.runDecayCheck(), decayInterval, decayInterval);
+
+        if (updateChecker.isEnabled()) {
+            Bukkit.getScheduler().runTaskLater(this, () -> updateChecker.check(), 60L);
+        }
 
         getLogger().info("UpdraftDuels has been enabled!");
     }
@@ -243,6 +250,7 @@ public class UpdraftDuels extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new SignListener(this), this);
         getServer().getPluginManager().registerEvents(new DeathMessageListener(this), this);
         getServer().getPluginManager().registerEvents(playtimeManager, this);
+        getServer().getPluginManager().registerEvents(updateChecker, this);
     }
 
     private void loadMessagesConfig() {
@@ -299,6 +307,7 @@ public class UpdraftDuels extends JavaPlugin {
     public AntiSpamManager getAntiSpamManager() { return antiSpamManager; }
     public RankManager getRankManager() { return rankManager; }
     public PlaytimeManager getPlaytimeManager() { return playtimeManager; }
+    public UpdateChecker getUpdateChecker() { return updateChecker; }
 
     public Location getLobbyLocation() { return lobbyLocation; }
 

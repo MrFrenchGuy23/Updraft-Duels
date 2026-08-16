@@ -35,7 +35,7 @@ commands:
     usage: /profile [player]
   uduels:
     description: UpdraftDuels admin commands
-    usage: /uduels <setlobby|lobby|reload|setpos1|setpos2|gateinfo>
+    usage: /uduels <setlobby|lobby|reload|setpos1|setpos2|gateinfo|update>
     aliases: [updraftduels]
   tournament:
     description: Tournament management

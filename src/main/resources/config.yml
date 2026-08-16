@@ -186,6 +186,17 @@ voting:
 anticheat:
   bypass-during-duel: true
 
+update-checker:
+  enabled: true
+  # Log the check result to the console on startup.
+  notify-console: true
+  # Remind admins on join when an update is available.
+  notify-players: true
+  notify-permission: "updraftduels.admin"
+  # Repository that hosts the releases (used by the GitHub releases API).
+  repo-owner: "MrFrenchGuy23"
+  repo-name: "Updraft-Duels"
+
 cosmetics:
   kill-effects-enabled: true
   victory-animations-enabled: true

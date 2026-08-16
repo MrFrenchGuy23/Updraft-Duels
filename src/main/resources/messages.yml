@@ -264,3 +264,12 @@ signs:
   created: "&aQueue sign created. Type: &f%type%"
   clicked-rtp: "&aJoining RTP queue."
   clicked-arena: "&aJoining queue for &f%arena%&a."
+
+# ===========================
+# Update Checker Messages
+# ===========================
+update-checker:
+  available: "&aAn update is available! &7Current: &f%current% &7| Latest: &f%latest% &7| Download: &f%download%"
+  up-to-date: "&aUpdraftDuels is up to date (&f%current%&a)."
+  check-failed: "&cCould not check for updates. The GitHub releases API is unreachable."
+  player-available: "&aAn update is available for UpdraftDuels! &f%current% &7-> &f%latest% &7| &e%download%"
