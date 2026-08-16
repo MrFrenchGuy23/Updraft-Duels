@@ -45,6 +45,9 @@ Releases are also published automatically to GitHub Releases when a `v*` tag is 
   party-duel accept/decline/challenge, free-cam and vanish toggles, plus various error messages).
 - The duel sender is now told when their request is accepted; expired requests and opponents leaving during the
   countdown/teleport are announced; a post-duel stats line (wins/losses/ELO) is shown after every match.
+- Performance: duel scoreboards no longer re-query stats and reschedule a sync task every second per player;
+  ELO/W-L lines only refresh when the cached stats actually change. The anticheat exemption loop (several plugin
+  lookups per move event) now runs once per player instead of on every move.
 
 ## [1.0.0] - 2026-08-15
 
