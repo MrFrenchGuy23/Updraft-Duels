@@ -122,6 +122,11 @@ public class DuelManager {
                 pendingRequests.remove(req.getRequestId());
                 outgoingRequests.getOrDefault(req.getSenderUUID(), new ArrayList<>()).remove(req);
                 incomingRequests.getOrDefault(req.getReceiverUUID(), new ArrayList<>()).remove(req);
+                Player sender = Bukkit.getPlayer(req.getSenderUUID());
+                if (sender != null) {
+                    sender.sendMessage(plugin.getMessages().get("duel.request-expired",
+                            "%player%", Bukkit.getOfflinePlayer(req.getReceiverUUID()).getName()));
+                }
             }
         }
     }
@@ -914,6 +919,11 @@ public class DuelManager {
 
                         player.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix(
                                 "&7Score: &f" + matchScore + " &7| Time: &f" + duration));
+
+                        player.sendMessage(plugin.getMessages().get("duel.stats-updated",
+                                "%wins%", String.valueOf(stats.getWins()),
+                                "%losses%", String.valueOf(stats.getLosses()),
+                                "%elo%", String.valueOf(stats.getElo())));
                     });
                 }
             }));
@@ -1191,12 +1201,14 @@ public class DuelManager {
         Duel duel = getDuelOf(uuid);
         if (duel == null) return;
 
-        if (duel.getState() == DuelState.WAITING) {
-            cancelDuel(duel);
-            return;
-        }
-
-        if (duel.getState() == DuelState.COUNTDOWN) {
+        if (duel.getState() == DuelState.WAITING || duel.getState() == DuelState.COUNTDOWN) {
+            for (UUID participantUUID : duel.getAllParticipants()) {
+                if (participantUUID.equals(uuid)) continue;
+                Player participant = Bukkit.getPlayer(participantUUID);
+                if (participant != null) {
+                    participant.sendMessage(plugin.getMessages().get("duel.opponent-offline"));
+                }
+            }
             cancelDuel(duel);
             return;
         }

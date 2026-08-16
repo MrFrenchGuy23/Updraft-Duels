@@ -131,7 +131,7 @@ public class DuelCommand implements CommandExecutor, TabCompleter {
                     "%player%", Bukkit.getOfflinePlayer(request.getSenderUUID()).getName())));
             Player sender = Bukkit.getPlayer(request.getSenderUUID());
             if (sender != null) {
-                sender.sendMessage(ColorUtil.colorize(plugin.getMessages().get("duel.request-received",
+                sender.sendMessage(ColorUtil.colorize(plugin.getMessages().get("duel.request-accepted-by",
                         "%player%", player.getName())));
             }
         }

@@ -40,6 +40,8 @@ Releases are also published automatically to GitHub Releases when a `v*` tag is 
 ### Changed
 - Party and spectator messages are now fully configurable via `messages.yml` (party chat toggle, ready confirmation,
   party-duel accept/decline/challenge, free-cam and vanish toggles, plus various error messages).
+- The duel sender is now told when their request is accepted; expired requests and opponents leaving during the
+  countdown/teleport are announced; a post-duel stats line (wins/losses/ELO) is shown after every match.
 
 ## [1.0.0] - 2026-08-15
 

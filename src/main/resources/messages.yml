@@ -8,6 +8,7 @@ duel:
   request-sent: "&aDuel request sent to &f%player%&a."
   request-received: "&f%player% &achallenged you to a duel. Click to accept or &c/duel deny"
   request-accepted: "&aYou accepted the duel from &f%player%&a."
+  request-accepted-by: "&f%player% &aaccepted your duel request."
   request-denied: "&cYou denied the duel from &f%player%&c."
   request-expired: "&7Your duel request to &f%player% &7expired."
   already-in-duel: "&cYou are already in a duel."
