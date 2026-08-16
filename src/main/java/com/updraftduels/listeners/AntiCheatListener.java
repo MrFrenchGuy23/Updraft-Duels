@@ -28,10 +28,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AntiCheatListener implements Listener {
     private final UpdraftDuels plugin;
     private final Set<String> antiCheatPlugins;
+    private final Set<UUID> exempted = ConcurrentHashMap.newKeySet();
 
     public AntiCheatListener(UpdraftDuels plugin) {
         this.plugin = plugin;
@@ -45,17 +47,31 @@ public class AntiCheatListener implements Listener {
         if (!plugin.getConfig().getBoolean("anticheat.bypass-during-duel", true)) return;
 
         Player player = event.getPlayer();
-        Duel duel = plugin.getDuelManager().getDuelOf(player.getUniqueId());
-        if (duel == null) return;
+        UUID uuid = player.getUniqueId();
+        Duel duel = plugin.getDuelManager().getDuelOf(uuid);
+        if (duel == null) {
+            exempted.remove(uuid);
+            return;
+        }
 
         if (duel.getState() == DuelState.COUNTDOWN) {
-            if (plugin.getDuelManager().isFrozen(player.getUniqueId())) {
+            if (plugin.getDuelManager().isFrozen(uuid)) {
                 if (event.getFrom().getX() != event.getTo().getX() ||
                         event.getFrom().getZ() != event.getTo().getZ()) {
-                    exemptPlayer(player);
+                    exemptOnce(uuid, player);
                 }
+            } else {
+                exempted.remove(uuid);
             }
         } else if (duel.getState() == DuelState.IN_PROGRESS) {
+            exemptOnce(uuid, player);
+        } else {
+            exempted.remove(uuid);
+        }
+    }
+
+    private void exemptOnce(UUID uuid, Player player) {
+        if (exempted.add(uuid)) {
             exemptPlayer(player);
         }
     }

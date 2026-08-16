@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ScoreboardManager {
     private final UpdraftDuels plugin;
     private final Map<UUID, Set<String>> lastEntries = new ConcurrentHashMap<>();
+    private final Map<UUID, String> lastStatsLines = new ConcurrentHashMap<>();
     private int taskId = -1;
 
     public ScoreboardManager(UpdraftDuels plugin) {
@@ -114,23 +115,44 @@ public class ScoreboardManager {
         }
         lastEntries.put(uuid, next);
 
-        plugin.getDatabase().getOrCreateStats(player.getUniqueId(), player.getName()).thenAccept(stats -> {
-            if (stats != null) {
-                Bukkit.getScheduler().runTask(plugin, () -> {
-                    Objective current = player.getScoreboard().getObjective("updraftduels_duel");
-                    if (current != objective) return;
-                    try {
-                        objective.getScore(com.updraftduels.util.ColorUtil.colorize("&7ELO: &f" + stats.getElo())).setScore(1);
-                        objective.getScore(com.updraftduels.util.ColorUtil.colorize("&7W/L: &f" + stats.getWins() + "-" + stats.getLosses())).setScore(0);
-                    } catch (IllegalStateException ignored) {
-                    }
-                });
+        updateStatsLine(uuid, objective);
+    }
+
+    private void updateStatsLine(UUID uuid, Objective objective) {
+        DuelPlayerStats cached = plugin.getDatabase().getCachedStats(uuid);
+        if (cached == null) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player == null) return;
+            plugin.getDatabase().getOrCreateStats(uuid, player.getName()).thenAccept(stats -> {
+                if (stats != null) {
+                    applyStatsLine(uuid, stats.getElo(), stats.getWins(), stats.getLosses(), objective);
+                }
+            });
+            return;
+        }
+        applyStatsLine(uuid, cached.getElo(), cached.getWins(), cached.getLosses(), objective);
+    }
+
+    private void applyStatsLine(UUID uuid, int elo, int wins, int losses, Objective objective) {
+        String statsKey = elo + "|" + wins + "|" + losses;
+        if (statsKey.equals(lastStatsLines.get(uuid))) return;
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player == null) return;
+            Objective current = player.getScoreboard().getObjective("updraftduels_duel");
+            if (current != objective) return;
+            try {
+                objective.getScore(com.updraftduels.util.ColorUtil.colorize("&7ELO: &f" + elo)).setScore(1);
+                objective.getScore(com.updraftduels.util.ColorUtil.colorize("&7W/L: &f" + wins + "-" + losses)).setScore(0);
+            } catch (IllegalStateException ignored) {
             }
         });
+        lastStatsLines.put(uuid, statsKey);
     }
 
     public void removeScoreboard(Player player) {
         lastEntries.remove(player.getUniqueId());
+        lastStatsLines.remove(player.getUniqueId());
         Scoreboard board = player.getScoreboard();
         if (board != null) {
             Objective obj = board.getObjective("updraftduels_duel");
