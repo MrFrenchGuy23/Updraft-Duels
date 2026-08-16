@@ -1,0 +1,45 @@
+# Auto-release: whenever a new version lands on main (a pom.xml version with no
+# matching v* tag yet), tag it automatically. The tag push then triggers
+# release.yml, which builds the plugin and publishes the GitHub Release.
+name: Auto Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Read version from pom.xml
+        id: version
+        run: |
+          VERSION=$(grep -m1 '<version>' pom.xml | sed -n 's/.*<version>\(.*\)<\/version>.*/\1/p')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version from pom.xml: $VERSION"
+
+      - name: Skip if this version is already released
+        id: released
+        run: |
+          if git tag -l "v${{ steps.version.outputs.version }}" | grep -q .; then
+            echo "released=true" >> "$GITHUB_OUTPUT"
+            echo "v${{ steps.version.outputs.version }} already exists — nothing to release."
+          else
+            echo "released=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and push version tag
+        if: steps.released.outputs.released == 'false'
+        run: |
+          git tag "v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}" \
+            || echo "Tag push failed (likely raced with another run) — nothing more to do."
