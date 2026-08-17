@@ -545,7 +545,7 @@ public class DuelManager {
                 if (player != null) {
                     String countdownMsg = plugin.getMessages().get("duel.countdown", "%count%", String.valueOf(remaining));
                     player.sendMessage(countdownMsg);
-                    player.sendTitle("", ChatColor.YELLOW + "Starting in " + ChatColor.WHITE + remaining, 0, 25, 0);
+                    player.sendTitle("", ChatColor.AQUA + "Starting in " + ChatColor.RED + remaining, 0, 25, 0);
                 }
             }
 
