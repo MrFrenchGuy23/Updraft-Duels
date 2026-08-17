@@ -675,7 +675,7 @@ public class DuelManager {
             if (player != null) {
                 String opponentName = getOpponentName(duel, uuid);
                 activeDuelContext.put(uuid, opponentName);
-                player.sendTitle(ChatColor.GREEN + "Duel Started", ChatColor.GRAY + "Good luck!", 10, 40, 10);
+                player.sendTitle(ChatColor.AQUA + "Duel Started", ChatColor.GREEN + "Good luck!", 10, 40, 10);
                 String startMsg = plugin.getMessages().get("duel.duel-started");
                 player.sendMessage(startMsg);
             }
@@ -787,7 +787,7 @@ public class DuelManager {
             if (p != null) {
                 p.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix(
                         "&7Score: &f" + duel.getScoreA() + " - " + duel.getScoreB()
-                                + " &7| Round &f" + duel.getCurrentRound() + "/" + duel.getRounds()));
+                                + " &7| Round &8" + duel.getCurrentRound() + "/" + duel.getRounds()));
             }
         }
     }
