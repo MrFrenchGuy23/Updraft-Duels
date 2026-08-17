@@ -86,13 +86,13 @@ public class DuelManager {
         sender.sendMessage(com.updraftduels.util.ColorUtil.colorize(
                 plugin.getMessages().get("duel.request-sent", "%player%", target.getName())));
         sender.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix(
-                "&7Kit: &f" + kitName + " &8| &7Rounds: &f" + rounds));
+                "&7Kit: &f" + kitName + " &8| &7Rounds: &c" + rounds));
 
         String acceptCmd = "/duel accept " + sender.getName();
         com.updraftduels.util.ChatUtil.sendClickable(target,
                 com.updraftduels.util.ColorUtil.colorize(
                         plugin.getMessages().get("duel.request-received", "%player%", sender.getName())),
-                acceptCmd, "&aClick to accept duel!");
+                acceptCmd, "&aClick to accept the duel request");
         return true;
     }
 
