@@ -387,7 +387,10 @@ public class GUIListener implements Listener {
     }
 
     private void handlePartyChat(AsyncPlayerChatEvent event, Player player) {
-        if (!plugin.getPartyManager().isPartyChatEnabled(player.getUniqueId())) return;
+        if (!plugin.getPartyManager().isPartyChatEnabled(player.getUniqueId())) {
+            handleChatMentions(event, player);
+            return;
+        }
         Party party = plugin.getPartyManager().getParty(player.getUniqueId());
         if (party == null) {
             plugin.getPartyManager().setPartyChat(player.getUniqueId(), false);
@@ -400,6 +403,19 @@ public class GUIListener implements Listener {
             if (member != null) {
                 member.sendMessage(ColorUtil.colorize(
                         plugin.getMessages().get("party.chat-prefix") + "&f" + player.getName() + ": &7" + message));
+            }
+        }
+    }
+
+    private void handleChatMentions(AsyncPlayerChatEvent event, Player player) {
+        String message = event.getMessage();
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.getUniqueId().equals(player.getUniqueId())) continue;
+            if (!plugin.isChatMentions(online.getUniqueId())) continue;
+            if (message.toLowerCase().contains("@" + online.getName().toLowerCase())) {
+                online.playSound(online.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
+                online.sendMessage(ColorUtil.colorize(
+                        "&e&lMention &7by &f" + player.getName() + "&7: &f" + message));
             }
         }
     }
@@ -596,10 +612,41 @@ public class GUIListener implements Listener {
                 player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aAuto-GG enabled." : "&7Auto-GG disabled."));
                 plugin.getGuiManager().openSettingsGUI(player);
             }
-            case 12 -> plugin.getGuiManager().openProfileGUI(player, player);
-            case 13 -> plugin.getGuiManager().openKitsGUI(player);
-            case 14 -> plugin.getGuiManager().openCosmeticsGUI(player);
-            case 16 -> plugin.getGuiManager().openKitRoomGUI(player);
+            case 12 -> {
+                boolean enabled = !plugin.isAutoRequeue(player.getUniqueId());
+                plugin.setAutoRequeue(player.getUniqueId(), enabled);
+                player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aAuto Requeue enabled." : "&7Auto Requeue disabled."));
+                plugin.getGuiManager().openSettingsGUI(player);
+            }
+            case 13 -> {
+                boolean enabled = !plugin.isPartyInvites(player.getUniqueId());
+                plugin.setPartyInvites(player.getUniqueId(), enabled);
+                player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aParty invites enabled." : "&7Party invites disabled."));
+                plugin.getGuiManager().openSettingsGUI(player);
+            }
+            case 14 -> {
+                boolean enabled = !plugin.isSpectators(player.getUniqueId());
+                plugin.setSpectators(player.getUniqueId(), enabled);
+                player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aSpectators enabled." : "&7Spectators disabled."));
+                plugin.getGuiManager().openSettingsGUI(player);
+            }
+            case 15 -> {
+                boolean enabled = !plugin.isScoreboard(player.getUniqueId());
+                plugin.setScoreboard(player.getUniqueId(), enabled);
+                Bukkit.dispatchCommand(player, "sb");
+                player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aScoreboard enabled." : "&7Scoreboard disabled."));
+                plugin.getGuiManager().openSettingsGUI(player);
+            }
+            case 16 -> {
+                boolean enabled = !plugin.isChatMentions(player.getUniqueId());
+                plugin.setChatMentions(player.getUniqueId(), enabled);
+                player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aChat mentions enabled." : "&7Chat mentions disabled."));
+                plugin.getGuiManager().openSettingsGUI(player);
+            }
+            case 20 -> plugin.getGuiManager().openProfileGUI(player, player);
+            case 21 -> plugin.getGuiManager().openKitsGUI(player);
+            case 23 -> plugin.getGuiManager().openCosmeticsGUI(player);
+            case 25 -> plugin.getGuiManager().openKitRoomGUI(player);
         }
     }
 

@@ -999,6 +999,17 @@ public class DuelManager {
             frozenPlayers.remove(uuid);
             pendingCountdowns.remove(duel.getId());
             activeDuelContext.remove(uuid);
+
+            if (plugin.isAutoRequeue(uuid) && player.isOnline() && duel.getType() == DuelType.SOLO) {
+                String kitName = duel.getRulesetId();
+                boolean ranked = duel.isRanked();
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    if (player.isOnline() && !isInDuel(uuid) && !plugin.getQueueManager().isInQueue(uuid)) {
+                        plugin.getQueueManager().joinGamemodeQueue(uuid, kitName, ranked);
+                        player.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix("&aAuto-requeued for &f" + kitName + "&a."));
+                    }
+                }, 20L);
+            }
         }
 
         for (UUID spectatorUUID : new ArrayList<>(duel.getSpectators())) {

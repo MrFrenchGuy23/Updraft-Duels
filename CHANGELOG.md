@@ -8,6 +8,14 @@ handled by `release.yml`.
 
 ## Unreleased
 
+### Added
+- Settings GUI expanded to 54 slots with new per-player toggles:
+  - **Party Invites**: block incoming party invites when off.
+  - **Spectators**: prevent others from spectating your duels when off.
+  - **Scoreboard**: toggle the TAB scoreboard display (runs `/sb`).
+  - **Chat Mentions**: receive a sound and styled message when someone types `@YourName` in chat.
+  - **Auto Requeue**: automatically rejoin the same queue after a duel ends.
+
 ## [1.1.0] - 2026-08-16
 
 ### Removed

@@ -559,7 +559,7 @@ public class GUIManager {
     }
 
     public void openSettingsGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(SETTINGS_TITLE));
+        Inventory gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(SETTINGS_TITLE));
 
         boolean ranked = plugin.getQueueManager().isRankedMode(player.getUniqueId());
         gui.setItem(10, new ItemBuilder(ranked ? Material.NETHERITE_INGOT : Material.IRON_INGOT)
@@ -575,22 +575,57 @@ public class GUIManager {
                         "&7Automatically send \"GG\" at the end of each duel.")
                 .build());
 
-        gui.setItem(12, new ItemBuilder(Material.PLAYER_HEAD)
+        boolean autoRequeue = plugin.isAutoRequeue(player.getUniqueId());
+        gui.setItem(12, new ItemBuilder(autoRequeue ? Material.EMERALD : Material.IRON_INGOT)
+                .name("&fAuto Requeue: " + (autoRequeue ? "&aON" : "&cOFF"))
+                .lore("",
+                        "&7Automatically rejoin queue after a duel ends.")
+                .build());
+
+        boolean partyInvites = plugin.isPartyInvites(player.getUniqueId());
+        gui.setItem(13, new ItemBuilder(partyInvites ? Material.POPPY : Material.IRON_INGOT)
+                .name("&fParty Invites: " + (partyInvites ? "&aON" : "&cOFF"))
+                .lore("",
+                        "&7Allow other players to send you party invites.")
+                .build());
+
+        boolean spectatorEnabled = plugin.isSpectators(player.getUniqueId());
+        gui.setItem(14, new ItemBuilder(spectatorEnabled ? Material.ENDER_EYE : Material.IRON_INGOT)
+                .name("&fSpectators: " + (spectatorEnabled ? "&aON" : "&cOFF"))
+                .lore("",
+                        "&7Allow others to spectate your duels.")
+                .build());
+
+        boolean sbEnabled = plugin.isScoreboard(player.getUniqueId());
+        gui.setItem(15, new ItemBuilder(sbEnabled ? Material.PAPER : Material.IRON_INGOT)
+                .name("&fScoreboard: " + (sbEnabled ? "&aON" : "&cOFF"))
+                .lore("",
+                        "&7Toggle the in-game scoreboard display.")
+                .build());
+
+        boolean mentions = plugin.isChatMentions(player.getUniqueId());
+        gui.setItem(16, new ItemBuilder(mentions ? Material.NAME_TAG : Material.IRON_INGOT)
+                .name("&fChat Mentions: " + (mentions ? "&aON" : "&cOFF"))
+                .lore("",
+                        "&7Receive a sound when someone mentions you in chat.")
+                .build());
+
+        gui.setItem(20, new ItemBuilder(Material.PLAYER_HEAD)
                 .name("&fProfile")
                 .lore("&7View your stats")
                 .build());
 
-        gui.setItem(13, new ItemBuilder(Material.CHEST)
+        gui.setItem(21, new ItemBuilder(Material.CHEST)
                 .name("&fKits")
                 .lore("&7Browse and equip kits")
                 .build());
 
-        gui.setItem(14, new ItemBuilder(Material.FIREWORK_ROCKET)
+        gui.setItem(23, new ItemBuilder(Material.FIREWORK_ROCKET)
                 .name("&fCosmetics")
                 .lore("&7Manage your cosmetics")
                 .build());
 
-        gui.setItem(16, new ItemBuilder(Material.DIAMOND_SWORD)
+        gui.setItem(25, new ItemBuilder(Material.DIAMOND_SWORD)
                 .name("&fKit Room")
                 .lore("&7Grab items for your kit")
                 .build());

@@ -47,6 +47,11 @@ public class SpectatorManager {
         UUID specUUID = spectator.getUniqueId();
         UUID targetUUID = target.getUniqueId();
 
+        if (!plugin.isSpectators(targetUUID)) {
+            spectator.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix("&cThis player has spectators disabled."));
+            return;
+        }
+
         originalGameMode.put(specUUID, spectator.getGameMode());
         originalFlySpeed.put(specUUID, spectator.getFlySpeed());
 

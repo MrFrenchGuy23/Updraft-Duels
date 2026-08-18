@@ -77,6 +77,11 @@ public class UpdraftDuels extends JavaPlugin {
     private FileConfiguration messagesConfig;
     private final Map<String, FileConfiguration> extraConfigs = new HashMap<>();
     private final Map<UUID, Boolean> autoGG = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> autoRequeue = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> partyInvites = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> spectators = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> chatMentions = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> scoreboard = new ConcurrentHashMap<>();
 
     @Override
     public void onEnable() {
@@ -314,6 +319,21 @@ public class UpdraftDuels extends JavaPlugin {
 
     public boolean isAutoGG(UUID uuid) { return autoGG.getOrDefault(uuid, false); }
     public void setAutoGG(UUID uuid, boolean enabled) { autoGG.put(uuid, enabled); }
+
+    public boolean isAutoRequeue(UUID uuid) { return autoRequeue.getOrDefault(uuid, false); }
+    public void setAutoRequeue(UUID uuid, boolean enabled) { autoRequeue.put(uuid, enabled); }
+
+    public boolean isPartyInvites(UUID uuid) { return partyInvites.getOrDefault(uuid, true); }
+    public void setPartyInvites(UUID uuid, boolean enabled) { partyInvites.put(uuid, enabled); }
+
+    public boolean isSpectators(UUID uuid) { return spectators.getOrDefault(uuid, true); }
+    public void setSpectators(UUID uuid, boolean enabled) { spectators.put(uuid, enabled); }
+
+    public boolean isChatMentions(UUID uuid) { return chatMentions.getOrDefault(uuid, true); }
+    public void setChatMentions(UUID uuid, boolean enabled) { chatMentions.put(uuid, enabled); }
+
+    public boolean isScoreboard(UUID uuid) { return scoreboard.getOrDefault(uuid, true); }
+    public void setScoreboard(UUID uuid, boolean enabled) { scoreboard.put(uuid, enabled); }
 
     public Location getLobbyLocation() { return lobbyLocation; }
 

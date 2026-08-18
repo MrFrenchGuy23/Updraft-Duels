@@ -93,6 +93,11 @@ public class PartyCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
+        if (!plugin.isPartyInvites(target.getUniqueId())) {
+            player.sendMessage(ColorUtil.colorizePrefix("&cThis player has party invites disabled."));
+            return;
+        }
+
         if (plugin.getPartyManager().inviteToParty(player.getUniqueId(), target.getUniqueId())) {
             player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("party.invite-sent", "%player%", target.getName())));
 
