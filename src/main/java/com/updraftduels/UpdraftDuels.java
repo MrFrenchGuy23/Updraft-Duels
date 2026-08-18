@@ -42,6 +42,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UpdraftDuels extends JavaPlugin {
     private static UpdraftDuels instance;
@@ -74,6 +76,7 @@ public class UpdraftDuels extends JavaPlugin {
     private Location lobbyLocation;
     private FileConfiguration messagesConfig;
     private final Map<String, FileConfiguration> extraConfigs = new HashMap<>();
+    private final Map<UUID, Boolean> autoGG = new ConcurrentHashMap<>();
 
     @Override
     public void onEnable() {
@@ -308,6 +311,9 @@ public class UpdraftDuels extends JavaPlugin {
     public RankManager getRankManager() { return rankManager; }
     public PlaytimeManager getPlaytimeManager() { return playtimeManager; }
     public UpdateChecker getUpdateChecker() { return updateChecker; }
+
+    public boolean isAutoGG(UUID uuid) { return autoGG.getOrDefault(uuid, false); }
+    public void setAutoGG(UUID uuid, boolean enabled) { autoGG.put(uuid, enabled); }
 
     public Location getLobbyLocation() { return lobbyLocation; }
 

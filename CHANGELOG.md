@@ -48,6 +48,7 @@ handled by `release.yml`.
 - Arena voting for direct duels: with `duel.vote-for-arena` enabled and 2+ arenas available, fighters pick the
   arena via a vote GUI before the countdown (`duel.vote-seconds` controls the timeout). Voting resolves early once
   everyone has voted.
+- Auto-GG setting: per-player toggle in Settings that automatically sends "GG" to the opponent at the end of each duel.
 
 ### Changed
 - Party and spectator messages are now fully configurable via `messages.yml` (party chat toggle, ready confirmation,

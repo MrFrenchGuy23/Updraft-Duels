@@ -590,6 +590,12 @@ public class GUIListener implements Listener {
                 player.sendMessage(ColorUtil.colorizePrefix(ranked ? "&6Ranked mode enabled." : "&7Unranked mode enabled."));
                 plugin.getGuiManager().openSettingsGUI(player);
             }
+            case 11 -> {
+                boolean enabled = !plugin.isAutoGG(player.getUniqueId());
+                plugin.setAutoGG(player.getUniqueId(), enabled);
+                player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aAuto-GG enabled." : "&7Auto-GG disabled."));
+                plugin.getGuiManager().openSettingsGUI(player);
+            }
             case 12 -> plugin.getGuiManager().openProfileGUI(player, player);
             case 13 -> plugin.getGuiManager().openKitsGUI(player);
             case 14 -> plugin.getGuiManager().openCosmeticsGUI(player);

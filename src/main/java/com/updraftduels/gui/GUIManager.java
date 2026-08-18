@@ -568,6 +568,13 @@ public class GUIManager {
                         "&7" + (ranked ? "You fight for ELO & rewards" : "Casual matches, no ELO"))
                 .build());
 
+        boolean autoGG = plugin.isAutoGG(player.getUniqueId());
+        gui.setItem(11, new ItemBuilder(autoGG ? Material.GOLD_INGOT : Material.IRON_INGOT)
+                .name("&fAuto-GG: " + (autoGG ? "&aON" : "&cOFF"))
+                .lore("",
+                        "&7Automatically send \"GG\" at the end of each duel.")
+                .build());
+
         gui.setItem(12, new ItemBuilder(Material.PLAYER_HEAD)
                 .name("&fProfile")
                 .lore("&7View your stats")

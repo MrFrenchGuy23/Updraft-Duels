@@ -912,6 +912,15 @@ public class DuelManager {
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_ITEM_BREAK, 1.0f, 1.0f);
             }
 
+            if (plugin.isAutoGG(uuid)) {
+                String ggMsg = com.updraftduels.util.ColorUtil.colorizePrefix("&f" + player.getName() + " &7says: &fGG");
+                for (UUID otherUUID : duel.getAllParticipants()) {
+                    if (otherUUID.equals(uuid)) continue;
+                    Player other = Bukkit.getPlayer(otherUUID);
+                    if (other != null) other.sendMessage(ggMsg);
+                }
+            }
+
             restorePlayerState(player, duel);
             plugin.getScoreboardManager().removeScoreboard(player);
 
