@@ -82,6 +82,7 @@ public class UpdraftDuels extends JavaPlugin {
     private final Map<UUID, Boolean> spectators = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> chatMentions = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> scoreboard = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> duelRequests = new ConcurrentHashMap<>();
 
     @Override
     public void onEnable() {
@@ -107,6 +108,7 @@ public class UpdraftDuels extends JavaPlugin {
         queueManager = new QueueManager(this);
         scoreboardManager = new ScoreboardManager(this);
         cosmeticsManager = new CosmeticsManager(this);
+        cosmeticsManager.startLobbyTrailTask();
         tournamentManager = new TournamentManager(this);
         seasonManager = new SeasonManager(this);
         votingManager = new VotingManager(this);
@@ -334,6 +336,9 @@ public class UpdraftDuels extends JavaPlugin {
 
     public boolean isScoreboard(UUID uuid) { return scoreboard.getOrDefault(uuid, true); }
     public void setScoreboard(UUID uuid, boolean enabled) { scoreboard.put(uuid, enabled); }
+
+    public boolean isDuelRequests(UUID uuid) { return duelRequests.getOrDefault(uuid, true); }
+    public void setDuelRequests(UUID uuid, boolean enabled) { duelRequests.put(uuid, enabled); }
 
     public Location getLobbyLocation() { return lobbyLocation; }
 

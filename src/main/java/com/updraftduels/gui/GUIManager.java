@@ -610,6 +610,13 @@ public class GUIManager {
                         "&7Receive a sound when someone mentions you in chat.")
                 .build());
 
+        boolean duelReqs = plugin.isDuelRequests(player.getUniqueId());
+        gui.setItem(17, new ItemBuilder(duelReqs ? Material.WRITTEN_BOOK : Material.IRON_INGOT)
+                .name("&fDuel Requests: " + (duelReqs ? "&aON" : "&cOFF"))
+                .lore("",
+                        "&7Allow other players to send you duel requests.")
+                .build());
+
         gui.setItem(20, new ItemBuilder(Material.PLAYER_HEAD)
                 .name("&fProfile")
                 .lore("&7View your stats")

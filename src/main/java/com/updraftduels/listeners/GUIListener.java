@@ -643,6 +643,12 @@ public class GUIListener implements Listener {
                 player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aChat mentions enabled." : "&7Chat mentions disabled."));
                 plugin.getGuiManager().openSettingsGUI(player);
             }
+            case 17 -> {
+                boolean enabled = !plugin.isDuelRequests(player.getUniqueId());
+                plugin.setDuelRequests(player.getUniqueId(), enabled);
+                player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aDuel requests enabled." : "&7Duel requests disabled."));
+                plugin.getGuiManager().openSettingsGUI(player);
+            }
             case 20 -> plugin.getGuiManager().openProfileGUI(player, player);
             case 21 -> plugin.getGuiManager().openKitsGUI(player);
             case 23 -> plugin.getGuiManager().openCosmeticsGUI(player);

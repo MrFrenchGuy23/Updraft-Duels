@@ -19,11 +19,15 @@ package com.updraftduels.manager;
 
 import com.updraftduels.UpdraftDuels;
 import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Vector;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,6 +37,8 @@ public class CosmeticsManager {
     private final Map<UUID, String> selectedVictoryAnimation;
     private final Map<UUID, String> selectedTrail;
     private final Map<UUID, String> selectedDeathMessage;
+    private final File cosmeticsFile;
+    private FileConfiguration cosmeticsConfig;
 
     public CosmeticsManager(UpdraftDuels plugin) {
         this.plugin = plugin;
@@ -40,15 +46,32 @@ public class CosmeticsManager {
         this.selectedVictoryAnimation = new ConcurrentHashMap<>();
         this.selectedTrail = new ConcurrentHashMap<>();
         this.selectedDeathMessage = new ConcurrentHashMap<>();
+        this.cosmeticsFile = new File(plugin.getDataFolder(), "cosmetics.yml");
+        loadAll();
     }
 
-    public void setKillEffect(UUID uuid, String effect) { selectedKillEffect.put(uuid, effect); }
+    public void setKillEffect(UUID uuid, String effect) {
+        selectedKillEffect.put(uuid, effect);
+        save(uuid);
+    }
     public String getKillEffect(UUID uuid) { return selectedKillEffect.getOrDefault(uuid, "none"); }
-    public void setVictoryAnimation(UUID uuid, String anim) { selectedVictoryAnimation.put(uuid, anim); }
+
+    public void setVictoryAnimation(UUID uuid, String anim) {
+        selectedVictoryAnimation.put(uuid, anim);
+        save(uuid);
+    }
     public String getVictoryAnimation(UUID uuid) { return selectedVictoryAnimation.getOrDefault(uuid, "none"); }
-    public void setTrail(UUID uuid, String trail) { selectedTrail.put(uuid, trail); }
+
+    public void setTrail(UUID uuid, String trail) {
+        selectedTrail.put(uuid, trail);
+        save(uuid);
+    }
     public String getTrail(UUID uuid) { return selectedTrail.getOrDefault(uuid, "none"); }
-    public void setDeathMessage(UUID uuid, String msg) { selectedDeathMessage.put(uuid, msg); }
+
+    public void setDeathMessage(UUID uuid, String msg) {
+        selectedDeathMessage.put(uuid, msg);
+        save(uuid);
+    }
     public String getDeathMessage(UUID uuid) { return selectedDeathMessage.getOrDefault(uuid, "default"); }
 
     public List<String> getAvailableKillEffects() {
@@ -161,6 +184,19 @@ public class CosmeticsManager {
         world.playSound(location, Sound.BLOCK_ANVIL_LAND, 0.5f, 1.5f);
     }
 
+    public void startLobbyTrailTask() {
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+                com.updraftduels.model.Duel duel = plugin.getDuelManager().getDuelOf(player.getUniqueId());
+                if (duel != null) continue;
+                String trail = getTrail(player.getUniqueId());
+                if (!trail.equals("none")) {
+                    playTrail(player, trail);
+                }
+            }
+        }, 2L, 2L);
+    }
+
     public void playTrail(Player player, String trail) {
         if (trail == null || trail.equals("none")) return;
         Location loc = player.getLocation().add(0, 0.1, 0);
@@ -204,5 +240,36 @@ public class CosmeticsManager {
                 .build());
         meta.setPower(1);
         fw.setFireworkMeta(meta);
+    }
+
+    private void save(UUID uuid) {
+        String path = uuid.toString();
+        cosmeticsConfig.set(path + ".kill-effect", selectedKillEffect.getOrDefault(uuid, "none"));
+        cosmeticsConfig.set(path + ".victory-animation", selectedVictoryAnimation.getOrDefault(uuid, "none"));
+        cosmeticsConfig.set(path + ".trail", selectedTrail.getOrDefault(uuid, "none"));
+        cosmeticsConfig.set(path + ".death-message", selectedDeathMessage.getOrDefault(uuid, "default"));
+        try {
+            cosmeticsConfig.save(cosmeticsFile);
+        } catch (IOException e) {
+            plugin.getLogger().warning("Failed to save cosmetics for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    private void loadAll() {
+        if (!cosmeticsFile.exists()) {
+            cosmeticsConfig = new YamlConfiguration();
+            return;
+        }
+        cosmeticsConfig = YamlConfiguration.loadConfiguration(cosmeticsFile);
+        for (String key : cosmeticsConfig.getKeys(false)) {
+            try {
+                UUID uuid = UUID.fromString(key);
+                selectedKillEffect.put(uuid, cosmeticsConfig.getString(key + ".kill-effect", "none"));
+                selectedVictoryAnimation.put(uuid, cosmeticsConfig.getString(key + ".victory-animation", "none"));
+                selectedTrail.put(uuid, cosmeticsConfig.getString(key + ".trail", "none"));
+                selectedDeathMessage.put(uuid, cosmeticsConfig.getString(key + ".death-message", "default"));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
     }
 }

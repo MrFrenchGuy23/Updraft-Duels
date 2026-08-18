@@ -76,6 +76,10 @@ public class DuelManager {
             if (selected != null && plugin.getRulesetManager().hasRuleset(selected)) kitName = selected;
         }
         if (kitName == null || kitName.isEmpty()) kitName = "default";
+        if (!plugin.isDuelRequests(target.getUniqueId())) {
+            sender.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix("&cThis player has duel requests disabled."));
+            return false;
+        }
         if (plugin.getAntiSpamManager().isOnCooldown(sender.getUniqueId(), "duel-request")) {
             plugin.getAntiSpamManager().sendCooldownMessage(sender, "duel-request");
             return false;

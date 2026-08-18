@@ -15,6 +15,11 @@ handled by `release.yml`.
   - **Scoreboard**: toggle the TAB scoreboard display (runs `/sb`).
   - **Chat Mentions**: receive a sound and styled message when someone types `@YourName` in chat.
   - **Auto Requeue**: automatically rejoin the same queue after a duel ends.
+  - **Duel Requests**: block incoming duel requests when off.
+
+### Fixed
+- Cosmetics now persist across server restarts (saved to `cosmetics.yml`).
+- Trails now play continuously while standing in the lobby/spawn.
 
 ## [1.1.0] - 2026-08-16
 
