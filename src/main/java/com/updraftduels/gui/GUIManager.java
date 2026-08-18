@@ -393,7 +393,7 @@ public class GUIManager {
     public void openKitsGUI(Player player) {
         Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(KITS_TITLE));
 
-        gui.setItem(11, new ItemBuilder(Material.PLAYER_HEAD)
+        gui.setItem(11, new ItemBuilder(Material.ENDER_CHEST)
                 .name("&aPersonal Kits")
                 .lore("&7Browse your own kits")
                 .build());
