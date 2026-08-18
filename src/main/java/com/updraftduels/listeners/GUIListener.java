@@ -406,7 +406,7 @@ public class GUIListener implements Listener {
 
     private void handleQueueClick(Player player, int slot, ItemStack item, boolean ranked) {
         if (item == null || item.getType() == Material.AIR || item.getType() == Material.BLACK_STAINED_GLASS_PANE) return;
-        if (slot == 49) {
+        if (slot == 22) {
             player.closeInventory();
             return;
         }

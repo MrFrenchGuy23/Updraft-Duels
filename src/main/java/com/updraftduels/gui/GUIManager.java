@@ -362,14 +362,14 @@ public class GUIManager {
     }
 
     private Inventory buildQueueGUI(Player player, boolean ranked) {
-        Inventory gui = Bukkit.createInventory(null, 54,
+        Inventory gui = Bukkit.createInventory(null, 27,
                 ColorUtil.colorize(ranked ? RANKED_QUEUE_TITLE : QUEUE_TITLE));
 
         FileConfiguration config = getGamemodesConfig();
         int slot = 0;
         if (config != null) {
             for (String gamemode : config.getKeys(false)) {
-                if (slot >= 45) break;
+                if (slot >= 18) break;
                 String kit = config.getString(gamemode + ".kit", gamemode);
                 String icon = config.getString(gamemode + ".icon", "PAPER");
                 Material material = Material.matchMaterial(icon);
@@ -384,7 +384,7 @@ public class GUIManager {
             }
         }
 
-        gui.setItem(49, closeButton());
+        gui.setItem(22, closeButton());
 
         fillWithGlass(gui, slot);
         return gui;
