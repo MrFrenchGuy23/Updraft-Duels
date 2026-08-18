@@ -8,6 +8,8 @@ handled by `release.yml`.
 
 ## Unreleased
 
+## [1.2.0] - 2026-08-16
+
 ### Added
 - Settings GUI expanded to 54 slots with new per-player toggles:
   - **Party Invites**: block incoming party invites when off.
