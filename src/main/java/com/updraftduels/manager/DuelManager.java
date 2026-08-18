@@ -1307,7 +1307,7 @@ public class DuelManager {
                 restorePlayerState(player, duel);
                 plugin.getScoreboardManager().removeScoreboard(player);
                 player.closeInventory();
-                player.sendTitle(ChatColor.RED + "Duel Cancelled", "", 10, 40, 10);
+                player.sendTitle(ChatColor.DARK_RED + "Duel Cancelled", "", 10, 40, 10);
             } else {
                 saveOfflineRestore(duel, uuid);
             }
