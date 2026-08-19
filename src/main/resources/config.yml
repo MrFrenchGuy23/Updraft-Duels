@@ -10,6 +10,8 @@ duel:
   allowed-team-sizes: [1, 2, 3, 4]
   countdown-seconds: 3
   max-pending-requests: 5
+  # How long a duel request stays valid before it auto-expires (in seconds).
+  request-expire-seconds: 60
   # Set to true to log arena boundary checks and duel teleports to the console.
   # Use this to debug players getting teleported to the wrong world or "can't leave arena" issues.
   debug: false

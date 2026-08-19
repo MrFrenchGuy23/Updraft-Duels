@@ -8,6 +8,10 @@ handled by `release.yml`.
 
 ## Unreleased
 
+### Changed
+- Duel request expiry is now configurable via `duel.request-expire-seconds` in `config.yml` (default 60s).
+- Expired duel requests now clean up automatically every 10 seconds instead of only when a new request is created.
+
 ## [1.2.0] - 2026-08-16
 
 ### Added

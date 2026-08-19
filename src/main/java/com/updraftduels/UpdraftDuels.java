@@ -142,6 +142,8 @@ public class UpdraftDuels extends JavaPlugin {
         long decayInterval = decayHours * 60 * 60 * 20L;
         Bukkit.getScheduler().runTaskTimer(this, () -> seasonManager.runDecayCheck(), decayInterval, decayInterval);
 
+        Bukkit.getScheduler().runTaskTimer(this, () -> duelManager.cleanupExpiredRequests(), 200L, 200L);
+
         if (updateChecker.isEnabled()) {
             Bukkit.getScheduler().runTaskLater(this, () -> updateChecker.check(), 60L);
         }

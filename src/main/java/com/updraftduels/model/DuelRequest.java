@@ -33,16 +33,21 @@ public class DuelRequest {
     private boolean processed;
     private boolean ranked;
     private String arenaName;
+    private final long expiresAt;
 
     public DuelRequest(UUID senderUUID, UUID receiverUUID, DuelType type, String rulesetId) {
-        this(senderUUID, receiverUUID, type, rulesetId, false, 1);
+        this(senderUUID, receiverUUID, type, rulesetId, false, 1, 60_000);
     }
 
     public DuelRequest(UUID senderUUID, UUID receiverUUID, DuelType type, String rulesetId, boolean ranked) {
-        this(senderUUID, receiverUUID, type, rulesetId, ranked, 1);
+        this(senderUUID, receiverUUID, type, rulesetId, ranked, 1, 60_000);
     }
 
     public DuelRequest(UUID senderUUID, UUID receiverUUID, DuelType type, String rulesetId, boolean ranked, int rounds) {
+        this(senderUUID, receiverUUID, type, rulesetId, ranked, rounds, 60_000);
+    }
+
+    public DuelRequest(UUID senderUUID, UUID receiverUUID, DuelType type, String rulesetId, boolean ranked, int rounds, long expiryMillis) {
         this.requestId = UUID.randomUUID();
         this.senderUUID = senderUUID;
         this.receiverUUID = receiverUUID;
@@ -51,6 +56,7 @@ public class DuelRequest {
         this.ranked = ranked;
         this.rounds = rounds > 0 ? rounds : 1;
         this.createdAt = System.currentTimeMillis();
+        this.expiresAt = this.createdAt + expiryMillis;
         this.accepted = false;
         this.processed = false;
     }
@@ -73,6 +79,6 @@ public class DuelRequest {
     public void setArenaName(String arenaName) { this.arenaName = arenaName; }
 
     public boolean isExpired() {
-        return System.currentTimeMillis() - createdAt > 60_000;
+        return System.currentTimeMillis() > expiresAt;
     }
 }

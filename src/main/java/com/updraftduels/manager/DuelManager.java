@@ -110,7 +110,8 @@ public class DuelManager {
 
     public DuelRequest createRequest(UUID sender, UUID receiver, DuelType type, String rulesetId, boolean ranked, int rounds) {
         cleanupExpiredRequests();
-        DuelRequest request = new DuelRequest(sender, receiver, type, rulesetId, ranked, rounds);
+        long expiryMillis = plugin.getConfig().getLong("duel.request-expire-seconds", 60) * 1000L;
+        DuelRequest request = new DuelRequest(sender, receiver, type, rulesetId, ranked, rounds, expiryMillis);
         pendingRequests.put(request.getRequestId(), request);
 
         outgoingRequests.computeIfAbsent(sender, k -> new ArrayList<>()).add(request);
@@ -119,7 +120,7 @@ public class DuelManager {
         return request;
     }
 
-    private void cleanupExpiredRequests() {
+    public void cleanupExpiredRequests() {
         long now = System.currentTimeMillis();
         for (DuelRequest req : new ArrayList<>(pendingRequests.values())) {
             if (req.isExpired()) {
