@@ -649,10 +649,6 @@ public class GUIListener implements Listener {
                 player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aDuel requests enabled." : "&7Duel requests disabled."));
                 plugin.getGuiManager().openSettingsGUI(player);
             }
-            case 20 -> plugin.getGuiManager().openProfileGUI(player, player);
-            case 21 -> plugin.getGuiManager().openKitsGUI(player);
-            case 23 -> plugin.getGuiManager().openCosmeticsGUI(player);
-            case 25 -> plugin.getGuiManager().openKitRoomGUI(player);
         }
     }
 

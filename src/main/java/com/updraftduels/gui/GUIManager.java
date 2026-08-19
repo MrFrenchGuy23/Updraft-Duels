@@ -373,7 +373,7 @@ public class GUIManager {
                 String kit = config.getString(gamemode + ".kit", gamemode);
                 String icon = config.getString(gamemode + ".icon", "PAPER");
                 Material material = Material.matchMaterial(icon);
-                if (material == null) material = Material.PAPER;
+                if (material == null) material = Material.CHEST;
 
                 gui.setItem(slot++, new ItemBuilder(material)
                         .name("&f" + gamemode)
@@ -496,7 +496,7 @@ public class GUIManager {
                         statItem(Material.IRON_SWORD, "&eKills", stats.getKills()),
                         statItem(Material.FIRE_CHARGE, "&dWin Streak", stats.getWinStreak()),
                         statItem(Material.BLAZE_POWDER, "&cBest Streak", stats.getBestWinStreak()),
-                        statItem(Material.PAPER, "&7Games Played", stats.getGamesPlayed())
+                        statItem(Material.BOOK, "&7Games Played", stats.getGamesPlayed())
                 };
                 for (int i = 0; i < statsItems.length; i++) {
                     gui.setItem(9 + i, statsItems[i]);
@@ -559,83 +559,65 @@ public class GUIManager {
     }
 
     public void openSettingsGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(SETTINGS_TITLE));
+        Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(SETTINGS_TITLE));
 
         boolean ranked = plugin.getQueueManager().isRankedMode(player.getUniqueId());
-        gui.setItem(10, new ItemBuilder(ranked ? Material.NETHERITE_INGOT : Material.IRON_INGOT)
+        gui.setItem(10, new ItemBuilder(ranked ? Material.NETHERITE_INGOT : Material.GOLD_INGOT)
                 .name("&6Queue Mode: " + (ranked ? "Ranked" : "Unranked"))
                 .lore("",
                         "&7" + (ranked ? "You fight for ELO & rewards" : "Casual matches, no ELO"))
                 .build());
 
         boolean autoGG = plugin.isAutoGG(player.getUniqueId());
-        gui.setItem(11, new ItemBuilder(autoGG ? Material.GOLD_INGOT : Material.IRON_INGOT)
+        gui.setItem(11, new ItemBuilder(autoGG ? Material.GOLD_INGOT : Material.REDSTONE)
                 .name("&fAuto-GG: " + (autoGG ? "&aON" : "&cOFF"))
                 .lore("",
                         "&7Automatically send \"GG\" at the end of each duel.")
                 .build());
 
         boolean autoRequeue = plugin.isAutoRequeue(player.getUniqueId());
-        gui.setItem(12, new ItemBuilder(autoRequeue ? Material.EMERALD : Material.IRON_INGOT)
+        gui.setItem(12, new ItemBuilder(autoRequeue ? Material.ENDER_PEARL : Material.SLIME_BALL)
                 .name("&fAuto Requeue: " + (autoRequeue ? "&aON" : "&cOFF"))
                 .lore("",
                         "&7Automatically rejoin queue after a duel ends.")
                 .build());
 
         boolean partyInvites = plugin.isPartyInvites(player.getUniqueId());
-        gui.setItem(13, new ItemBuilder(partyInvites ? Material.POPPY : Material.IRON_INGOT)
+        gui.setItem(13, new ItemBuilder(partyInvites ? Material.POPPY : Material.WITHER_ROSE)
                 .name("&fParty Invites: " + (partyInvites ? "&aON" : "&cOFF"))
                 .lore("",
                         "&7Allow other players to send you party invites.")
                 .build());
 
         boolean spectatorEnabled = plugin.isSpectators(player.getUniqueId());
-        gui.setItem(14, new ItemBuilder(spectatorEnabled ? Material.ENDER_EYE : Material.IRON_INGOT)
+        gui.setItem(14, new ItemBuilder(spectatorEnabled ? Material.ENDER_EYE : Material.CACTUS)
                 .name("&fSpectators: " + (spectatorEnabled ? "&aON" : "&cOFF"))
                 .lore("",
                         "&7Allow others to spectate your duels.")
                 .build());
 
         boolean sbEnabled = plugin.isScoreboard(player.getUniqueId());
-        gui.setItem(15, new ItemBuilder(sbEnabled ? Material.PAPER : Material.IRON_INGOT)
+        gui.setItem(15, new ItemBuilder(sbEnabled ? Material.MAP : Material.GLASS_PANE)
                 .name("&fScoreboard: " + (sbEnabled ? "&aON" : "&cOFF"))
                 .lore("",
                         "&7Toggle the in-game scoreboard display.")
                 .build());
 
         boolean mentions = plugin.isChatMentions(player.getUniqueId());
-        gui.setItem(16, new ItemBuilder(mentions ? Material.NAME_TAG : Material.IRON_INGOT)
+        gui.setItem(16, new ItemBuilder(mentions ? Material.NAME_TAG : Material.BELL)
                 .name("&fChat Mentions: " + (mentions ? "&aON" : "&cOFF"))
                 .lore("",
                         "&7Receive a sound when someone mentions you in chat.")
                 .build());
 
         boolean duelReqs = plugin.isDuelRequests(player.getUniqueId());
-        gui.setItem(17, new ItemBuilder(duelReqs ? Material.WRITTEN_BOOK : Material.IRON_INGOT)
+        gui.setItem(17, new ItemBuilder(duelReqs ? Material.WRITTEN_BOOK : Material.BOOK)
                 .name("&fDuel Requests: " + (duelReqs ? "&aON" : "&cOFF"))
                 .lore("",
                         "&7Allow other players to send you duel requests.")
                 .build());
 
-        gui.setItem(20, new ItemBuilder(Material.PLAYER_HEAD)
-                .name("&fProfile")
-                .lore("&7View your stats")
-                .build());
-
-        gui.setItem(21, new ItemBuilder(Material.CHEST)
-                .name("&fKits")
-                .lore("&7Browse and equip kits")
-                .build());
-
-        gui.setItem(23, new ItemBuilder(Material.FIREWORK_ROCKET)
-                .name("&fCosmetics")
-                .lore("&7Manage your cosmetics")
-                .build());
-
-        gui.setItem(25, new ItemBuilder(Material.DIAMOND_SWORD)
-                .name("&fKit Room")
-                .lore("&7Grab items for your kit")
-                .build());
+        gui.setItem(22, closeButton());
 
         fillWithGlass(gui, 0);
         player.openInventory(gui);
@@ -842,7 +824,7 @@ public class GUIManager {
                         case 1 -> Material.GOLD_BLOCK;
                         case 2 -> Material.IRON_BLOCK;
                         case 3 -> Material.DIAMOND_BLOCK;
-                        default -> Material.PAPER;
+                        default -> Material.IRON_NUGGET;
                     };
                     String value = switch (columnFinal) {
                         case "deaths" -> "&c" + stats.getDeaths() + " deaths";
@@ -1024,7 +1006,7 @@ public class GUIManager {
                 .lore("&7Selected: &f" + formatMaterialName(plugin.getCosmeticsManager().getTrail(player.getUniqueId())))
                 .build());
 
-        gui.setItem(16, new ItemBuilder(Material.PAPER)
+        gui.setItem(16, new ItemBuilder(Material.WRITTEN_BOOK)
                 .name("&fDeath Message")
                 .lore("&7Selected: &f" + formatMaterialName(plugin.getCosmeticsManager().getDeathMessage(player.getUniqueId())))
                 .build());
@@ -1112,7 +1094,7 @@ public class GUIManager {
             case "humorous" -> Material.EMERALD;
             case "dramatic" -> Material.REDSTONE_BLOCK;
             case "minimal" -> Material.BOOK;
-            default -> Material.PAPER;
+            default -> Material.BARRIER;
         };
     }
 
