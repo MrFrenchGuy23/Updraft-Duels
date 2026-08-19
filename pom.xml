@@ -6,7 +6,7 @@
 
     <groupId>com.updraftduels</groupId>
     <artifactId>UpdraftDuels</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <packaging>jar</packaging>
 
     <name>UpdraftDuels</name>

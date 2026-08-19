@@ -1375,6 +1375,12 @@ public class DuelManager {
                 .findFirst().orElse(null);
     }
 
+    public Duel getSpectatingDuel(UUID uuid) {
+        return activeDuels.values().stream()
+                .filter(d -> d.getSpectators().contains(uuid) && d.getState() == DuelState.IN_PROGRESS)
+                .findFirst().orElse(null);
+    }
+
     public boolean isFrozen(UUID uuid) {
         return frozenPlayers.containsKey(uuid);
     }

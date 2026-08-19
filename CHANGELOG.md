@@ -8,6 +8,11 @@ handled by `release.yml`.
 
 ## Unreleased
 
+## [3.0.1] - 2026-08-16
+
+### Fixed
+- Spectators can no longer leave the duel arena (boundary enforcement now applies to spectators).
+
 ## [3.0.0] - 2026-08-16
 
 ### Changed

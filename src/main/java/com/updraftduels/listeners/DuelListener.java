@@ -216,6 +216,9 @@ public class DuelListener implements Listener {
 
         Duel duel = plugin.getDuelManager().getDuelOf(player.getUniqueId());
         if (duel == null) {
+            duel = plugin.getDuelManager().getSpectatingDuel(player.getUniqueId());
+        }
+        if (duel == null) {
             return;
         }
         if (duel.getState() != DuelState.IN_PROGRESS && duel.getState() != DuelState.COUNTDOWN) return;
