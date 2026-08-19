@@ -1,20 +1,3 @@
-/*
- * Updraft Duels
- * Copyright (C) 2026 Updraft Duels
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 package com.updraftduels.manager;
 
 import com.updraftduels.UpdraftDuels;
@@ -26,13 +9,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ScoreboardManager {
     private final UpdraftDuels plugin;
     private final Map<UUID, Set<String>> lastEntries = new ConcurrentHashMap<>();
-    private final Map<UUID, String> lastStatsLines = new ConcurrentHashMap<>();
     private int taskId = -1;
 
     public ScoreboardManager(UpdraftDuels plugin) {
@@ -40,16 +25,17 @@ public class ScoreboardManager {
     }
 
     public void startUpdating() {
+        if (!plugin.getConfig().getBoolean("scoreboard.enabled", true)) return;
         taskId = new BukkitRunnable() {
             @Override
             public void run() {
                 for (Duel duel : plugin.getDuelManager().getActiveDuels()) {
                     if (duel.getState() != DuelState.IN_PROGRESS) continue;
-                    for (java.util.UUID uuid : duel.getAllParticipants()) {
+                    for (UUID uuid : duel.getAllParticipants()) {
                         Player player = Bukkit.getPlayer(uuid);
                         if (player != null) updateScoreboard(player, duel);
                     }
-                    for (java.util.UUID uuid : duel.getSpectators()) {
+                    for (UUID uuid : duel.getSpectators()) {
                         Player player = Bukkit.getPlayer(uuid);
                         if (player != null) updateScoreboard(player, duel);
                     }
@@ -66,6 +52,10 @@ public class ScoreboardManager {
     }
 
     private void updateScoreboard(Player player, Duel duel) {
+        if (!plugin.isScoreboard(player.getUniqueId())) {
+            removeScoreboard(player);
+            return;
+        }
         org.bukkit.scoreboard.ScoreboardManager sbManager = Bukkit.getScoreboardManager();
         if (sbManager == null) return;
 
@@ -75,36 +65,50 @@ public class ScoreboardManager {
             player.setScoreboard(board);
         }
 
+        String title = plugin.getConfig().getString("scoreboard.title", "&f&lDuel");
         Objective obj = board.getObjective("updraftduels_duel");
         if (obj == null) {
             obj = board.registerNewObjective("updraftduels_duel", Criteria.DUMMY,
-                    com.updraftduels.util.ColorUtil.colorize("&fDuel"));
+                    LegacyComponentSerializer.legacyAmpersand().deserialize(com.updraftduels.util.ColorUtil.colorize(title)));
             obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+        } else {
+            obj.displayName(LegacyComponentSerializer.legacyAmpersand().deserialize(com.updraftduels.util.ColorUtil.colorize(title)));
         }
         final Objective objective = obj;
 
-        LinkedHashMap<String, Integer> rows = new LinkedHashMap<>();
-        int line = 7;
-
-        for (int i = 0; i < duel.getTeams().size(); i++) {
-            var team = duel.getTeams().get(i);
-            String teamName = i == 0 ? "&aTeam A" : "&cTeam B";
-            rows.put(com.updraftduels.util.ColorUtil.colorize(teamName + " &7" + team.getAliveCount() + "/" + team.getSize()), line--);
+        List<String> templateLines = plugin.getConfig().getStringList("scoreboard.lines");
+        if (templateLines.isEmpty()) {
+            templateLines = Arrays.asList(
+                    "%team_a% %team_b%",
+                    "",
+                    "&7Arena: &f%arena%",
+                    "&7Duration: &f%duration%",
+                    "&7Gamemode: &f%gamemode%",
+                    "&7Ruleset: &f%ruleset%",
+                    "",
+                    "&7ELO: &f%elo%",
+                    "&7W/L: &f%wl%"
+            );
         }
 
-        rows.put(" ", line--);
-        rows.put(com.updraftduels.util.ColorUtil.colorize("&7Arena: &f" + duel.getArenaName()), line--);
-        rows.put(com.updraftduels.util.ColorUtil.colorize("&7Duration: &f" + duel.getFormattedDuration()), line--);
-        rows.put(com.updraftduels.util.ColorUtil.colorize("&7Ruleset: &f" + (duel.getRulesetId() != null ? duel.getRulesetId() : "default")), line--);
-        rows.put("  ", line--);
+        Map<String, String> placeholders = buildPlaceholders(duel, player);
+        placeholders.put("%score%", duel.getScoreA() + " - " + duel.getScoreB());
 
         UUID uuid = player.getUniqueId();
         Set<String> previous = lastEntries.getOrDefault(uuid, Collections.emptySet());
         Set<String> next = new HashSet<>();
-        for (Map.Entry<String, Integer> entry : rows.entrySet()) {
-            objective.getScore(entry.getKey()).setScore(entry.getValue());
-            next.add(entry.getKey());
+
+        int score = templateLines.size();
+        for (String line : templateLines) {
+            String resolved = replacePlaceholders(line, placeholders);
+            String colored = com.updraftduels.util.ColorUtil.colorize(resolved);
+            if (!colored.isEmpty()) {
+                objective.getScore(colored).setScore(score);
+                next.add(colored);
+            }
+            score--;
         }
+
         for (String key : previous) {
             if (!next.contains(key)) {
                 try {
@@ -114,45 +118,55 @@ public class ScoreboardManager {
             }
         }
         lastEntries.put(uuid, next);
-
-        updateStatsLine(uuid, objective);
     }
 
-    private void updateStatsLine(UUID uuid, Objective objective) {
-        DuelPlayerStats cached = plugin.getDatabase().getCachedStats(uuid);
-        if (cached == null) {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player == null) return;
-            plugin.getDatabase().getOrCreateStats(uuid, player.getName()).thenAccept(stats -> {
-                if (stats != null) {
-                    applyStatsLine(uuid, stats.getElo(), stats.getWins(), stats.getLosses(), objective);
-                }
-            });
-            return;
+    private Map<String, String> buildPlaceholders(Duel duel, Player player) {
+        Map<String, String> p = new HashMap<>();
+        p.put("%arena%", duel.getArenaName() != null ? duel.getArenaName() : "None");
+        p.put("%duration%", duel.getFormattedDuration());
+        p.put("%ruleset%", duel.getRulesetId() != null ? duel.getRulesetId() : "default");
+        p.put("%gamemode%", duel.getType().name());
+
+        StringBuilder teamA = new StringBuilder();
+        StringBuilder teamB = new StringBuilder();
+        for (int i = 0; i < duel.getTeams().size(); i++) {
+            var team = duel.getTeams().get(i);
+            StringBuilder sb = i == 0 ? teamA : teamB;
+            sb.append(i == 0 ? "&a" : "&c").append("Team ").append(i == 0 ? "A" : "B");
+            sb.append(" &7").append(team.getAliveCount()).append("/").append(team.getSize());
         }
-        applyStatsLine(uuid, cached.getElo(), cached.getWins(), cached.getLosses(), objective);
+        p.put("%team_a%", teamA.toString());
+        p.put("%team_b%", teamB.toString());
+
+        DuelPlayerStats stats = plugin.getDatabase().getCachedStats(player.getUniqueId());
+        if (stats != null) {
+            p.put("%elo%", String.valueOf(stats.getElo()));
+            p.put("%wins%", String.valueOf(stats.getWins()));
+            p.put("%losses%", String.valueOf(stats.getLosses()));
+            p.put("%wl%", stats.getWins() + "-" + stats.getLosses());
+            p.put("%kills%", String.valueOf(stats.getKills()));
+            p.put("%deaths%", String.valueOf(stats.getDeaths()));
+        } else {
+            p.put("%elo%", "0");
+            p.put("%wins%", "0");
+            p.put("%losses%", "0");
+            p.put("%wl%", "0-0");
+            p.put("%kills%", "0");
+            p.put("%deaths%", "0");
+        }
+
+        return p;
     }
 
-    private void applyStatsLine(UUID uuid, int elo, int wins, int losses, Objective objective) {
-        String statsKey = elo + "|" + wins + "|" + losses;
-        if (statsKey.equals(lastStatsLines.get(uuid))) return;
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            Player player = Bukkit.getPlayer(uuid);
-            if (player == null) return;
-            Objective current = player.getScoreboard().getObjective("updraftduels_duel");
-            if (current != objective) return;
-            try {
-                objective.getScore(com.updraftduels.util.ColorUtil.colorize("&7ELO: &f" + elo)).setScore(1);
-                objective.getScore(com.updraftduels.util.ColorUtil.colorize("&7W/L: &f" + wins + "-" + losses)).setScore(0);
-            } catch (IllegalStateException ignored) {
-            }
-        });
-        lastStatsLines.put(uuid, statsKey);
+    private String replacePlaceholders(String text, Map<String, String> placeholders) {
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            text = text.replace(entry.getKey(), entry.getValue());
+        }
+        return text;
     }
 
     public void removeScoreboard(Player player) {
         lastEntries.remove(player.getUniqueId());
-        lastStatsLines.remove(player.getUniqueId());
         Scoreboard board = player.getScoreboard();
         if (board != null) {
             Objective obj = board.getObjective("updraftduels_duel");

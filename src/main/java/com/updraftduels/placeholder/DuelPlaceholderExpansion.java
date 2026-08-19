@@ -127,6 +127,11 @@ public class DuelPlaceholderExpansion extends PlaceholderExpansion {
                 if (duel != null && duel.getArenaName() != null) yield duel.getArenaName();
                 yield "None";
             }
+            case "duel_gamemode" -> {
+                Duel duel = plugin.getDuelManager().getDuelOf(uuid);
+                if (duel != null) yield duel.getType().name();
+                yield "None";
+            }
             default -> getFallback();
         };
     }

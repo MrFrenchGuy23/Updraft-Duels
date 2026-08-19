@@ -15,6 +15,8 @@ handled by `release.yml`.
 
 ### Added
 - PlaceholderAPI placeholder `%updraftduels_duel_arena%` — shows the arena name during a duel, or "None".
+- PlaceholderAPI placeholder `%updraftduels_duel_gamemode%` — shows the gamemode (SOLO, DUO, TRIO, QUAD) during a duel, or "None".
+- Configurable scoreboard (`scoreboard.title`, `scoreboard.lines`) with placeholders: %team_a%, %team_b%, %arena%, %duration%, %ruleset%, %gamemode%, %score%, %elo%, %wins%, %losses%, %wl%, %kills%, %deaths%.
 
 ## [1.2.0] - 2026-08-16
 

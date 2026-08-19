@@ -25,6 +25,22 @@ duel:
   # How long the arena vote stays open (in seconds) if not everyone votes.
   vote-seconds: 8
 
+scoreboard:
+  enabled: true
+  title: "&f&lDuel"
+  # Placeholders: %team_a%, %team_b%, %arena%, %duration%, %ruleset%, %gamemode%, %score%, %elo%, %wins%, %losses%, %wl%
+  # Use "" (empty) lines for separators or to skip lines.
+  lines:
+    - "%team_a% %team_b%"
+    - ""
+    - "&7Arena: &f%arena%"
+    - "&7Duration: &f%duration%"
+    - "&7Gamemode: &f%gamemode%"
+    - "&7Ruleset: &f%ruleset%"
+    - ""
+    - "&7ELO: &f%elo%"
+    - "&7W/L: &f%wl%"
+
 arena:
   # Arenas where players may freely break/place blocks during a duel.
   # These bypass the default block-edit restriction (useful for buildpvp-style arenas).
