@@ -11,6 +11,10 @@ handled by `release.yml`.
 ### Changed
 - Duel request expiry is now configurable via `duel.request-expire-seconds` in `config.yml` (default 60s).
 - Expired duel requests now clean up automatically every 10 seconds instead of only when a new request is created.
+- ELO rank sub-levels now use standard convention: I = lowest, III = highest (was reversed).
+
+### Added
+- PlaceholderAPI placeholder `%updraftduels_duel_arena%` — shows the arena name during a duel, or "None".
 
 ## [1.2.0] - 2026-08-16
 

@@ -38,7 +38,7 @@ public class RankManager {
         if (rankSection == null) return;
 
         List<String> order = rankSection.getStringList("order");
-        String[] romanLevels = {"III", "II", "I"};
+        String[] romanLevels = {"I", "II", "III"};
 
         for (String rankKey : order) {
             ConfigurationSection section = rankSection.getConfigurationSection(rankKey);
