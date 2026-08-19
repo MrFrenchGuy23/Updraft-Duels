@@ -368,6 +368,9 @@ public class TournamentManager {
             }
             playerTournament.remove(uuid);
         }
+
+        UUID tournamentId = tournament.getId();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> tournaments.remove(tournamentId), 6000L);
     }
 
     private void giveTournamentRewards(Player player, Tournament tournament) {

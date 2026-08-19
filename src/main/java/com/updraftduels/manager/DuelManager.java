@@ -124,14 +124,26 @@ public class DuelManager {
         for (DuelRequest req : new ArrayList<>(pendingRequests.values())) {
             if (req.isExpired()) {
                 pendingRequests.remove(req.getRequestId());
-                outgoingRequests.getOrDefault(req.getSenderUUID(), new ArrayList<>()).remove(req);
-                incomingRequests.getOrDefault(req.getReceiverUUID(), new ArrayList<>()).remove(req);
+                cleanupRequestFromLists(req);
                 Player sender = Bukkit.getPlayer(req.getSenderUUID());
                 if (sender != null) {
                     sender.sendMessage(plugin.getMessages().get("duel.request-expired",
                             "%player%", Bukkit.getOfflinePlayer(req.getReceiverUUID()).getName()));
                 }
             }
+        }
+    }
+
+    private void cleanupRequestFromLists(DuelRequest req) {
+        List<DuelRequest> out = outgoingRequests.get(req.getSenderUUID());
+        if (out != null) {
+            out.remove(req);
+            if (out.isEmpty()) outgoingRequests.remove(req.getSenderUUID());
+        }
+        List<DuelRequest> in = incomingRequests.get(req.getReceiverUUID());
+        if (in != null) {
+            in.remove(req);
+            if (in.isEmpty()) incomingRequests.remove(req.getReceiverUUID());
         }
     }
 
@@ -145,13 +157,11 @@ public class DuelManager {
         if (!startDuel(request)) {
             request.setProcessed(true);
             pendingRequests.remove(request.getRequestId());
-            outgoingRequests.getOrDefault(request.getSenderUUID(), new ArrayList<>()).remove(request);
-            incomingRequests.getOrDefault(request.getReceiverUUID(), new ArrayList<>()).remove(request);
+            cleanupRequestFromLists(request);
             return false;
         }
 
-        outgoingRequests.computeIfAbsent(request.getSenderUUID(), k -> new ArrayList<>()).remove(request);
-        incomingRequests.computeIfAbsent(request.getReceiverUUID(), k -> new ArrayList<>()).remove(request);
+        cleanupRequestFromLists(request);
         return true;
     }
 
@@ -1277,6 +1287,7 @@ public class DuelManager {
         pendingDuelSelections.remove(uuid);
         pendingRespawnLocations.remove(uuid);
         lobbyTeleportAfterDuel.remove(uuid);
+        activeDuelContext.remove(uuid);
         denyAllIncoming(uuid);
         for (DuelRequest req : new ArrayList<>(outgoingRequests.getOrDefault(uuid, new ArrayList<>()))) {
             denyRequest(req.getRequestId(), uuid);

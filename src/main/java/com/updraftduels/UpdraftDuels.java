@@ -169,6 +169,8 @@ public class UpdraftDuels extends JavaPlugin {
             }
         }
 
+        cosmeticsManager.saveIfDirty();
+
         gateManager.shutdown();
 
         if (database != null) {
@@ -339,6 +341,16 @@ public class UpdraftDuels extends JavaPlugin {
 
     public boolean isDuelRequests(UUID uuid) { return duelRequests.getOrDefault(uuid, true); }
     public void setDuelRequests(UUID uuid, boolean enabled) { duelRequests.put(uuid, enabled); }
+
+    public void clearPlayerSettings(UUID uuid) {
+        autoGG.remove(uuid);
+        autoRequeue.remove(uuid);
+        partyInvites.remove(uuid);
+        spectators.remove(uuid);
+        chatMentions.remove(uuid);
+        scoreboard.remove(uuid);
+        duelRequests.remove(uuid);
+    }
 
     public Location getLobbyLocation() { return lobbyLocation; }
 

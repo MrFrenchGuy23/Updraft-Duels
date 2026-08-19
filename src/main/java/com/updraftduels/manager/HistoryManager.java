@@ -23,7 +23,6 @@ import org.bukkit.Bukkit;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class HistoryManager {
     private final UpdraftDuels plugin;
@@ -32,7 +31,7 @@ public class HistoryManager {
 
     public HistoryManager(UpdraftDuels plugin) {
         this.plugin = plugin;
-        this.recentHistory = new CopyOnWriteArrayList<>();
+        this.recentHistory = Collections.synchronizedList(new ArrayList<>());
         this.playerHistory = new ConcurrentHashMap<>();
     }
 
@@ -48,7 +47,7 @@ public class HistoryManager {
 
     private void addToPlayerHistory(UUID uuid, DuelHistoryEntry entry) {
         if (uuid == null) return;
-        playerHistory.computeIfAbsent(uuid, k -> new CopyOnWriteArrayList<>()).add(entry);
+        playerHistory.computeIfAbsent(uuid, k -> Collections.synchronizedList(new ArrayList<>())).add(entry);
         List<DuelHistoryEntry> list = playerHistory.get(uuid);
         if (list.size() > 100) {
             list.remove(0);
@@ -91,5 +90,9 @@ public class HistoryManager {
         List<DuelHistoryEntry> history = playerHistory.get(uuid);
         if (history == null || history.isEmpty()) return null;
         return history.get(history.size() - 1);
+    }
+
+    public void clearPlayer(UUID uuid) {
+        playerHistory.remove(uuid);
     }
 }

@@ -134,4 +134,15 @@ public class FriendManager {
             autoAcceptCache.put(uuid, auto);
         });
     }
+
+    public void removeFromCache(UUID uuid) {
+        Set<UUID> friends = friendsCache.remove(uuid);
+        if (friends != null) {
+            for (UUID f : friends) {
+                Set<UUID> theirFriends = friendsCache.get(f);
+                if (theirFriends != null) theirFriends.remove(uuid);
+            }
+        }
+        autoAcceptCache.remove(uuid);
+    }
 }

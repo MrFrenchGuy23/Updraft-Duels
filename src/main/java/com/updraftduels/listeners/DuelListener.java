@@ -175,10 +175,15 @@ public class DuelListener implements Listener {
     @EventHandler
     public void onPlayerDisconnect(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        plugin.getQueueManager().onPlayerDisconnect(player.getUniqueId());
-        plugin.getDuelManager().onPlayerDisconnect(player.getUniqueId());
-        plugin.getSpectatorManager().onPlayerQuit(player.getUniqueId());
-        plugin.getAntiSpamManager().clearAll(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        plugin.getQueueManager().onPlayerDisconnect(uuid);
+        plugin.getDuelManager().onPlayerDisconnect(uuid);
+        plugin.getSpectatorManager().onPlayerQuit(uuid);
+        plugin.getAntiSpamManager().clearAll(uuid);
+        plugin.clearPlayerSettings(uuid);
+        plugin.getFriendManager().removeFromCache(uuid);
+        plugin.getHistoryManager().clearPlayer(uuid);
+        lastArenaWarning.remove(uuid);
     }
 
     @EventHandler

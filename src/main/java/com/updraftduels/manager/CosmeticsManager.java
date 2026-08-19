@@ -39,6 +39,7 @@ public class CosmeticsManager {
     private final Map<UUID, String> selectedDeathMessage;
     private final File cosmeticsFile;
     private FileConfiguration cosmeticsConfig;
+    private volatile boolean dirty;
 
     public CosmeticsManager(UpdraftDuels plugin) {
         this.plugin = plugin;
@@ -52,25 +53,25 @@ public class CosmeticsManager {
 
     public void setKillEffect(UUID uuid, String effect) {
         selectedKillEffect.put(uuid, effect);
-        save(uuid);
+        markDirty();
     }
     public String getKillEffect(UUID uuid) { return selectedKillEffect.getOrDefault(uuid, "none"); }
 
     public void setVictoryAnimation(UUID uuid, String anim) {
         selectedVictoryAnimation.put(uuid, anim);
-        save(uuid);
+        markDirty();
     }
     public String getVictoryAnimation(UUID uuid) { return selectedVictoryAnimation.getOrDefault(uuid, "none"); }
 
     public void setTrail(UUID uuid, String trail) {
         selectedTrail.put(uuid, trail);
-        save(uuid);
+        markDirty();
     }
     public String getTrail(UUID uuid) { return selectedTrail.getOrDefault(uuid, "none"); }
 
     public void setDeathMessage(UUID uuid, String msg) {
         selectedDeathMessage.put(uuid, msg);
-        save(uuid);
+        markDirty();
     }
     public String getDeathMessage(UUID uuid) { return selectedDeathMessage.getOrDefault(uuid, "default"); }
 
@@ -242,17 +243,28 @@ public class CosmeticsManager {
         fw.setFireworkMeta(meta);
     }
 
-    private void save(UUID uuid) {
-        String path = uuid.toString();
-        cosmeticsConfig.set(path + ".kill-effect", selectedKillEffect.getOrDefault(uuid, "none"));
-        cosmeticsConfig.set(path + ".victory-animation", selectedVictoryAnimation.getOrDefault(uuid, "none"));
-        cosmeticsConfig.set(path + ".trail", selectedTrail.getOrDefault(uuid, "none"));
-        cosmeticsConfig.set(path + ".death-message", selectedDeathMessage.getOrDefault(uuid, "default"));
+    private void markDirty() { dirty = true; }
+
+    public void saveIfDirty() {
+        if (!dirty) return;
+        Set<UUID> all = new HashSet<>();
+        all.addAll(selectedKillEffect.keySet());
+        all.addAll(selectedVictoryAnimation.keySet());
+        all.addAll(selectedTrail.keySet());
+        all.addAll(selectedDeathMessage.keySet());
+        for (UUID uuid : all) {
+            String path = uuid.toString();
+            cosmeticsConfig.set(path + ".kill-effect", selectedKillEffect.getOrDefault(uuid, "none"));
+            cosmeticsConfig.set(path + ".victory-animation", selectedVictoryAnimation.getOrDefault(uuid, "none"));
+            cosmeticsConfig.set(path + ".trail", selectedTrail.getOrDefault(uuid, "none"));
+            cosmeticsConfig.set(path + ".death-message", selectedDeathMessage.getOrDefault(uuid, "default"));
+        }
         try {
             cosmeticsConfig.save(cosmeticsFile);
         } catch (IOException e) {
-            plugin.getLogger().warning("Failed to save cosmetics for " + uuid + ": " + e.getMessage());
+            plugin.getLogger().warning("Failed to save cosmetics: " + e.getMessage());
         }
+        dirty = false;
     }
 
     private void loadAll() {

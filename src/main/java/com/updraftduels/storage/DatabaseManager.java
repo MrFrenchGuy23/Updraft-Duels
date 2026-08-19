@@ -34,7 +34,12 @@ public class DatabaseManager {
     private final ExecutorService executor;
     private final java.util.concurrent.Executor gracefulExecutor;
     private final boolean useMySQL;
-    private final Map<UUID, DuelPlayerStats> statsCache = new ConcurrentHashMap<>();
+    private final Map<UUID, DuelPlayerStats> statsCache = Collections.synchronizedMap(new LinkedHashMap<>(256, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<UUID, DuelPlayerStats> eldest) {
+            return size() > 256;
+        }
+    });
 
     public DatabaseManager(UpdraftDuels plugin) {
         this.plugin = plugin;
