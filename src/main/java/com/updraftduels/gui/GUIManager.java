@@ -18,6 +18,7 @@
 package com.updraftduels.gui;
 
 import com.updraftduels.UpdraftDuels;
+import com.updraftduels.manager.QueueManager;
 import com.updraftduels.manager.RankManager;
 import com.updraftduels.manager.VotingManager;
 import com.updraftduels.model.Duel;
