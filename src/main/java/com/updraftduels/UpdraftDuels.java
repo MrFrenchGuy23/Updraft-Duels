@@ -68,6 +68,7 @@ public class UpdraftDuels extends JavaPlugin {
     private RankManager rankManager;
     private PlaytimeManager playtimeManager;
     private GateManager gateManager;
+    private NametagManager nametagManager;
     private MessageManager messages;
     private UpdateChecker updateChecker;
     private QueueCommand queueCommand;
@@ -118,6 +119,7 @@ public class UpdraftDuels extends JavaPlugin {
         rankManager = new RankManager(this);
         playtimeManager = new PlaytimeManager(this);
         gateManager = new GateManager(this);
+        nametagManager = new NametagManager(this);
         guiManager = new GUIManager(this);
         updateChecker = new UpdateChecker(this);
 
@@ -128,6 +130,7 @@ public class UpdraftDuels extends JavaPlugin {
         kitManager.loadKits();
 
         scoreboardManager.startUpdating();
+        nametagManager.startUpdating();
 
         for (org.bukkit.entity.Player p : Bukkit.getOnlinePlayers()) {
             playtimeManager.startTracking(p);
@@ -154,6 +157,7 @@ public class UpdraftDuels extends JavaPlugin {
     @Override
     public void onDisable() {
         scoreboardManager.stopUpdating();
+        nametagManager.stopUpdating();
 
         playtimeManager.saveAll();
 
@@ -321,6 +325,7 @@ public class UpdraftDuels extends JavaPlugin {
     public AntiSpamManager getAntiSpamManager() { return antiSpamManager; }
     public RankManager getRankManager() { return rankManager; }
     public PlaytimeManager getPlaytimeManager() { return playtimeManager; }
+    public NametagManager getNametagManager() { return nametagManager; }
     public UpdateChecker getUpdateChecker() { return updateChecker; }
 
     public boolean isAutoGG(UUID uuid) { return autoGG.getOrDefault(uuid, false); }
@@ -352,6 +357,16 @@ public class UpdraftDuels extends JavaPlugin {
         chatMentions.remove(uuid);
         scoreboard.remove(uuid);
         duelRequests.remove(uuid);
+        saveCosmeticsForPlayer(uuid);
+    }
+
+    public void saveCosmeticsForPlayer(UUID uuid) {
+        if (database == null || cosmeticsManager == null) return;
+        database.saveCosmetics(uuid,
+                cosmeticsManager.getKillEffect(uuid),
+                cosmeticsManager.getVictoryAnimation(uuid),
+                cosmeticsManager.getTrail(uuid),
+                cosmeticsManager.getDeathMessage(uuid));
     }
 
     public Location getLobbyLocation() { return lobbyLocation; }

@@ -146,6 +146,9 @@ public class ScoreboardManager {
             p.put("%wl%", stats.getWins() + "-" + stats.getLosses());
             p.put("%kills%", String.valueOf(stats.getKills()));
             p.put("%deaths%", String.valueOf(stats.getDeaths()));
+            p.put("%rank%", plugin.getRankManager().getRankForElo(stats.getElo()));
+            p.put("%coloredrank%", plugin.getRankManager().getColoredRankForElo(stats.getElo()));
+            p.put("%divisionelo%", plugin.getRankManager().getDivisionElo(stats.getElo()));
         } else {
             p.put("%elo%", "0");
             p.put("%wins%", "0");
@@ -153,6 +156,9 @@ public class ScoreboardManager {
             p.put("%wl%", "0-0");
             p.put("%kills%", "0");
             p.put("%deaths%", "0");
+            p.put("%rank%", "Unranked");
+            p.put("%coloredrank%", "&7Unranked");
+            p.put("%divisionelo%", "&7Unranked (0)");
         }
 
         return p;

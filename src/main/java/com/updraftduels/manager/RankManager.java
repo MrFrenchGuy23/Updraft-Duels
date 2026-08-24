@@ -87,6 +87,12 @@ public class RankManager {
         return getRankColorForElo(elo) + getRankForElo(elo);
     }
 
+    public String getDivisionElo(int elo) {
+        String rank = getRankForElo(elo);
+        String color = getRankColorForElo(elo);
+        return color + rank + " &7(" + elo + ")";
+    }
+
     public List<RankTier> getRanks() { return ranks; }
 
     public DivisionInfo getDivision(int matches) {

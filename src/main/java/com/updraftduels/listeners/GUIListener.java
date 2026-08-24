@@ -19,6 +19,7 @@ package com.updraftduels.listeners;
 
 import com.updraftduels.UpdraftDuels;
 import com.updraftduels.gui.GUIManager;
+import com.updraftduels.manager.QueueManager;
 import com.updraftduels.manager.VotingManager;
 import com.updraftduels.model.Duel;
 import com.updraftduels.model.DuelState;
@@ -252,15 +253,18 @@ public class GUIListener implements Listener {
             return;
         }
 
-        if (title.equals(ColorUtil.colorize(GUIManager.QUEUE_TITLE))) {
+        if (title.equals(ColorUtil.colorize(GUIManager.QUEUE_TITLE))
+                || title.equals(ColorUtil.colorize(GUIManager.CASUAL_QUEUE_TITLE))
+                || title.equals(ColorUtil.colorize(GUIManager.COMPETITIVE_QUEUE_TITLE))
+                || title.equals(ColorUtil.colorize(GUIManager.BOTH_QUEUE_TITLE))) {
             event.setCancelled(true);
-            handleQueueClick(player, event.getSlot(), event.getCurrentItem(), false);
-            return;
-        }
-
-        if (title.equals(ColorUtil.colorize(GUIManager.RANKED_QUEUE_TITLE))) {
-            event.setCancelled(true);
-            handleQueueClick(player, event.getSlot(), event.getCurrentItem(), true);
+            QueueManager.MatchmakingMode mode = QueueManager.MatchmakingMode.BOTH;
+            if (title.equals(ColorUtil.colorize(GUIManager.CASUAL_QUEUE_TITLE))) {
+                mode = QueueManager.MatchmakingMode.CASUAL;
+            } else if (title.equals(ColorUtil.colorize(GUIManager.COMPETITIVE_QUEUE_TITLE))) {
+                mode = QueueManager.MatchmakingMode.COMPETITIVE;
+            }
+            handleQueueClick(player, event.getSlot(), event.getCurrentItem(), mode);
             return;
         }
 
@@ -420,7 +424,7 @@ public class GUIListener implements Listener {
         }
     }
 
-    private void handleQueueClick(Player player, int slot, ItemStack item, boolean ranked) {
+    private void handleQueueClick(Player player, int slot, ItemStack item, QueueManager.MatchmakingMode mode) {
         if (item == null || item.getType() == Material.AIR || item.getType() == Material.BLACK_STAINED_GLASS_PANE) return;
         if (slot == 22) {
             player.closeInventory();
@@ -434,7 +438,7 @@ public class GUIListener implements Listener {
 
         String gamemode = gamemodes.get(slot);
         player.closeInventory();
-        plugin.getQueueCommand().joinGamemode(player, gamemode, ranked);
+        plugin.getQueueCommand().joinGamemode(player, gamemode, mode);
     }
 
     private void handleDuelKitClick(Player player, int slot, ItemStack item) {
@@ -601,9 +605,19 @@ public class GUIListener implements Listener {
     private void handleSettingsClick(Player player, int slot) {
         switch (slot) {
             case 10 -> {
-                boolean ranked = !plugin.getQueueManager().isRankedMode(player.getUniqueId());
-                plugin.getQueueManager().setRankedMode(player.getUniqueId(), ranked);
-                player.sendMessage(ColorUtil.colorizePrefix(ranked ? "&6Ranked mode enabled." : "&7Unranked mode enabled."));
+                QueueManager.MatchmakingMode current = plugin.getQueueManager().getMatchmakingMode(player.getUniqueId());
+                QueueManager.MatchmakingMode next = switch (current) {
+                    case CASUAL -> QueueManager.MatchmakingMode.COMPETITIVE;
+                    case COMPETITIVE -> QueueManager.MatchmakingMode.BOTH;
+                    case BOTH -> QueueManager.MatchmakingMode.CASUAL;
+                };
+                plugin.getQueueManager().setMatchmakingMode(player.getUniqueId(), next);
+                String msg = switch (next) {
+                    case CASUAL -> "&7Matchmaking set to &7Casual";
+                    case COMPETITIVE -> "&6Matchmaking set to &6Competitive";
+                    case BOTH -> "&bMatchmaking set to &bBoth";
+                };
+                player.sendMessage(ColorUtil.colorizePrefix(msg));
                 plugin.getGuiManager().openSettingsGUI(player);
             }
             case 11 -> {

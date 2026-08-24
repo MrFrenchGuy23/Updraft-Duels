@@ -148,45 +148,32 @@ divisions:
   increase-per-rank: 0
   ranks:
     0:
-      name: "Leather"
+      name: "Copper"
       color: "&6"
-      material: LEATHER_HELMET
+      material: COPPER_BLOCK
     1:
-      name: "Chainmail"
-      color: "&7"
-      material: CHAINMAIL_HELMET
-    2:
       name: "Iron"
       color: "&f"
-      material: IRON_HELMET
-    3:
+      material: IRON_BLOCK
+    2:
       name: "Gold"
       color: "&e"
-      material: GOLDEN_HELMET
-    4:
+      material: GOLD_BLOCK
+    3:
       name: "Diamond"
       color: "&b"
-      material: DIAMOND_HELMET
-    5:
-      name: "Emerald"
-      color: "&a"
-      material: EMERALD_BLOCK
-    6:
+      material: DIAMOND_BLOCK
+    4:
       name: "Netherite"
       color: "&8"
-      material: NETHERITE_HELMET
-    7:
-      name: "Master"
-      color: "&d"
-      material: NETHER_STAR
-    8:
-      name: "Legend"
-      color: "&4"
-      material: DRAGON_HEAD
-    9:
-      name: "Mythic"
-      color: "&5"
-      material: SHULKER_BOX
+      material: NETHERITE_BLOCK
+
+matchmaking:
+  # Modes: CASUAL, COMPETITIVE, BOTH
+  # CASUAL = no ELO changes, COMPETITIVE = ELO changes, BOTH = queue accepts both
+  default-mode: BOTH
+  # Competitive requires this many wins to unlock
+  competitive-min-wins: 15
 
 season:
   current-season: 1
@@ -239,51 +226,33 @@ rulesets: {}
 
 ranks:
   order:
-    - redstone
-    - ruby
     - copper
     - iron
     - gold
     - diamond
     - netherite
-    - elite
-  redstone:
-    color: "&4"
-    elo-iii: 675
-    elo-ii: 750
-    elo-i: 825
-  ruby:
-    color: "&c"
-    elo-iii: 900
-    elo-ii: 975
-    elo-i: 1050
   copper:
     color: "&6"
-    elo-iii: 1125
-    elo-ii: 1200
-    elo-i: 1275
+    elo-iii: 800
+    elo-ii: 900
+    elo-i: 1000
   iron:
-    color: "&7"
-    elo-iii: 1350
-    elo-ii: 1425
-    elo-i: 1500
+    color: "&f"
+    elo-iii: 1100
+    elo-ii: 1200
+    elo-i: 1300
   gold:
     color: "&e"
-    elo-iii: 1575
-    elo-ii: 1650
-    elo-i: 1725
+    elo-iii: 1400
+    elo-ii: 1500
+    elo-i: 1600
   diamond:
     color: "&b"
-    elo-iii: 1800
-    elo-ii: 1875
-    elo-i: 1950
+    elo-iii: 1700
+    elo-ii: 1800
+    elo-i: 1900
   netherite:
     color: "&8"
-    elo-iii: 2025
+    elo-iii: 2000
     elo-ii: 2100
-    elo-i: 2175
-  elite:
-    color: "&d"
-    elo-iii: 2250
-    elo-ii: 2325
-    elo-i: 2400
+    elo-i: 2200

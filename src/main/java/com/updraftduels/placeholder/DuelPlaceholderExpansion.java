@@ -107,6 +107,9 @@ public class DuelPlaceholderExpansion extends PlaceholderExpansion {
                 if (info.isMaxed()) yield "MAXED";
                 yield plugin.getRankManager().getProgressBar(info.getMatchesIntoDivision(), info.getMatchesNeeded());
             }
+            case "divisionelo" -> {
+                yield plugin.getRankManager().getDivisionElo(stats.getElo());
+            }
             case "duel_duration" -> {
                 Duel duel = plugin.getDuelManager().getDuelOf(uuid);
                 if (duel != null) yield duel.getFormattedDuration();

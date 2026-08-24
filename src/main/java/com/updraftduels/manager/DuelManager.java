@@ -1018,9 +1018,12 @@ public class DuelManager {
             if (plugin.isAutoRequeue(uuid) && player.isOnline() && duel.getType() == DuelType.SOLO) {
                 String kitName = duel.getRulesetId();
                 boolean ranked = duel.isRanked();
+                com.updraftduels.manager.QueueManager.MatchmakingMode mode = ranked
+                        ? com.updraftduels.manager.QueueManager.MatchmakingMode.COMPETITIVE
+                        : com.updraftduels.manager.QueueManager.MatchmakingMode.CASUAL;
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
                     if (player.isOnline() && !isInDuel(uuid) && !plugin.getQueueManager().isInQueue(uuid)) {
-                        plugin.getQueueManager().joinGamemodeQueue(uuid, kitName, ranked);
+                        plugin.getQueueManager().joinGamemodeQueue(uuid, kitName, mode);
                         player.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix("&aAuto-requeued for &f" + kitName + "&a."));
                     }
                 }, 20L);

@@ -74,7 +74,9 @@ public class GUIManager {
     public static final String DUEL_KIT_TITLE = "Select a Kit";
     public static final String DUEL_ROUNDS_TITLE = "Select Rounds";
     public static final String QUEUE_TITLE = "Queue";
-    public static final String RANKED_QUEUE_TITLE = "Ranked Queue";
+    public static final String CASUAL_QUEUE_TITLE = "Casual Queue";
+    public static final String COMPETITIVE_QUEUE_TITLE = "Competitive Queue";
+    public static final String BOTH_QUEUE_TITLE = "Queue";
     public static final String VOTE_TITLE = "Vote for Arena";
 
     private static final Material[] VOTE_WOOL = {
@@ -354,16 +356,28 @@ public class GUIManager {
     }
 
     public void openQueueGUI(Player player) {
-        player.openInventory(buildQueueGUI(player, false));
+        player.openInventory(buildQueueGUI(player, QueueManager.MatchmakingMode.BOTH));
+    }
+
+    public void openCasualQueueGUI(Player player) {
+        player.openInventory(buildQueueGUI(player, QueueManager.MatchmakingMode.CASUAL));
+    }
+
+    public void openCompetitiveQueueGUI(Player player) {
+        player.openInventory(buildQueueGUI(player, QueueManager.MatchmakingMode.COMPETITIVE));
     }
 
     public void openRankedQueueGUI(Player player) {
-        player.openInventory(buildQueueGUI(player, true));
+        openCompetitiveQueueGUI(player);
     }
 
-    private Inventory buildQueueGUI(Player player, boolean ranked) {
-        Inventory gui = Bukkit.createInventory(null, 27,
-                ColorUtil.colorize(ranked ? RANKED_QUEUE_TITLE : QUEUE_TITLE));
+    private Inventory buildQueueGUI(Player player, QueueManager.MatchmakingMode mode) {
+        String title = switch (mode) {
+            case CASUAL -> CASUAL_QUEUE_TITLE;
+            case COMPETITIVE -> COMPETITIVE_QUEUE_TITLE;
+            case BOTH -> BOTH_QUEUE_TITLE;
+        };
+        Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(title));
 
         FileConfiguration config = getGamemodesConfig();
         int slot = 0;
@@ -561,11 +575,18 @@ public class GUIManager {
     public void openSettingsGUI(Player player) {
         Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(SETTINGS_TITLE));
 
-        boolean ranked = plugin.getQueueManager().isRankedMode(player.getUniqueId());
-        gui.setItem(10, new ItemBuilder(ranked ? Material.NETHERITE_INGOT : Material.GOLD_INGOT)
-                .name("&6Queue Mode: " + (ranked ? "Ranked" : "Unranked"))
+        QueueManager.MatchmakingMode mode = plugin.getQueueManager().getMatchmakingMode(player.getUniqueId());
+        String modeName = switch (mode) {
+            case CASUAL -> "&7Casual";
+            case COMPETITIVE -> "&6Competitive";
+            case BOTH -> "&bBoth";
+        };
+        gui.setItem(10, new ItemBuilder(mode == QueueManager.MatchmakingMode.COMPETITIVE ? Material.NETHERITE_INGOT : Material.GOLD_INGOT)
+                .name("&6Matchmaking: " + modeName)
                 .lore("",
-                        "&7" + (ranked ? "You fight for ELO & rewards" : "Casual matches, no ELO"))
+                        "&7Casual: No ELO changes",
+                        "&7Competitive: ELO on the line",
+                        "&7Both: Queue accepts all modes")
                 .build());
 
         boolean autoGG = plugin.isAutoGG(player.getUniqueId());

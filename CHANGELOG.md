@@ -8,6 +8,31 @@ handled by `release.yml`.
 
 ## Unreleased
 
+## [3.1.0] - 2026-08-24
+
+### Added
+- **Matchmaking system**: Three modes — Casual (no ELO), Competitive (ELO on the line, 15+ wins required), and Both.
+  - `/queue casual`, `/queue competitive`, `/queue both` to set default mode.
+  - `/queue <kit> casual|competitive|both` to join with a specific mode.
+  - Settings GUI cycles through all three modes on click.
+  - Queue GUI separated into Casual Queue, Competitive Queue, and Both Queue.
+- **Rank system overhaul**: Copper III (800 ELO) through Netherite III (2200 ELO) with Minecraft game colors.
+  - Copper `&6`, Iron `&f`, Gold `&e`, Diamond `&b`, Netherite `&8`.
+  - 5 tiers x 3 levels = 15 total ranks.
+- **Nametag rank display**: Player nametags now show their colored rank prefix via scoreboard teams.
+- **New placeholders**:
+  - `%updraftduels_divisionelo%` — formatted rank + ELO, e.g. `&6Copper III &7(1050)`.
+  - `%updraftduels_rank%` — rank name without color.
+  - `%updraftduels_coloredrank%` — rank with color codes.
+- Scoreboard now supports `%rank%`, `%coloredrank%`, `%divisionelo%` placeholders.
+
+### Fixed
+- Cosmetics now save on player disconnect instead of only on plugin shutdown.
+
+### Changed
+- Divisions updated to match new ranks: Copper, Iron, Gold, Diamond, Netherite with matching materials.
+- Legacy `ranked`/`unranked` commands still work as aliases for `competitive`/`casual`.
+
 ## [3.0.1] - 2026-08-16
 
 ### Fixed

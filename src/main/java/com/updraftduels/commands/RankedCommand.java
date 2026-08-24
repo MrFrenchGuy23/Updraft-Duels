@@ -34,7 +34,7 @@ public class RankedCommand implements CommandExecutor {
             sender.sendMessage("Players only.");
             return true;
         }
-        plugin.getGuiManager().openRankedQueueGUI(player);
+        plugin.getGuiManager().openCompetitiveQueueGUI(player);
         return true;
     }
 }

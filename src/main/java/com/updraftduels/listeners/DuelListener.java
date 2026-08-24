@@ -36,6 +36,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -183,7 +184,13 @@ public class DuelListener implements Listener {
         plugin.clearPlayerSettings(uuid);
         plugin.getFriendManager().removeFromCache(uuid);
         plugin.getHistoryManager().clearPlayer(uuid);
+        plugin.getNametagManager().onPlayerQuit(player);
         lastArenaWarning.remove(uuid);
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        plugin.getNametagManager().onPlayerJoin(event.getPlayer());
     }
 
     @EventHandler

@@ -18,6 +18,7 @@
 package com.updraftduels.commands;
 
 import com.updraftduels.UpdraftDuels;
+import com.updraftduels.manager.QueueManager;
 import com.updraftduels.model.Arena;
 import com.updraftduels.model.Kit;
 import com.updraftduels.util.ColorUtil;
@@ -58,18 +59,39 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
 
         switch (args[0].toLowerCase()) {
             case "leave" -> handleLeave(player);
+            case "casual" -> {
+                if (args.length == 1) {
+                    handleMatchmakingMode(player, QueueManager.MatchmakingMode.CASUAL);
+                } else {
+                    joinGamemode(player, args[1], QueueManager.MatchmakingMode.CASUAL);
+                }
+            }
+            case "competitive" -> {
+                if (args.length == 1) {
+                    handleMatchmakingMode(player, QueueManager.MatchmakingMode.COMPETITIVE);
+                } else {
+                    joinGamemode(player, args[1], QueueManager.MatchmakingMode.COMPETITIVE);
+                }
+            }
+            case "both" -> {
+                if (args.length == 1) {
+                    handleMatchmakingMode(player, QueueManager.MatchmakingMode.BOTH);
+                } else {
+                    joinGamemode(player, args[1], QueueManager.MatchmakingMode.BOTH);
+                }
+            }
             case "ranked" -> {
                 if (args.length == 1) {
-                    handleRanked(player);
+                    handleMatchmakingMode(player, QueueManager.MatchmakingMode.COMPETITIVE);
                 } else {
-                    joinGamemode(player, args[0], true);
+                    joinGamemode(player, args[1], QueueManager.MatchmakingMode.COMPETITIVE);
                 }
             }
             case "unranked" -> {
                 if (args.length == 1) {
-                    handleUnranked(player);
+                    handleMatchmakingMode(player, QueueManager.MatchmakingMode.CASUAL);
                 } else {
-                    joinGamemode(player, args[0], false);
+                    joinGamemode(player, args[1], QueueManager.MatchmakingMode.CASUAL);
                 }
             }
             case "add" -> handleAddGamemode(player, args);
@@ -78,16 +100,28 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
             case "join" -> handleJoin(player, args);
             case "info" -> handleInfo(player, args);
             default -> {
-                if (args.length >= 2 && !args[1].equalsIgnoreCase("ranked") && !args[1].equalsIgnoreCase("unranked")) {
-                    sendHelp(player);
-                    return true;
+                if (args.length >= 2) {
+                    QueueManager.MatchmakingMode mode = parseMode(args[1]);
+                    if (mode != null) {
+                        joinGamemode(player, args[0], mode);
+                    } else {
+                        sendHelp(player);
+                    }
+                } else {
+                    joinGamemode(player, args[0], plugin.getQueueManager().getMatchmakingMode(player.getUniqueId()));
                 }
-                boolean ranked = args.length >= 2 ? args[1].equalsIgnoreCase("ranked")
-                        : plugin.getQueueManager().isRankedMode(player.getUniqueId());
-                joinGamemode(player, args[0], ranked);
             }
         }
         return true;
+    }
+
+    private QueueManager.MatchmakingMode parseMode(String input) {
+        return switch (input.toLowerCase()) {
+            case "casual", "unranked" -> QueueManager.MatchmakingMode.CASUAL;
+            case "competitive", "ranked" -> QueueManager.MatchmakingMode.COMPETITIVE;
+            case "both" -> QueueManager.MatchmakingMode.BOTH;
+            default -> null;
+        };
     }
 
     private void handleLeave(Player player) {
@@ -98,25 +132,17 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    private void handleUnranked(Player player) {
-        plugin.getQueueManager().setRankedMode(player.getUniqueId(), false);
-        player.sendMessage(ColorUtil.colorizePrefix("&7Queue mode set to &7Unranked"));
+    private void handleMatchmakingMode(Player player, QueueManager.MatchmakingMode mode) {
+        plugin.getQueueManager().setMatchmakingMode(player.getUniqueId(), mode);
+        String color = switch (mode) {
+            case CASUAL -> "&7Casual";
+            case COMPETITIVE -> "&6Competitive";
+            case BOTH -> "&bBoth";
+        };
+        player.sendMessage(ColorUtil.colorizePrefix("&7Matchmaking mode set to " + color));
     }
 
-    private void handleRanked(Player player) {
-        boolean ranked = !plugin.getQueueManager().isRankedMode(player.getUniqueId());
-        if (ranked) {
-            plugin.requireWins(player, 15, () -> {
-                plugin.getQueueManager().setRankedMode(player.getUniqueId(), true);
-                player.sendMessage(ColorUtil.colorizePrefix("&7Queue mode set to &6Ranked"));
-            });
-        } else {
-            plugin.getQueueManager().setRankedMode(player.getUniqueId(), false);
-            player.sendMessage(ColorUtil.colorizePrefix("&7Queue mode set to &7Unranked"));
-        }
-    }
-
-    public void joinGamemode(Player player, String name, boolean ranked) {
+    public void joinGamemode(Player player, String name, QueueManager.MatchmakingMode mode) {
         if (plugin.getDuelManager().isInDuel(player.getUniqueId())) {
             player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("duel.already-in-duel")));
             return;
@@ -128,14 +154,14 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
 
         String kitName = resolveKitName(name);
         Runnable join = () -> {
-            if (plugin.getQueueManager().joinGamemodeQueue(player.getUniqueId(), kitName, ranked)) {
+            if (plugin.getQueueManager().joinGamemodeQueue(player.getUniqueId(), kitName, mode)) {
                 player.sendMessage(plugin.getMessages().get("queue.joined-gamemode", "%gamemode_queue%", name));
             } else {
                 player.sendMessage(ColorUtil.colorizePrefix("&cPlease wait a moment before joining a queue."));
             }
         };
 
-        if (ranked) {
+        if (mode == QueueManager.MatchmakingMode.COMPETITIVE) {
             plugin.requireWins(player, 15, join);
         } else {
             join.run();
@@ -268,13 +294,14 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
 
     private void sendHelp(Player player) {
         player.sendMessage(ColorUtil.colorizePrefix("&fQueue Commands:"));
-        player.sendMessage(ColorUtil.colorizePrefix("&e/queue &7- Open the unranked queue GUI"));
-        player.sendMessage(ColorUtil.colorizePrefix("&e/ranked &7- Open the ranked queue GUI"));
-        player.sendMessage(ColorUtil.colorizePrefix("&e/queue <kit> &7- Join the queue for a kit/gamemode"));
-        player.sendMessage(ColorUtil.colorizePrefix("&e/queue <kit> ranked &7- Join the ranked queue (&c15+ wins required&7)"));
-        player.sendMessage(ColorUtil.colorizePrefix("&e/queue <kit> unranked &7- Join the unranked queue"));
-        player.sendMessage(ColorUtil.colorizePrefix("&e/queue ranked &7- Toggle ranked mode as default"));
-        player.sendMessage(ColorUtil.colorizePrefix("&e/queue unranked &7- Set unranked mode as default"));
+        player.sendMessage(ColorUtil.colorizePrefix("&e/queue &7- Open the queue GUI"));
+        player.sendMessage(ColorUtil.colorizePrefix("&e/queue <kit> &7- Join queue (uses current mode)"));
+        player.sendMessage(ColorUtil.colorizePrefix("&e/queue <kit> casual &7- Join casual queue"));
+        player.sendMessage(ColorUtil.colorizePrefix("&e/queue <kit> competitive &7- Join competitive queue (&c15+ wins required&7)"));
+        player.sendMessage(ColorUtil.colorizePrefix("&e/queue <kit> both &7- Join both queues"));
+        player.sendMessage(ColorUtil.colorizePrefix("&e/queue casual &7- Set casual mode as default"));
+        player.sendMessage(ColorUtil.colorizePrefix("&e/queue competitive &7- Set competitive mode as default"));
+        player.sendMessage(ColorUtil.colorizePrefix("&e/queue both &7- Set both modes as default"));
         player.sendMessage(ColorUtil.colorizePrefix("&e/queue leave &7- Leave the queue"));
         player.sendMessage(ColorUtil.colorizePrefix("&e/leave &7- Leave the queue"));
         player.sendMessage(ColorUtil.colorizePrefix("&e/queue add <name> <kit> <icon> &7- Add a gamemode (Admin)"));
@@ -290,7 +317,7 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player player)) return Collections.emptyList();
 
         if (args.length == 1) {
-            List<String> completions = new ArrayList<>(List.of("leave", "ranked", "unranked", "add", "remove", "create", "join", "info"));
+            List<String> completions = new ArrayList<>(List.of("leave", "casual", "competitive", "both", "ranked", "unranked", "add", "remove", "create", "join", "info"));
             FileConfiguration config = plugin.getExtraConfig("gamemodes.yml");
             if (config != null) {
                 completions.addAll(config.getKeys(false));
@@ -318,8 +345,8 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
                         .filter(n -> n.toLowerCase().startsWith(args[1].toLowerCase()))
                         .collect(Collectors.toList());
             }
-            if (!List.of("leave", "ranked", "unranked", "add", "remove").contains(args[0].toLowerCase())) {
-                return filter(List.of("ranked", "unranked"), args[1]);
+            if (!List.of("leave", "casual", "competitive", "both", "ranked", "unranked", "add", "remove").contains(args[0].toLowerCase())) {
+                return filter(List.of("casual", "competitive", "both"), args[1]);
             }
         }
         if (args.length == 4 && args[0].equalsIgnoreCase("add")) {
