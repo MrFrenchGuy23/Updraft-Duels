@@ -70,7 +70,7 @@ public class NametagManager {
             team.addEntry(entry);
         }
 
-        String colorPrefix = com.updraftduels.util.ColorUtil.colorize(prefix);
+        String colorPrefix = prefix;
         team.prefix(net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
                 .legacyAmpersand().deserialize(colorPrefix));
     }
