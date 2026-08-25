@@ -163,6 +163,7 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
                                 com.updraftduels.util.ColorUtil.colorize(
                                         plugin.getMessages().getRaw("queue.joined-gamemode").replace("%gamemode_queue%", name)
                                                 + " &7| &e/leave &7to leave queue")));
+                player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENDER_CHEST_OPEN, 0.6f, 1.3f);
             } else {
                 player.sendMessage(ColorUtil.colorizePrefix("&cPlease wait a moment before joining a queue."));
             }
@@ -292,6 +293,7 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
                             com.updraftduels.util.ColorUtil.colorize(
                                     plugin.getMessages().getRaw("queue.joined").replace("%arena%", args[1])
                                             + " &7| &e/leave &7to leave queue")));
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENDER_CHEST_OPEN, 0.6f, 1.3f);
         } else {
             player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.queue-full")));
         }

@@ -594,6 +594,14 @@ public class DuelManager {
             int remaining = pendingCountdowns.getOrDefault(duel.getId(), 0);
             if (remaining <= 0) {
                 task.cancel();
+                for (UUID uuid : duel.getAllParticipants()) {
+                    Player p = Bukkit.getPlayer(uuid);
+                    if (p != null) {
+                        p.playSound(p.getLocation(), org.bukkit.Sound.ENTITY_ENDER_DRAGON_GROWL, 0.5f, 1.5f);
+                        p.playSound(p.getLocation(), org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.8f, 1.2f);
+                        p.playSound(p.getLocation(), org.bukkit.Sound.BLOCK_ENDER_EYE_DEACTIVATE, 0.6f, 1.0f);
+                    }
+                }
                 beginDuel(duel, arena, ruleset, rtpMode);
                 return;
             }
@@ -609,6 +617,10 @@ public class DuelManager {
                     String skipLine = ChatColor.GRAY + "Shift to skip " + ChatColor.GREEN + ready + ChatColor.GRAY + "/" + needed;
                     player.sendTitle(ChatColor.AQUA + "Starting in " + ChatColor.RED + remaining,
                             skipLine, 0, 25, 0);
+
+                    float pitch = remaining == 3 ? 0.8f : remaining == 2 ? 1.0f : 1.2f;
+                    player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_STONE_BUTTON_CLICK_ON, 0.7f, pitch);
+                    player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENDER_EYE_DEACTIVATE, 0.3f, pitch);
                 }
             }
 
@@ -739,6 +751,8 @@ public class DuelManager {
                 String opponentName = getOpponentName(duel, uuid);
                 activeDuelContext.put(uuid, opponentName);
                 player.sendTitle(ChatColor.AQUA + "Duel Started", ChatColor.GREEN + "Good luck!", 10, 40, 10);
+                player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENDER_EYE_DEACTIVATE, 0.7f, 1.0f);
+                player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, 1.5f);
                 String startMsg = plugin.getMessages().get("duel.duel-started");
                 player.sendMessage(startMsg);
             }
@@ -976,6 +990,9 @@ public class DuelManager {
                 player.sendTitle(com.updraftduels.util.ColorUtil.colorize("&2&lVICTORY"),
                         com.updraftduels.util.ColorUtil.colorize("&a" + titleWinnerName + " won the match"), 10, 60, 10);
                 player.playSound(player.getLocation(), org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+                player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 0.8f, 1.2f);
+                player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EVOKER_CAST_SPELL, 0.5f, 1.5f);
+                player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.4f, 1.8f);
             } else if (isDraw) {
                 player.sendMessage(com.updraftduels.util.ColorUtil.colorize(plugin.getMessages().get("duel.draw")));
             } else {
@@ -988,6 +1005,9 @@ public class DuelManager {
                 player.sendTitle(com.updraftduels.util.ColorUtil.colorize("&c&lDEFEAT"),
                         com.updraftduels.util.ColorUtil.colorize("&7" + titleWinnerName + " won the match"), 10, 60, 10);
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_ITEM_BREAK, 1.0f, 1.0f);
+                player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ANVIL_LAND, 0.6f, 0.7f);
+                player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_WITHER_HURT, 0.5f, 0.8f);
+                player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_GLASS_BREAK, 0.4f, 0.6f);
             }
 
             if (plugin.isAutoGG(uuid)) {
@@ -1053,6 +1073,8 @@ public class DuelManager {
                             player.sendMessage(com.updraftduels.util.ColorUtil.colorizePrefix(
                                     "&bYou advanced to the " + newDivisionInfo.getColor() + newDivisionInfo.getName() + " &bdivision"));
                             player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.5f);
+                            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENDER_EYE_DEACTIVATE, 0.8f, 1.3f);
+                            player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EVOKER_CAST_SPELL, 0.6f, 1.5f);
                         }
 
                         var divisionInfo = plugin.getRankManager().getDivision(newMatches);
@@ -1413,6 +1435,8 @@ public class DuelManager {
                 plugin.getScoreboardManager().removeScoreboard(player);
                 player.closeInventory();
                 player.sendTitle(ChatColor.DARK_RED + "Duel Cancelled", "", 10, 40, 10);
+                player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ANVIL_LAND, 0.5f, 0.8f);
+                player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 0.4f, 1.0f);
             } else {
                 saveOfflineRestore(duel, uuid);
             }

@@ -143,7 +143,10 @@ public class CosmeticsManager {
         switch (animation.toLowerCase()) {
             case "firework_show" -> {
                 for (int i = 0; i < 5; i++) {
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> spawnFirework(location), i * 10L);
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        spawnFirework(location);
+                        location.getWorld().playSound(location, Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 0.8f, 1.2f);
+                    }, i * 10L);
                 }
             }
             case "lightning_rain" -> {
@@ -151,7 +154,10 @@ public class CosmeticsManager {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         double x = location.getX() + (Math.random() - 0.5) * 10;
                         double z = location.getZ() + (Math.random() - 0.5) * 10;
-                        world.strikeLightningEffect(new Location(world, x, location.getY(), z));
+                        Location strikeLoc = new Location(world, x, location.getY(), z);
+                        world.strikeLightningEffect(strikeLoc);
+                        world.playSound(strikeLoc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 0.9f);
+                        world.playSound(strikeLoc, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 0.8f, 1.1f);
                     }, i * 15L);
                 }
             }
@@ -160,12 +166,14 @@ public class CosmeticsManager {
                     double y = i * 0.5;
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         world.spawnParticle(Particle.FLAME, location.clone().add(0, y, 0), 10, 0.3, 0, 0.3, 0.05);
+                        if (i % 5 == 0) world.playSound(location, Sound.BLOCK_FIRE_AMBIENT, 0.4f, 1.5f);
                     }, i * 2L);
                 }
             }
             case "ender_dragon" -> {
                 world.spawnParticle(Particle.DRAGON_BREATH, location.clone().add(0, 1, 0), 200, 2, 2, 2, 0.1);
                 world.playSound(location, Sound.ENTITY_ENDER_DRAGON_GROWL, 2f, 1f);
+                world.playSound(location, Sound.ENTITY_ENDER_DRAGON_FLAP, 0.6f, 1.2f);
             }
             case "fireworks_ring" -> {
                 for (int i = 0; i < 8; i++) {
@@ -173,7 +181,10 @@ public class CosmeticsManager {
                     double x = location.getX() + Math.cos(angle) * 5;
                     double z = location.getZ() + Math.sin(angle) * 5;
                     Location fwLoc = new Location(location.getWorld(), x, location.getY() + 3, z);
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> spawnFirework(fwLoc), i * 5L);
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                        spawnFirework(fwLoc);
+                        world.playSound(fwLoc, Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 0.6f, 1.0f + (float)(Math.random() * 0.5));
+                    }, i * 5L);
                 }
             }
         }
@@ -187,9 +198,10 @@ public class CosmeticsManager {
         world.spawnParticle(Particle.SMOKE, origin, 40, 0.5, 1.0, 0.5, 0.05);
         world.spawnParticle(Particle.ASH, origin, 30, 0.4, 0.8, 0.4, 0.02);
         world.spawnParticle(Particle.SOUL_FIRE_FLAME, origin, 15, 0.3, 0.6, 0.3, 0.03);
-        world.playSound(location, Sound.ENTITY_VILLAGER_NO, 1.0f, 0.8f);
-        world.playSound(location, Sound.ENTITY_WITHER_HURT, 0.8f, 0.6f);
-        world.playSound(location, Sound.BLOCK_ANVIL_LAND, 0.5f, 1.5f);
+        world.playSound(location, Sound.ENTITY_WITHER_HURT, 1.0f, 0.5f);
+        world.playSound(location, Sound.BLOCK_ANVIL_LAND, 0.8f, 0.6f);
+        world.playSound(location, Sound.BLOCK_GLASS_BREAK, 0.5f, 0.7f);
+        world.playSound(location, Sound.ENTITY_VILLAGER_NO, 0.4f, 0.8f);
     }
 
     public void startLobbyTrailTask() {

@@ -475,6 +475,8 @@ public class DuelListener implements Listener {
                                         .replace("%kills%", String.valueOf(totalKills))),
                         10, 60, 20);
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.5f);
+                player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EVOKER_CAST_SPELL, 0.6f, 1.3f);
+                player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENCHANTMENT_TABLE_USE, 0.5f, 1.6f);
                 break;
             }
         }

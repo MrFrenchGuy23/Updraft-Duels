@@ -54,6 +54,7 @@ public class RTPQueueCommand implements CommandExecutor {
                             com.updraftduels.util.ColorUtil.colorize(
                                     plugin.getMessages().get("queue.rtp-joined")
                                             + " &7| &e/leave &7to leave queue")));
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENDER_CHEST_OPEN, 0.6f, 1.3f);
         } else {
             player.sendMessage(ColorUtil.colorizePrefix("&cPlease wait a moment before joining a queue."));
         }

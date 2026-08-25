@@ -450,6 +450,9 @@ public class QueueManager {
         int fadeOut = plugin.getConfig().getInt("titles.match-found.fade-out", 10);
         player.sendTitle(com.updraftduels.util.ColorUtil.colorize(title),
                 com.updraftduels.util.ColorUtil.colorize(subtitle), fadeIn, stay, fadeOut);
+        player.playSound(player.getLocation(), org.bukkit.Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
+        player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.7f, 1.2f);
+        player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.5f, 1.5f);
     }
 
     public int getQueueSize(String arenaName) {

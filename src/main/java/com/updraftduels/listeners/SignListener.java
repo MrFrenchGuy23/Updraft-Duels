@@ -111,6 +111,7 @@ public class SignListener implements Listener {
                                 com.updraftduels.util.ColorUtil.colorize(
                                         plugin.getMessages().get("queue.rtp-joined")
                                                 + " &7| &e/leave &7to leave queue")));
+                player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENDER_CHEST_OPEN, 0.6f, 1.3f);
                 updateSignCount(block, sign, plugin.getQueueManager().getRTPQueueSize());
             }
             case "arena" -> {
@@ -132,6 +133,7 @@ public class SignListener implements Listener {
                                     com.updraftduels.util.ColorUtil.colorize(
                                             plugin.getMessages().get("queue.joined", "%arena%", line2)
                                                     + " &7| &e/leave &7to leave queue")));
+                    player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENDER_CHEST_OPEN, 0.6f, 1.3f);
                 } else {
                     player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.queue-full")));
                 }

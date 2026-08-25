@@ -57,6 +57,10 @@ public class GUIListener implements Listener {
         this.plugin = plugin;
     }
 
+    private void playClickSound(Player player) {
+        player.playSound(player.getLocation(), org.bukkit.Sound.UI_BUTTON_CLICK, 0.5f, 1.2f);
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
@@ -72,6 +76,12 @@ public class GUIListener implements Listener {
             event.setCancelled(true);
             plugin.getPartyManager().executePartyItem(player, event.getCurrentItem());
             return;
+        }
+
+        if (event.getClickedInventory() != null
+                && event.getClickedInventory() != player.getInventory()
+                && event.getClickedInventory().getType() != org.bukkit.event.inventory.InventoryType.CRAFTING) {
+            playClickSound(player);
         }
 
         String title = event.getView().getTitle();
@@ -423,7 +433,8 @@ public class GUIListener implements Listener {
             if (online.getUniqueId().equals(player.getUniqueId())) continue;
             if (!plugin.isChatMentions(online.getUniqueId())) continue;
             if (message.toLowerCase().contains("@" + online.getName().toLowerCase())) {
-                online.playSound(online.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
+                online.playSound(online.getLocation(), org.bukkit.Sound.BLOCK_AMETHYST_BLOCK_CHIME, 0.8f, 1.5f);
+                online.playSound(online.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.6f, 1.8f);
                 online.sendMessage(ColorUtil.colorize(
                         "&e&lMention &7by &f" + player.getName() + "&7: &f" + message));
             }
