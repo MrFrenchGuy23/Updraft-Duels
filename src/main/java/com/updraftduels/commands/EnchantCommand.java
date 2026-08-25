@@ -68,7 +68,7 @@ public class EnchantCommand implements CommandExecutor, TabCompleter {
 
         item.addUnsafeEnchantment(enchantment, level);
         player.sendMessage(plugin.getMessages().get("enchant.success",
-                "%enchantment%", enchantment.getName(),
+                "%enchantment%", enchantment.getKey().getKey(),
                 "%level%", String.valueOf(level)));
         return true;
     }

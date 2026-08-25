@@ -158,7 +158,7 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
                 player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
                         new net.md_5.bungee.api.chat.TextComponent(
                                 com.updraftduels.util.ColorUtil.colorize(
-                                        plugin.getMessages().getRaw("queue.joined-gamemode", "%gamemode_queue%", name)
+                                        plugin.getMessages().getRaw("queue.joined-gamemode").replace("%gamemode_queue%", name)
                                                 + " &7| &e/leave &7to leave queue")));
             } else {
                 player.sendMessage(ColorUtil.colorizePrefix("&cPlease wait a moment before joining a queue."));
@@ -284,7 +284,7 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
             player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
                     new net.md_5.bungee.api.chat.TextComponent(
                             com.updraftduels.util.ColorUtil.colorize(
-                                    plugin.getMessages().getRaw("queue.joined", "%arena%", args[1])
+                                    plugin.getMessages().getRaw("queue.joined").replace("%arena%", args[1])
                                             + " &7| &e/leave &7to leave queue")));
         } else {
             player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.queue-full")));
