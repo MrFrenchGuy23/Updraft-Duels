@@ -354,11 +354,21 @@ public class GUIManager {
                 Material material = Material.matchMaterial(icon);
                 if (material == null) material = Material.CHEST;
 
-                gui.setItem(slot++, new ItemBuilder(material)
+                int queueSize = plugin.getQueueManager().getGamemodeQueueSize(gamemode);
+                int fightingCount = plugin.getQueueManager().getGamemodeFightingCount(gamemode);
+                boolean isActive = queueSize > 0 || fightingCount > 0;
+
+                ItemBuilder builder = new ItemBuilder(material)
                         .name("&f" + gamemode)
                         .lore(buildQueueLore(gamemode))
-                        .hideVanillaLore()
-                        .build());
+                        .hideVanillaLore();
+
+                if (isActive) {
+                    builder.enchant(org.bukkit.enchantments.Enchantment.SHARPNESS, 1);
+                    builder.amount(Math.max(1, queueSize));
+                }
+
+                gui.setItem(slot++, builder.build());
             }
         }
 

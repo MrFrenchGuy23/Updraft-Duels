@@ -55,6 +55,21 @@ public class RTPQueueCommand implements CommandExecutor {
                                     plugin.getMessages().get("queue.rtp-joined")
                                             + " &7| &e/leave &7to leave queue")));
             player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_ENDER_CHEST_OPEN, 0.6f, 1.3f);
+
+            net.md_5.bungee.api.chat.TextComponent msg = new net.md_5.bungee.api.chat.TextComponent(
+                    com.updraftduels.util.ColorUtil.colorize(
+                            "&b&l" + player.getName() + " &7is queueing in &b&lRTP Queue &7click to fight him!"));
+            net.md_5.bungee.api.chat.ClickEvent clickEvent = new net.md_5.bungee.api.chat.ClickEvent(
+                    net.md_5.bungee.api.chat.ClickEvent.Action.RUN_COMMAND, "/rtpqueue");
+            net.md_5.bungee.api.chat.HoverEvent hoverEvent = new net.md_5.bungee.api.chat.HoverEvent(
+                    net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT,
+                    new net.md_5.bungee.api.chat.TextComponent(com.updraftduels.util.ColorUtil.colorize("&eClick to join the RTP Queue!")));
+            msg.setClickEvent(clickEvent);
+            msg.setHoverEvent(hoverEvent);
+
+            for (org.bukkit.entity.Player online : org.bukkit.Bukkit.getOnlinePlayers()) {
+                online.spigot().sendMessage(msg);
+            }
         } else {
             player.sendMessage(ColorUtil.colorizePrefix("&cPlease wait a moment before joining a queue."));
         }
