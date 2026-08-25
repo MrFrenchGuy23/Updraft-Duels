@@ -75,6 +75,13 @@ public class CosmeticsManager {
     }
     public String getDeathMessage(UUID uuid) { return selectedDeathMessage.getOrDefault(uuid, "default"); }
 
+    public void onPlayerDisconnect(UUID uuid) {
+        selectedKillEffect.remove(uuid);
+        selectedVictoryAnimation.remove(uuid);
+        selectedTrail.remove(uuid);
+        selectedDeathMessage.remove(uuid);
+    }
+
     public List<String> getAvailableKillEffects() {
         return List.of("none", "lightning", "firework", "explosion", "soul", "blood", "electric");
     }

@@ -86,6 +86,7 @@ public class KitCommand implements CommandExecutor, TabCompleter {
             case "create" -> handleCreate(player, args);
             case "edit", "editor" -> handleEdit(player, args);
             case "delete" -> handleDelete(player, args);
+            case "reset" -> handleReset(player, args);
             case "list" -> handleList(player);
             default -> sendHelp(player);
         }
@@ -178,6 +179,31 @@ public class KitCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("kit.deleted", "%name%", args[1])));
     }
 
+    private void handleReset(Player player, String[] args) {
+        if (args.length < 2) {
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("general.usage", "%usage%", "/kit reset <name>")));
+            return;
+        }
+        Kit kit = plugin.getKitManager().getKit(args[1]);
+        if (kit == null) {
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("kit.not-found", "%name%", args[1])));
+            return;
+        }
+        if (kit.isPublic()) {
+            if (!player.hasPermission("updraftduels.kit.managepublic") && !kit.getOwnerUUID().equals(player.getUniqueId())) {
+                player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("kit.no-access")));
+                return;
+            }
+        } else if (!kit.getOwnerUUID().equals(player.getUniqueId())) {
+            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("kit.no-access")));
+            return;
+        }
+        kit.setContents(null);
+        kit.setArmorContents(null);
+        plugin.getKitManager().saveKit(kit);
+        player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("kit.reset", "%name%", args[1])));
+    }
+
     private void handleList(Player player) {
         List<Kit> publicKits = plugin.getKitManager().getPublicKits();
         List<Kit> personalKits = plugin.getKitManager().getPersonalKits(player.getUniqueId());
@@ -202,6 +228,7 @@ public class KitCommand implements CommandExecutor, TabCompleter {
         player.sendMessage(ColorUtil.colorizePrefix("&e/kit edit <name> &7- Open the kit editor"));
         player.sendMessage(ColorUtil.colorizePrefix("&e/kit editor <name> &7- Open the kit editor"));
         player.sendMessage(ColorUtil.colorizePrefix("&e/kit delete <name> &7- Delete a kit"));
+        player.sendMessage(ColorUtil.colorizePrefix("&e/kit reset <name> &7- Reset a kit's contents"));
         player.sendMessage(ColorUtil.colorizePrefix("&e/pk create|edit|delete <name> &7- Manage public kits"));
         player.sendMessage(ColorUtil.colorizePrefix("&e/kit list &7- List all kits"));
     }
@@ -211,7 +238,7 @@ public class KitCommand implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player player)) return Collections.emptyList();
 
         if (args.length == 1) {
-            List<String> completions = new ArrayList<>(List.of("room", "gui", "create", "edit", "editor", "delete", "list"));
+            List<String> completions = new ArrayList<>(List.of("room", "gui", "create", "edit", "editor", "delete", "reset", "list"));
             for (int i = 1; i <= 9; i++) completions.add("k" + i);
             return filter(completions, args[0]);
         }

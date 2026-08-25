@@ -94,6 +94,8 @@ public class DuelPlayerStats {
 
     public void incrementKills() { this.kills++; }
 
+    public void incrementDeaths() { this.deaths++; }
+
     public void incrementGamesPlayed() { this.gamesPlayed++; }
 
     public void updateRankTier() {

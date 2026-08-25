@@ -70,6 +70,7 @@ public class UpdraftDuels extends JavaPlugin {
     private GateManager gateManager;
     private NametagManager nametagManager;
     private MessageManager messages;
+    private TrainCommand trainCommand;
     private UpdateChecker updateChecker;
     private QueueCommand queueCommand;
     private PartyCommand partyCommand;
@@ -258,6 +259,17 @@ public class UpdraftDuels extends JavaPlugin {
         AnvilCommand anvilCmd = new AnvilCommand(this);
         getCommand("anvil").setExecutor(anvilCmd);
         getCommand("anvil").setTabCompleter(anvilCmd);
+
+        LeaveMatchCommand leaveMatchCmd = new LeaveMatchCommand(this);
+        getCommand("leavematch").setExecutor(leaveMatchCmd);
+
+        EnchantCommand enchantCmd = new EnchantCommand(this);
+        getCommand("enchant").setExecutor(enchantCmd);
+        getCommand("enchant").setTabCompleter(enchantCmd);
+
+        TrainCommand trainCmd = new TrainCommand(this);
+        this.trainCommand = trainCmd;
+        getCommand("train").setExecutor(trainCmd);
     }
 
     private void registerListeners() {
@@ -316,6 +328,7 @@ public class UpdraftDuels extends JavaPlugin {
     public GUIManager getGuiManager() { return guiManager; }
     public GateManager getGateManager() { return gateManager; }
     public MessageManager getMessages() { return messages; }
+    public TrainCommand getTrainCommand() { return trainCommand; }
     public CosmeticsManager getCosmeticsManager() { return cosmeticsManager; }
     public TournamentManager getTournamentManager() { return tournamentManager; }
     public SeasonManager getSeasonManager() { return seasonManager; }

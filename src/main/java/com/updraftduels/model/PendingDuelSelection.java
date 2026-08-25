@@ -25,6 +25,7 @@ public class PendingDuelSelection {
     private String kitName;
     private int rounds;
     private boolean awaitingChat;
+    private boolean personalKit;
 
     public PendingDuelSelection(UUID sender, UUID target) {
         this.sender = sender;
@@ -40,4 +41,6 @@ public class PendingDuelSelection {
     public void setRounds(int rounds) { this.rounds = rounds; }
     public boolean isAwaitingChat() { return awaitingChat; }
     public void setAwaitingChat(boolean awaitingChat) { this.awaitingChat = awaitingChat; }
+    public boolean isPersonalKit() { return personalKit; }
+    public void setPersonalKit(boolean personalKit) { this.personalKit = personalKit; }
 }

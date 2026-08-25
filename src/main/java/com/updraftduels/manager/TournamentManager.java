@@ -445,4 +445,15 @@ public class TournamentManager {
         while (power < n) power *= 2;
         return power;
     }
+
+    public void onPlayerDisconnect(UUID uuid) {
+        pendingFormatTournament.remove(uuid);
+        UUID tournamentId = playerTournament.remove(uuid);
+        if (tournamentId != null) {
+            Tournament t = tournaments.get(tournamentId);
+            if (t != null && t.getState() == Tournament.State.RECRUITING) {
+                t.getParticipants().remove(uuid);
+            }
+        }
+    }
 }

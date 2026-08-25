@@ -38,6 +38,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
@@ -51,6 +52,7 @@ import org.bukkit.potion.PotionEffectType;
 public class DuelListener implements Listener {
     private final UpdraftDuels plugin;
     private final Map<UUID, Long> lastArenaWarning;
+    private final Map<UUID, Long> maceCooldown = new ConcurrentHashMap<>();
 
     public DuelListener(UpdraftDuels plugin) {
         this.plugin = plugin;
@@ -67,6 +69,13 @@ public class DuelListener implements Listener {
         event.getDrops().clear();
         event.setDroppedExp(0);
         event.setDeathMessage(null);
+
+        plugin.getDatabase().getOrCreateStats(player.getUniqueId(), player.getName()).thenAccept(stats -> {
+            if (stats != null) {
+                stats.incrementDeaths();
+                plugin.getDatabase().saveStats(stats);
+            }
+        });
 
         Player killer = player.getKiller();
         String deathCause = resolveDeathCause(player);
@@ -91,6 +100,17 @@ public class DuelListener implements Listener {
             if (!trail.equals("none")) {
                 plugin.getCosmeticsManager().playTrail(killer, trail);
             }
+
+            plugin.getDatabase().getOrCreateStats(killer.getUniqueId(), killer.getName()).thenAccept(stats -> {
+                if (stats != null) {
+                    stats.incrementKills();
+                    plugin.getDatabase().saveStats(stats);
+                    int totalKills = stats.getKills();
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        checkKillMilestone(killer, totalKills);
+                    });
+                }
+            });
         }
 
         for (UUID uuid : duel.getAllParticipants()) {
@@ -107,6 +127,11 @@ public class DuelListener implements Listener {
     public void onPlayerDamage(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player damaged)) return;
 
+        if (plugin.getTrainCommand().isTraining(damaged.getUniqueId())) {
+            event.setCancelled(true);
+            return;
+        }
+
         Entity damagerEntity = event.getDamager();
         Player damager = null;
         if (damagerEntity instanceof Player) {
@@ -118,6 +143,19 @@ public class DuelListener implements Listener {
 
         Duel duel = plugin.getDuelManager().getDuelOf(damaged.getUniqueId());
         if (duel == null || duel.getState() != DuelState.IN_PROGRESS) return;
+
+        ItemStack damagerWeapon = damager.getInventory().getItemInMainHand();
+        if (damagerWeapon != null && damagerWeapon.getType() == Material.MACE) {
+            long now = System.currentTimeMillis();
+            Long last = maceCooldown.get(damager.getUniqueId());
+            if (last != null && now - last < 250) {
+                event.setCancelled(true);
+                return;
+            }
+            maceCooldown.put(damager.getUniqueId(), now);
+            double currentDamage = event.getDamage();
+            event.setDamage(Math.min(currentDamage, 20.0));
+        }
 
         Ruleset ruleset = plugin.getRulesetManager().getRuleset(duel.getRulesetId());
 
@@ -185,12 +223,24 @@ public class DuelListener implements Listener {
         plugin.getFriendManager().removeFromCache(uuid);
         plugin.getHistoryManager().clearPlayer(uuid);
         plugin.getNametagManager().onPlayerQuit(player);
+        plugin.getCosmeticsManager().onPlayerDisconnect(uuid);
+        plugin.getRulesetManager().onPlayerDisconnect(uuid);
+        plugin.getPartyManager().onPlayerDisconnect(uuid);
+        plugin.getTournamentManager().onPlayerDisconnect(uuid);
         lastArenaWarning.remove(uuid);
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         plugin.getNametagManager().onPlayerJoin(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onEntityDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (plugin.getTrainCommand().isTraining(player.getUniqueId())) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
@@ -206,6 +256,16 @@ public class DuelListener implements Listener {
             event.setCancelled(true);
             player.setFoodLevel(20);
             player.setSaturation(20f);
+            return;
+        }
+
+        if (event.getItem() != null) {
+            Material type = event.getItem().getType();
+            if (type.name().contains("GOLDEN_APPLE") || type == Material.ENCHANTED_GOLDEN_APPLE) {
+                event.setCancelled(false);
+                player.setFoodLevel(Math.min(20, player.getFoodLevel() + 4));
+                player.setSaturation(Math.min(20f, player.getSaturation() + 6f));
+            }
         }
     }
 
@@ -238,6 +298,13 @@ public class DuelListener implements Listener {
                     + " | arena=" + (arena == null ? "NOT_FOUND" : arena.getName() + " configured=" + arena.isConfigured()));
         }
         enforceArenaBoundary(event, player, arena, duel);
+    }
+
+    @EventHandler
+    public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
+        if (!event.isSneaking()) return;
+        Player player = event.getPlayer();
+        plugin.getDuelManager().onPlayerShiftDuringCountdown(player.getUniqueId());
     }
 
     private void enforceArenaBoundary(PlayerMoveEvent event, Player player, Arena arena, Duel duel) {
@@ -393,6 +460,24 @@ public class DuelListener implements Listener {
         if (type.name().contains("SPEAR")) return "spear";
         if (type == Material.MACE) return "mace";
         return type.name().toLowerCase();
+    }
+
+    private void checkKillMilestone(Player player, int totalKills) {
+        if (!plugin.getConfig().getBoolean("kill-milestones.enabled", true)) return;
+        java.util.List<Integer> intervals = plugin.getConfig().getIntegerList("kill-milestones.intervals");
+        if (intervals == null || intervals.isEmpty()) return;
+        for (int interval : intervals) {
+            if (totalKills == interval) {
+                player.sendTitle(
+                        com.updraftduels.util.ColorUtil.colorize(plugin.getMessages().getRaw("killmilestone.title")),
+                        com.updraftduels.util.ColorUtil.colorize(
+                                plugin.getMessages().getRaw("killmilestone.subtitle")
+                                        .replace("%kills%", String.valueOf(totalKills))),
+                        10, 60, 20);
+                player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.5f);
+                break;
+            }
+        }
     }
 
     private boolean duelDebug() {

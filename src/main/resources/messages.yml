@@ -273,3 +273,43 @@ update-checker:
   up-to-date: "&aUpdraftDuels is up to date (&f%current%&a)."
   check-failed: "&cCould not check for updates. The GitHub releases API is unreachable."
   player-available: "&aAn update is available for UpdraftDuels! &f%current% &7-> &f%latest% &7| &e%download%"
+
+# ===========================
+# Leave Match Messages
+# ===========================
+leavematch:
+  left: "&cYou forfeited the duel."
+  opponent-left: "&c%player% &cforfeited the duel."
+  not-in-duel: "&cYou are not in a duel."
+
+# ===========================
+# Enchant Command Messages
+# ===========================
+enchant:
+  success: "&aEnchanted held item with &f%enchantment% %level%&a."
+  no-item: "&cYou are not holding an item."
+  invalid-enchantment: "&cInvalid enchantment: &f%enchantment%&c."
+  invalid-level: "&cInvalid level: &f%level%&c."
+
+# ===========================
+# Train / Practice Messages
+# ===========================
+train:
+  enabled: "&aPractice mode enabled. You cannot take damage."
+  disabled: "&cPractice mode disabled."
+  teleporting: "&aTeleporting to practice arena..."
+  no-arena: "&cNo practice arena configured. Ask an admin to set &f/train-arena &cin config.yml."
+
+# ===========================
+# Kit Reset Messages
+# ===========================
+kit:
+  reset: "&aKit &f%name% &ahas been reset."
+  reset-confirm: "&7Type &f/kit reset %name% &7to confirm."
+
+# ===========================
+# Kill Milestone Messages
+# ===========================
+killmilestone:
+  title: "&cCongrats on the kills :D"
+  subtitle: "&7You reached &f%kills% &7kills!"

@@ -42,6 +42,7 @@ public class DuelManager {
     private final Map<UUID, String> activeDuelContext;
     private final Map<UUID, PendingDuelSelection> pendingDuelSelections;
     private final Map<UUID, OfflineRestoreState> offlineRestores;
+    private final Map<UUID, Set<UUID>> countdownSkipPlayers;
 
     public DuelManager(UpdraftDuels plugin) {
         this.plugin = plugin;
@@ -56,6 +57,7 @@ public class DuelManager {
         this.activeDuelContext = new ConcurrentHashMap<>();
         this.pendingDuelSelections = new ConcurrentHashMap<>();
         this.offlineRestores = new ConcurrentHashMap<>();
+        this.countdownSkipPlayers = new ConcurrentHashMap<>();
     }
 
     public void startDuelSelection(UUID sender, UUID target) {
@@ -173,8 +175,16 @@ public class DuelManager {
 
         request.setProcessed(true);
         pendingRequests.remove(requestId);
-        outgoingRequests.computeIfAbsent(request.getSenderUUID(), k -> new ArrayList<>()).remove(request);
-        incomingRequests.computeIfAbsent(request.getReceiverUUID(), k -> new ArrayList<>()).remove(request);
+        List<DuelRequest> outList = outgoingRequests.get(request.getSenderUUID());
+        if (outList != null) {
+            outList.remove(request);
+            if (outList.isEmpty()) outgoingRequests.remove(request.getSenderUUID());
+        }
+        List<DuelRequest> inList = incomingRequests.get(request.getReceiverUUID());
+        if (inList != null) {
+            inList.remove(request);
+            if (inList.isEmpty()) incomingRequests.remove(request.getReceiverUUID());
+        }
         return true;
     }
 
@@ -458,6 +468,39 @@ public class DuelManager {
         duel.getOriginalFlying().put(player.getUniqueId(), player.isFlying());
     }
 
+    public void onPlayerShiftDuringCountdown(UUID uuid) {
+        Duel duel = getDuelOf(uuid);
+        if (duel == null || duel.getState() != DuelState.COUNTDOWN) return;
+
+        Set<UUID> skipSet = countdownSkipPlayers.computeIfAbsent(duel.getId(), k -> ConcurrentHashMap.newKeySet());
+        if (!skipSet.add(uuid)) return;
+
+        int needed = duel.getAllParticipants().size();
+        int ready = skipSet.size();
+
+        for (UUID participantUUID : duel.getAllParticipants()) {
+            Player participant = Bukkit.getPlayer(participantUUID);
+            if (participant != null) {
+                participant.sendTitle("",
+                        ChatColor.GREEN + "" + ready + ChatColor.GRAY + "/" + needed + ChatColor.AQUA + " ready to skip",
+                        0, 25, 0);
+            }
+        }
+
+        if (ready >= needed) {
+            DuelState countdownDuelState = duel.getState();
+            if (countdownDuelState != DuelState.COUNTDOWN) return;
+
+            countdownSkipPlayers.remove(duel.getId());
+
+            pendingCountdowns.remove(duel.getId());
+
+            Arena arena = plugin.getArenaManager().getArena(duel.getArenaName());
+            Ruleset ruleset = plugin.getRulesetManager().getRuleset(duel.getRulesetId());
+            beginDuel(duel, arena, ruleset, false);
+        }
+    }
+
     private void startCountdown(Duel duel, Arena arena, int seconds) {
         startCountdown(duel, arena, seconds, false);
     }
@@ -560,7 +603,12 @@ public class DuelManager {
                 if (player != null) {
                     String countdownMsg = plugin.getMessages().get("duel.countdown", "%count%", String.valueOf(remaining));
                     player.sendMessage(countdownMsg);
-                    player.sendTitle("", ChatColor.AQUA + "Starting in " + ChatColor.RED + remaining, 0, 25, 0);
+                    Set<UUID> skipSet = countdownSkipPlayers.getOrDefault(duel.getId(), Collections.emptySet());
+                    int ready = skipSet.size();
+                    int needed = duel.getAllParticipants().size();
+                    String skipLine = ChatColor.GRAY + "Shift to skip " + ChatColor.GREEN + ready + ChatColor.GRAY + "/" + needed;
+                    player.sendTitle(ChatColor.AQUA + "Starting in " + ChatColor.RED + remaining,
+                            skipLine, 0, 25, 0);
                 }
             }
 
@@ -706,9 +754,9 @@ public class DuelManager {
             String kitName = duel.getRulesetId().substring(4);
             Kit kit = plugin.getKitManager().getKit(kitName);
             if (kit != null) {
-                player.getInventory().setContents(kit.getContentsArray());
-                player.getInventory().setArmorContents(kit.getArmorContents());
-                player.getInventory().setItemInOffHand(kit.getOffHand() != null ? kit.getOffHand() : new ItemStack(Material.AIR));
+                player.getInventory().setContents(applyCurseOfVanishing(kit.getContentsArray()));
+                player.getInventory().setArmorContents(applyCurseOfVanishing(kit.getArmorContents()));
+                player.getInventory().setItemInOffHand(applyCurseOfVanishingSingle(kit.getOffHand()));
                 return;
             }
         }
@@ -732,11 +780,26 @@ public class DuelManager {
         if (duel.getRulesetId() != null) {
             Kit gamemodeKit = plugin.getKitManager().getKit(duel.getRulesetId());
             if (gamemodeKit != null) {
-                player.getInventory().setContents(gamemodeKit.getContentsArray());
-                player.getInventory().setArmorContents(gamemodeKit.getArmorContents());
-                player.getInventory().setItemInOffHand(gamemodeKit.getOffHand() != null ? gamemodeKit.getOffHand() : new ItemStack(Material.AIR));
+                player.getInventory().setContents(applyCurseOfVanishing(gamemodeKit.getContentsArray()));
+                player.getInventory().setArmorContents(applyCurseOfVanishing(gamemodeKit.getArmorContents()));
+                player.getInventory().setItemInOffHand(applyCurseOfVanishingSingle(gamemodeKit.getOffHand()));
             }
         }
+    }
+
+    private org.bukkit.inventory.ItemStack[] applyCurseOfVanishing(org.bukkit.inventory.ItemStack[] items) {
+        if (items == null) return new org.bukkit.inventory.ItemStack[36];
+        org.bukkit.inventory.ItemStack[] result = items.clone();
+        for (int i = 0; i < result.length; i++) {
+            result[i] = applyCurseOfVanishingSingle(result[i]);
+        }
+        return result;
+    }
+
+    private org.bukkit.inventory.ItemStack applyCurseOfVanishingSingle(org.bukkit.inventory.ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) return item;
+        item.addUnsafeEnchantment(org.bukkit.enchantments.Enchantment.VANISHING_CURSE, 1);
+        return item;
     }
 
     public void eliminatePlayer(UUID uuid) {
@@ -1013,6 +1076,7 @@ public class DuelManager {
 
             frozenPlayers.remove(uuid);
             pendingCountdowns.remove(duel.getId());
+            countdownSkipPlayers.remove(duel.getId());
             activeDuelContext.remove(uuid);
 
             if (plugin.isAutoRequeue(uuid) && player.isOnline() && duel.getType() == DuelType.SOLO) {
@@ -1292,6 +1356,7 @@ public class DuelManager {
         pendingRespawnLocations.remove(uuid);
         lobbyTeleportAfterDuel.remove(uuid);
         activeDuelContext.remove(uuid);
+        offlineRestores.remove(uuid);
         denyAllIncoming(uuid);
         for (DuelRequest req : new ArrayList<>(outgoingRequests.getOrDefault(uuid, new ArrayList<>()))) {
             denyRequest(req.getRequestId(), uuid);
@@ -1331,6 +1396,7 @@ public class DuelManager {
 
         frozenPlayers.remove(uuid);
         pendingCountdowns.remove(duel.getId());
+        countdownSkipPlayers.remove(duel.getId());
     }
 
     public void cancelDuel(Duel duel) {
@@ -1354,6 +1420,7 @@ public class DuelManager {
         }
 
         pendingCountdowns.remove(duel.getId());
+        countdownSkipPlayers.remove(duel.getId());
 
         Arena arena = plugin.getArenaManager().getArena(duel.getArenaName());
         if (arena != null) {

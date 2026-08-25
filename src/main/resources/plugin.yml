@@ -70,6 +70,17 @@ commands:
   anvil:
     description: Open an anvil
     usage: /anvil
+  leavematch:
+    description: Forfeit your current duel
+    usage: /leavematch
+    aliases: [lm]
+  enchant:
+    description: Enchant items without limits
+    usage: /enchant <enchantment> [level]
+    aliases: []
+  train:
+    description: Enter/exit practice mode
+    usage: /train [arena]
 
 permissions:
   updraftduels.duel:

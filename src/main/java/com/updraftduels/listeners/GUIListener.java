@@ -241,6 +241,12 @@ public class GUIListener implements Listener {
             return;
         }
 
+        if (title.equals(ColorUtil.colorize(GUIManager.DUEL_KIT_TYPE_TITLE))) {
+            event.setCancelled(true);
+            handleDuelKitTypeClick(player, event.getSlot());
+            return;
+        }
+
         if (title.equals(ColorUtil.colorize(GUIManager.DUEL_KIT_TITLE))) {
             event.setCancelled(true);
             handleDuelKitClick(player, event.getSlot(), event.getCurrentItem());
@@ -441,6 +447,26 @@ public class GUIListener implements Listener {
         plugin.getQueueCommand().joinGamemode(player, gamemode, mode);
     }
 
+    private void handleDuelKitTypeClick(Player player, int slot) {
+        PendingDuelSelection pending = plugin.getDuelManager().getPendingDuelSelection(player.getUniqueId());
+        if (pending == null) {
+            player.closeInventory();
+            return;
+        }
+        if (slot == 22) {
+            plugin.getDuelManager().removePendingDuelSelection(player.getUniqueId());
+            player.closeInventory();
+            return;
+        }
+        if (slot == 11) {
+            pending.setPersonalKit(false);
+            plugin.getGuiManager().openDuelPublicKitGUI(player);
+        } else if (slot == 15) {
+            pending.setPersonalKit(true);
+            plugin.getGuiManager().openDuelPersonalKitGUI(player);
+        }
+    }
+
     private void handleDuelKitClick(Player player, int slot, ItemStack item) {
         PendingDuelSelection pending = plugin.getDuelManager().getPendingDuelSelection(player.getUniqueId());
         if (pending == null) {
@@ -454,7 +480,9 @@ public class GUIListener implements Listener {
         }
         if (item == null || item.getType() == Material.AIR || item.getType() == Material.BLACK_STAINED_GLASS_PANE) return;
 
-        List<Kit> kits = plugin.getGuiManager().getVisiblePublicKits(player);
+        List<Kit> kits = pending.isPersonalKit()
+                ? plugin.getKitManager().getPersonalKits(player.getUniqueId())
+                : plugin.getGuiManager().getVisiblePublicKits(player);
         if (slot < 0 || slot >= kits.size()) return;
         pending.setKitName(kits.get(slot).getName());
         plugin.getGuiManager().openDuelRoundsGUI(player);
@@ -661,6 +689,27 @@ public class GUIListener implements Listener {
                 boolean enabled = !plugin.isDuelRequests(player.getUniqueId());
                 plugin.setDuelRequests(player.getUniqueId(), enabled);
                 player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aDuel requests enabled." : "&7Duel requests disabled."));
+                plugin.getGuiManager().openSettingsGUI(player);
+            }
+            case 28 -> {
+                boolean enabled = !plugin.getConfig().getBoolean("ping-limit.enabled", false);
+                plugin.getConfig().set("ping-limit.enabled", enabled);
+                plugin.saveConfig();
+                player.sendMessage(ColorUtil.colorizePrefix(enabled ? "&aPing limit enabled." : "&7Ping limit disabled."));
+                plugin.getGuiManager().openSettingsGUI(player);
+            }
+            case 31 -> {
+                int current = plugin.getConfig().getInt("ping-limit.max-ping", 200);
+                int next = switch (current) {
+                    case 100 -> 200;
+                    case 200 -> 300;
+                    case 300 -> 500;
+                    default -> 100;
+                };
+                plugin.getConfig().set("ping-limit.max-ping", next);
+                plugin.getConfig().set("ping-limit.enabled", true);
+                plugin.saveConfig();
+                player.sendMessage(ColorUtil.colorizePrefix("&eMax ping set to &f" + next + "ms"));
                 plugin.getGuiManager().openSettingsGUI(player);
             }
         }

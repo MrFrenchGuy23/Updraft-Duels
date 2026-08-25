@@ -155,7 +155,11 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
         String kitName = resolveKitName(name);
         Runnable join = () -> {
             if (plugin.getQueueManager().joinGamemodeQueue(player.getUniqueId(), kitName, mode)) {
-                player.sendMessage(plugin.getMessages().get("queue.joined-gamemode", "%gamemode_queue%", name));
+                player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+                        new net.md_5.bungee.api.chat.TextComponent(
+                                com.updraftduels.util.ColorUtil.colorize(
+                                        plugin.getMessages().getRaw("queue.joined-gamemode", "%gamemode_queue%", name)
+                                                + " &7| &e/leave &7to leave queue")));
             } else {
                 player.sendMessage(ColorUtil.colorizePrefix("&cPlease wait a moment before joining a queue."));
             }
@@ -277,7 +281,11 @@ public class QueueCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (plugin.getQueueManager().joinQueue(player.getUniqueId(), args[1])) {
-            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.joined", "%arena%", args[1])));
+            player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+                    new net.md_5.bungee.api.chat.TextComponent(
+                            com.updraftduels.util.ColorUtil.colorize(
+                                    plugin.getMessages().getRaw("queue.joined", "%arena%", args[1])
+                                            + " &7| &e/leave &7to leave queue")));
         } else {
             player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.queue-full")));
         }

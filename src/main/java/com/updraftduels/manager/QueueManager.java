@@ -58,7 +58,7 @@ public class QueueManager {
         this.playerQueues = new ConcurrentHashMap<>();
         this.matchmakingPreferences = new ConcurrentHashMap<>();
         this.kitNames = new ConcurrentHashMap<>();
-        this.rtpQueue = new LinkedList<>();
+        this.rtpQueue = new ArrayDeque<>();
     }
 
     public boolean joinQueue(UUID uuid, String arenaName) {
@@ -67,7 +67,7 @@ public class QueueManager {
         Arena arena = plugin.getArenaManager().getArena(arenaName);
         if (arena == null || arena.isInUse()) return false;
 
-        Queue<UUID> queue = queues.computeIfAbsent(arenaName.toLowerCase(), k -> new LinkedList<>());
+        Queue<UUID> queue = queues.computeIfAbsent(arenaName.toLowerCase(), k -> new ArrayDeque<>());
         queue.add(uuid);
         playerQueues.put(uuid, arenaName.toLowerCase());
 
@@ -102,7 +102,7 @@ public class QueueManager {
         String key = "gm:" + gamemode.toLowerCase() + ":" + mode.name().toLowerCase();
         matchmakingPreferences.put(uuid, mode);
         kitNames.put(uuid, gamemode);
-        Queue<UUID> queue = queues.computeIfAbsent(key, k -> new LinkedList<>());
+        Queue<UUID> queue = queues.computeIfAbsent(key, k -> new ArrayDeque<>());
         queue.add(uuid);
         playerQueues.put(uuid, key);
 
@@ -126,12 +126,41 @@ public class QueueManager {
             return false;
         });
 
-        if (queue.size() < 2) return;
+        if (queue.size() < 2) {
+            if (queue.isEmpty()) queues.remove(queueKey);
+            return;
+        }
 
         UUID player1 = queue.poll();
         UUID player2 = queue.poll();
 
+        if (queue.isEmpty()) queues.remove(queueKey);
+
         if (player1 == null || player2 == null) return;
+
+        boolean pingLimitEnabled = plugin.getConfig().getBoolean("ping-limit.enabled", false);
+        int maxPing = plugin.getConfig().getInt("ping-limit.max-ping", 200);
+        if (pingLimitEnabled && maxPing > 0) {
+            Player p1 = Bukkit.getPlayer(player1);
+            Player p2 = Bukkit.getPlayer(player2);
+            if (p1 != null && p2 != null) {
+                int ping1 = p1.getPing();
+                int ping2 = p2.getPing();
+                if (ping1 > maxPing || ping2 > maxPing) {
+                    queue.add(player1);
+                    queue.add(player2);
+                    playerQueues.put(player1, queueKey);
+                    playerQueues.put(player2, queueKey);
+                    if (matchmakingPreferences.containsKey(player1)) {
+                        matchmakingPreferences.put(player1, matchmakingPreferences.get(player1));
+                    }
+                    if (matchmakingPreferences.containsKey(player2)) {
+                        matchmakingPreferences.put(player2, matchmakingPreferences.get(player2));
+                    }
+                    return;
+                }
+            }
+        }
 
         playerQueues.remove(player1);
         playerQueues.remove(player2);
@@ -186,7 +215,7 @@ public class QueueManager {
 
     private void requeueGamemodePlayers(String queueKey, String kitName, boolean ranked,
                                         UUID player1, UUID player2) {
-        Queue<UUID> queue = queues.computeIfAbsent(queueKey, k -> new LinkedList<>());
+        Queue<UUID> queue = queues.computeIfAbsent(queueKey, k -> new ArrayDeque<>());
         MatchmakingMode mode = ranked ? MatchmakingMode.COMPETITIVE : MatchmakingMode.CASUAL;
         if (player1 != null && Bukkit.getPlayer(player1) != null
                 && !plugin.getDuelManager().isInDuel(player1) && !playerQueues.containsKey(player1)) {
@@ -230,6 +259,22 @@ public class QueueManager {
                         || ("kit:" + kitName).equalsIgnoreCase(d.getRulesetId()))
                 .mapToInt(d -> d.getAllParticipants().size())
                 .sum();
+    }
+
+    public List<com.updraftduels.model.DuelPlayerStats> getGamemodeTopQueued(String gamemode, int limit) {
+        String key = gamemode.toLowerCase();
+        List<UUID> uuids = new ArrayList<>();
+        for (MatchmakingMode mode : MatchmakingMode.values()) {
+            Queue<UUID> q = queues.get("gm:" + key + ":" + mode.name().toLowerCase());
+            if (q != null) uuids.addAll(q);
+        }
+        List<com.updraftduels.model.DuelPlayerStats> result = new ArrayList<>();
+        for (UUID uuid : uuids) {
+            com.updraftduels.model.DuelPlayerStats stats = plugin.getDatabase().getCachedStats(uuid);
+            if (stats != null) result.add(stats);
+        }
+        result.sort((a, b) -> Integer.compare(b.getElo(), a.getElo()));
+        return result.size() > limit ? result.subList(0, limit) : result;
     }
 
     public boolean leaveQueue(UUID uuid) {
@@ -346,6 +391,8 @@ public class QueueManager {
 
         UUID player1 = queue.poll();
         UUID player2 = queue.poll();
+
+        if (queue.isEmpty()) queues.remove(arenaName);
 
         if (player1 == null || player2 == null) return;
 

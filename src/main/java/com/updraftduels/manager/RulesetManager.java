@@ -179,4 +179,8 @@ public class RulesetManager {
     public void clearSelectedRuleset(UUID playerUUID) {
         selectedRulesets.remove(playerUUID);
     }
+
+    public void onPlayerDisconnect(UUID uuid) {
+        selectedRulesets.remove(uuid);
+    }
 }

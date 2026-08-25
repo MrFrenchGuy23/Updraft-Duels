@@ -73,6 +73,7 @@ public class GUIManager {
     public static final String TOURNAMENT_FORMAT_TITLE = "Tournament Format";
     public static final String SPECTATOR_TITLE = "Spectate";
     public static final String DUEL_KIT_TITLE = "Select a Kit";
+    public static final String DUEL_KIT_TYPE_TITLE = "Choose your gamemode type";
     public static final String DUEL_ROUNDS_TITLE = "Select Rounds";
     public static final String QUEUE_TITLE = "Queue";
     public static final String CASUAL_QUEUE_TITLE = "Casual Queue";
@@ -300,9 +301,50 @@ public class GUIManager {
     }
 
     public void openDuelKitGUI(Player player) {
+        Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(DUEL_KIT_TYPE_TITLE));
+
+        gui.setItem(11, new ItemBuilder(Material.CHEST)
+                .name("&fPublic Kits")
+                .lore("&7Choose from public kits")
+                .build());
+
+        gui.setItem(15, new ItemBuilder(Material.ENDER_CHEST)
+                .name("&fPersonal Kits")
+                .lore("&7Use your own saved kits")
+                .build());
+
+        gui.setItem(22, closeButton());
+
+        fillWithGlass(gui, 0);
+        player.openInventory(gui);
+    }
+
+    public void openDuelPublicKitGUI(Player player) {
         Inventory gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(DUEL_KIT_TITLE));
 
         List<Kit> kits = getVisiblePublicKits(player);
+        int slot = 0;
+        for (Kit kit : kits) {
+            if (slot >= 45) break;
+            Material material = Material.matchMaterial(kit.getIconMaterial());
+            if (material == null) material = Material.CHEST;
+            gui.setItem(slot++, new ItemBuilder(material)
+                    .name("&f" + kit.getName())
+                    .lore("&7Prefix: &f" + (kit.getPrefix().isEmpty() ? "None" : kit.getPrefix()))
+                    .hideVanillaLore()
+                    .build());
+        }
+
+        gui.setItem(49, closeButton());
+
+        fillWithGlass(gui, slot);
+        player.openInventory(gui);
+    }
+
+    public void openDuelPersonalKitGUI(Player player) {
+        Inventory gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(DUEL_KIT_TITLE));
+
+        List<Kit> kits = plugin.getKitManager().getPersonalKits(player.getUniqueId());
         int slot = 0;
         for (Kit kit : kits) {
             if (slot >= 45) break;
@@ -392,8 +434,7 @@ public class GUIManager {
 
                 gui.setItem(slot++, new ItemBuilder(material)
                         .name("&f" + gamemode)
-                        .lore("&7Fighting: &f" + plugin.getQueueManager().getGamemodeFightingCount(gamemode),
-                                "&7Queuing: &f" + plugin.getQueueManager().getGamemodeQueueSize(gamemode))
+                        .lore(buildQueueLore(gamemode))
                         .hideVanillaLore()
                         .build());
             }
@@ -403,6 +444,23 @@ public class GUIManager {
 
         fillWithGlass(gui, slot);
         return gui;
+    }
+
+    private List<String> buildQueueLore(String gamemode) {
+        List<String> lore = new ArrayList<>();
+        lore.add("&7Fighting: &f" + plugin.getQueueManager().getGamemodeFightingCount(gamemode));
+        lore.add("&7Queuing: &f" + plugin.getQueueManager().getGamemodeQueueSize(gamemode));
+        List<com.updraftduels.model.DuelPlayerStats> top = plugin.getQueueManager().getGamemodeTopQueued(gamemode, 5);
+        if (!top.isEmpty()) {
+            lore.add("");
+            lore.add("&e&lTop Players");
+            for (int i = 0; i < top.size(); i++) {
+                com.updraftduels.model.DuelPlayerStats s = top.get(i);
+                String rank = plugin.getRankManager().getDivisionElo(s.getElo());
+                lore.add("&7" + (i + 1) + ". " + rank + " &f" + s.getName());
+            }
+        }
+        return lore;
     }
 
     public void openKitsGUI(Player player) {
@@ -574,7 +632,7 @@ public class GUIManager {
     }
 
     public void openSettingsGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(SETTINGS_TITLE));
+        Inventory gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(SETTINGS_TITLE));
 
         QueueManager.MatchmakingMode mode = plugin.getQueueManager().getMatchmakingMode(player.getUniqueId());
         String modeName = switch (mode) {
@@ -639,7 +697,25 @@ public class GUIManager {
                         "&7Allow other players to send you duel requests.")
                 .build());
 
-        gui.setItem(22, closeButton());
+        boolean pingLimitEnabled = plugin.getConfig().getBoolean("ping-limit.enabled", false);
+        int maxPing = plugin.getConfig().getInt("ping-limit.max-ping", 200);
+        gui.setItem(28, new ItemBuilder(pingLimitEnabled ? Material.EMERALD : Material.REDSTONE)
+                .name("&fPing Limit: " + (pingLimitEnabled ? "&aON" : "&cOFF"))
+                .lore("",
+                        "&7Max ping: &f" + maxPing + "ms",
+                        "&7Players with higher ping won't be matched.",
+                        "",
+                        "&7Click to toggle")
+                .build());
+
+        gui.setItem(31, new ItemBuilder(Material.COMPASS)
+                .name("&fMax Ping: &e" + maxPing + "ms")
+                .lore("",
+                        "&7Click to cycle ping limit:",
+                        "&7100ms &7| &f200ms &7| &7300ms &7| &7500ms &7| &7Off")
+                .build());
+
+        gui.setItem(49, closeButton());
 
         fillWithGlass(gui, 0);
         player.openInventory(gui);

@@ -366,4 +366,8 @@ public class PartyManager {
             }
         }
     }
+
+    public void onPlayerDisconnect(UUID uuid) {
+        partyChatToggles.remove(uuid);
+    }
 }

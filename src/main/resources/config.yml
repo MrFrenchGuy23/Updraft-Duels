@@ -175,6 +175,26 @@ matchmaking:
   # Competitive requires this many wins to unlock
   competitive-min-wins: 15
 
+# Ping limit for matchmaking (in ms). Players with higher ping won't be matched together.
+# Set to 0 to disable.
+ping-limit:
+  enabled: false
+  max-ping: 200
+
+# Kill milestones - show a title when a player reaches these kill counts
+kill-milestones:
+  enabled: true
+  intervals: [10, 20, 30, 40, 50, 75, 100, 150, 200, 250, 300, 500]
+
+# Practice / Train mode
+train-arena:
+  # World name for the practice arena
+  world: "world"
+  # Spawn location for practice
+  spawn-x: 0
+  spawn-y: 64
+  spawn-z: 0
+
 season:
   current-season: 1
   length-days: 30
