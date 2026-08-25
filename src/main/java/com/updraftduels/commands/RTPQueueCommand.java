@@ -41,12 +41,19 @@ public class RTPQueueCommand implements CommandExecutor {
             return true;
         }
         if (plugin.getQueueManager().isInQueue(player.getUniqueId())) {
-            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.already-in-queue")));
+            player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+                    new net.md_5.bungee.api.chat.TextComponent(
+                            com.updraftduels.util.ColorUtil.colorize(
+                                    plugin.getMessages().get("queue.already-in-queue"))));
             return true;
         }
 
         if (plugin.getQueueManager().joinRTPQueue(player.getUniqueId())) {
-            player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.rtp-joined")));
+            player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+                    new net.md_5.bungee.api.chat.TextComponent(
+                            com.updraftduels.util.ColorUtil.colorize(
+                                    plugin.getMessages().get("queue.rtp-joined")
+                                            + " &7| &e/leave &7to leave queue")));
         } else {
             player.sendMessage(ColorUtil.colorizePrefix("&cPlease wait a moment before joining a queue."));
         }

@@ -99,11 +99,18 @@ public class SignListener implements Listener {
                     return;
                 }
                 if (plugin.getQueueManager().isInQueue(player.getUniqueId())) {
-                    player.sendMessage(plugin.getMessages().get("queue.already-in-queue"));
+                    player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+                            new net.md_5.bungee.api.chat.TextComponent(
+                                    com.updraftduels.util.ColorUtil.colorize(
+                                            plugin.getMessages().get("queue.already-in-queue"))));
                     return;
                 }
                 plugin.getQueueManager().joinRTPQueue(player.getUniqueId());
-                player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.rtp-joined")));
+                player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+                        new net.md_5.bungee.api.chat.TextComponent(
+                                com.updraftduels.util.ColorUtil.colorize(
+                                        plugin.getMessages().get("queue.rtp-joined")
+                                                + " &7| &e/leave &7to leave queue")));
                 updateSignCount(block, sign, plugin.getQueueManager().getRTPQueueSize());
             }
             case "arena" -> {
@@ -113,11 +120,18 @@ public class SignListener implements Listener {
                     return;
                 }
                 if (plugin.getQueueManager().isInQueue(player.getUniqueId())) {
-                    player.sendMessage(plugin.getMessages().get("queue.already-in-queue"));
+                    player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+                            new net.md_5.bungee.api.chat.TextComponent(
+                                    com.updraftduels.util.ColorUtil.colorize(
+                                            plugin.getMessages().get("queue.already-in-queue"))));
                     return;
                 }
                 if (plugin.getQueueManager().joinQueue(player.getUniqueId(), line2)) {
-                    player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.joined", "%arena%", line2)));
+                    player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR,
+                            new net.md_5.bungee.api.chat.TextComponent(
+                                    com.updraftduels.util.ColorUtil.colorize(
+                                            plugin.getMessages().get("queue.joined", "%arena%", line2)
+                                                    + " &7| &e/leave &7to leave queue")));
                 } else {
                     player.sendMessage(ColorUtil.colorize(plugin.getMessages().get("queue.queue-full")));
                 }
