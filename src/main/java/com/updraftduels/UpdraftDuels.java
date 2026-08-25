@@ -52,6 +52,7 @@ public class UpdraftDuels extends JavaPlugin {
     private DuelManager duelManager;
     private ArenaManager arenaManager;
     private KitManager kitManager;
+    private KitRoomManager kitRoomManager;
     private RulesetManager rulesetManager;
     private PartyManager partyManager;
     private FriendManager friendManager;
@@ -104,6 +105,7 @@ public class UpdraftDuels extends JavaPlugin {
         duelManager = new DuelManager(this);
         arenaManager = new ArenaManager(this);
         kitManager = new KitManager(this);
+        kitRoomManager = new KitRoomManager(this);
         rulesetManager = new RulesetManager(this);
         partyManager = new PartyManager(this);
         friendManager = new FriendManager(this);
@@ -129,6 +131,7 @@ public class UpdraftDuels extends JavaPlugin {
 
         arenaManager.loadArenas();
         kitManager.loadKits();
+        kitRoomManager.loadFromDatabase();
 
         scoreboardManager.startUpdating();
         nametagManager.startUpdating();
@@ -308,6 +311,7 @@ public class UpdraftDuels extends JavaPlugin {
         rankManager.loadRanks();
         arenaManager.loadArenas();
         kitManager.loadKits();
+        kitRoomManager.loadFromDatabase();
         rulesetManager.reload();
         gateManager.load();
         seasonManager.reload();
@@ -318,6 +322,7 @@ public class UpdraftDuels extends JavaPlugin {
     public DuelManager getDuelManager() { return duelManager; }
     public ArenaManager getArenaManager() { return arenaManager; }
     public KitManager getKitManager() { return kitManager; }
+    public KitRoomManager getKitRoomManager() { return kitRoomManager; }
     public RulesetManager getRulesetManager() { return rulesetManager; }
     public PartyManager getPartyManager() { return partyManager; }
     public FriendManager getFriendManager() { return friendManager; }

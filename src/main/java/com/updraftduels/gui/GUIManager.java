@@ -87,65 +87,6 @@ public class GUIManager {
             Material.PINK_WOOL, Material.PURPLE_WOOL, Material.GREEN_WOOL
     };
 
-    private static final List<Material> COMBAT_ITEMS = List.of(
-            Material.DIAMOND_SWORD, Material.DIAMOND_AXE, Material.DIAMOND_PICKAXE,
-            Material.IRON_SWORD, Material.IRON_AXE, Material.IRON_PICKAXE,
-            Material.STONE_SWORD, Material.STONE_AXE, Material.STONE_PICKAXE,
-            Material.WOODEN_SWORD, Material.WOODEN_AXE, Material.WOODEN_PICKAXE,
-            Material.NETHERITE_SWORD, Material.NETHERITE_AXE, Material.NETHERITE_PICKAXE,
-            Material.GOLDEN_SWORD, Material.GOLDEN_AXE, Material.GOLDEN_PICKAXE,
-            Material.TRIDENT, Material.MACE, Material.BOW, Material.CROSSBOW,
-            Material.SHIELD, Material.ARROW, Material.SPECTRAL_ARROW,
-            Material.TIPPED_ARROW, Material.SPYGLASS
-    );
-
-    private static final List<Material> FOOD_ITEMS = List.of(
-            Material.GOLDEN_APPLE, Material.ENCHANTED_GOLDEN_APPLE,
-            Material.COOKED_BEEF, Material.COOKED_PORKCHOP, Material.COOKED_MUTTON,
-            Material.COOKED_CHICKEN, Material.COOKED_RABBIT, Material.COOKED_COD,
-            Material.COOKED_SALMON, Material.BREAD, Material.PUMPKIN_PIE,
-            Material.GOLDEN_CARROT, Material.BAKED_POTATO, Material.MUSHROOM_STEW,
-            Material.BEETROOT_SOUP, Material.RABBIT_STEW, Material.SUSPICIOUS_STEW,
-            Material.CHORUS_FRUIT, Material.SWEET_BERRIES, Material.GLOW_BERRIES,
-            Material.APPLE, Material.MELON_SLICE, Material.DRIED_KELP,
-            Material.CARROT, Material.POTATO, Material.BEETROOT,
-            Material.HONEY_BOTTLE
-    );
-
-    private static final List<Material> UTILITY_ITEMS = List.of(
-            Material.ENDER_PEARL, Material.ENDER_EYE, Material.ELYTRA,
-            Material.FIREWORK_ROCKET, Material.OBSIDIAN, Material.CRYING_OBSIDIAN,
-            Material.ENDER_CHEST, Material.CHEST, Material.BARREL,
-            Material.BOW, Material.FLINT_AND_STEEL,
-            Material.COBWEB, Material.SLIME_BLOCK, Material.HONEY_BLOCK,
-            Material.TRIDENT, Material.SHIELD, Material.TOTEM_OF_UNDYING,
-            Material.TORCH, Material.SOUL_TORCH, Material.LANTERN,
-            Material.SOUL_LANTERN, Material.CRAFTING_TABLE, Material.ANVIL,
-            Material.BREWING_STAND, Material.CHEST_MINECART,
-            Material.HOPPER, Material.BUCKET, Material.WATER_BUCKET,
-            Material.LAVA_BUCKET, Material.MILK_BUCKET, Material.NAME_TAG,
-            Material.SADDLE, Material.LEAD, Material.COMPASS,
-            Material.CLOCK, Material.BOOK, Material.ENCHANTING_TABLE,
-            Material.BONE_MEAL, Material.SHEARS, Material.FISHING_ROD
-    );
-
-    private static final List<Material> INGREDIENT_ITEMS = List.of(
-            Material.DIAMOND, Material.EMERALD, Material.NETHERITE_INGOT,
-            Material.IRON_INGOT, Material.GOLD_INGOT, Material.COPPER_INGOT,
-            Material.NETHERITE_SCRAP, Material.ANCIENT_DEBRIS,
-            Material.REDSTONE, Material.LAPIS_LAZULI, Material.QUARTZ,
-            Material.GLOWSTONE_DUST, Material.BLAZE_POWDER, Material.BLAZE_ROD,
-            Material.NETHER_WART, Material.FERMENTED_SPIDER_EYE,
-            Material.SPIDER_EYE, Material.MAGMA_CREAM, Material.ENDER_PEARL,
-            Material.DRAGON_BREATH, Material.PHANTOM_MEMBRANE,
-            Material.EXPERIENCE_BOTTLE, Material.BOOK, Material.PAPER,
-            Material.LEATHER, Material.STRING, Material.FLINT,
-            Material.GUNPOWDER, Material.SLIME_BALL, Material.HONEY_BOTTLE,
-            Material.SHULKER_SHELL, Material.ECHO_SHARD, Material.HEART_OF_THE_SEA,
-            Material.NAUTILUS_SHELL, Material.PRISMARINE_SHARD, Material.PRISMARINE_CRYSTALS,
-            Material.END_CRYSTAL
-    );
-
     public GUIManager(UpdraftDuels plugin) {
         this.plugin = plugin;
     }
@@ -155,126 +96,107 @@ public class GUIManager {
                 ColorUtil.colorize(KIT_EDITOR_TITLE + " - " + kit.getName()));
 
         ItemStack[] contents = kit.getContentsArray();
-        for (int i = 0; i < Math.min(contents.length, 36); i++) {
+        for (int i = 0; i < Math.min(contents.length, 41); i++) {
             gui.setItem(i, contents[i] != null ? contents[i].clone() : null);
         }
 
-        ItemStack[] armor = kit.getArmorContents();
-        if (armor != null) {
-            gui.setItem(36, lockArmor(armor[0]));
-            gui.setItem(37, lockArmor(armor[1]));
-            gui.setItem(38, lockArmor(armor[2]));
-            gui.setItem(39, lockArmor(armor[3]));
+        for (int i = 41; i < 54; i++) {
+            gui.setItem(i, glassPane());
         }
 
-        gui.setItem(46, new ItemBuilder(Material.EXPERIENCE_BOTTLE)
-                .name("&fRepair All")
-                .lore("&7Restore all items to full durability")
+        gui.setItem(45, armorLabel(Material.CHAINMAIL_BOOTS, "BOOTS"));
+        gui.setItem(46, armorLabel(Material.CHAINMAIL_LEGGINGS, "LEGGINGS"));
+        gui.setItem(47, armorLabel(Material.CHAINMAIL_CHESTPLATE, "CHESTPLATE"));
+        gui.setItem(48, armorLabel(Material.CHAINMAIL_HELMET, "HELMET"));
+        gui.setItem(49, armorLabel(Material.SHIELD, "OFFHAND"));
+
+        gui.setItem(51, new ItemBuilder(Material.CHEST)
+                .name("&aIMPORT")
+                .lore("&7Import from inventory")
                 .build());
 
-        gui.setItem(47, new ItemBuilder(Material.BARRIER)
-                .name("&cClear All")
-                .lore("&7Remove all items from this kit")
+        gui.setItem(52, new ItemBuilder(Material.BARRIER)
+                .name("&cCLEAR KIT")
+                .lore("&7Shift click to clear")
                 .build());
 
-        gui.setItem(48, new ItemBuilder(Material.LIME_DYE)
-                .name("&aSave Kit")
-                .lore("&7Save the kit and close the editor")
-                .build());
-
-        gui.setItem(50, new ItemBuilder(Material.RED_DYE)
-                .name("&cDon't Save")
-                .lore("&7Discard changes and close the editor")
+        gui.setItem(53, new ItemBuilder(Material.OAK_DOOR)
+                .name("&cBACK")
                 .build());
 
         player.openInventory(gui);
     }
 
-    private ItemStack lockArmor(ItemStack item) {
-        if (item == null) {
-            item = new ItemStack(Material.BARRIER);
-        }
-        ItemBuilder builder = new ItemBuilder(item)
-                .name("&cLocked")
-                .lore("&7Armor cannot be edited", "&7It is saved with the kit automatically");
-        builder.hideVanillaLore();
-        return builder.build();
+    private ItemStack armorLabel(Material material, String name) {
+        return new ItemBuilder(material)
+                .name("&7" + name)
+                .build();
     }
 
     public void openKitRoomGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 27,
-                ColorUtil.colorize(KIT_ROOM_TITLE));
-
-        gui.setItem(10, new ItemBuilder(Material.DIAMOND_SWORD)
-                .name("&fCombat")
-                .lore("&7Weapons, armor & tools")
-                .build());
-
-        gui.setItem(12, new ItemBuilder(Material.COOKED_BEEF)
-                .name("&fFood")
-                .lore("&7Food & consumables")
-                .build());
-
-        gui.setItem(14, new ItemBuilder(Material.ENDER_PEARL)
-                .name("&fUtility")
-                .lore("&7Tools & utility items")
-                .build());
-
-        gui.setItem(16, new ItemBuilder(Material.DIAMOND)
-                .name("&fMaterials")
-                .lore("&7Crafting ingredients & materials")
-                .build());
-
-        fillWithGlass(gui, 0);
-        player.openInventory(gui);
+        openKitRoomGUI(player, 0);
     }
 
-    public void openKitRoomCategoryGUI(Player player, String category) {
-        Inventory gui;
-        List<Material> items;
+    public void openKitRoomGUI(Player player, int page) {
+        KitRoomManager kitRoomManager = plugin.getKitRoomManager();
+        Inventory gui = Bukkit.createInventory(null, 54,
+                ColorUtil.colorize(KIT_ROOM_TITLE));
 
-        switch (category.toLowerCase()) {
-            case "combat" -> {
-                gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(KIT_ROOM_TITLE + " - Combat"));
-                items = COMBAT_ITEMS;
-            }
-            case "food" -> {
-                gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(KIT_ROOM_TITLE + " - Food"));
-                items = FOOD_ITEMS;
-            }
-            case "utility" -> {
-                gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(KIT_ROOM_TITLE + " - Utility"));
-                items = UTILITY_ITEMS;
-            }
-            case "ingredients" -> {
-                gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(KIT_ROOM_TITLE + " - Materials"));
-                items = INGREDIENT_ITEMS;
-            }
-            default -> {
-                openKitRoomGUI(player);
-                return;
+        for (int i = 0; i < 45; i++) {
+            gui.setItem(i, null);
+        }
+
+        if (kitRoomManager.getPage(page) != null) {
+            ItemStack[] items = kitRoomManager.getPage(page);
+            for (int i = 0; i < Math.min(items.length, 45); i++) {
+                gui.setItem(i, items[i] != null ? items[i].clone() : null);
             }
         }
 
-        gui.setItem(45, backButton());
+        gui.setItem(45, new ItemBuilder(Material.BEACON)
+                .name("&bREFILL")
+                .build());
 
-        int slot = 0;
-        for (Material material : items) {
-            if (slot >= 45) break;
-            gui.setItem(slot++, new ItemBuilder(material)
-                    .name("&f" + formatMaterialName(material.name()))
+        gui.setItem(46, glassPane());
+        gui.setItem(47, kitRoomPageButton(0, page));
+        gui.setItem(48, kitRoomPageButton(1, page));
+        gui.setItem(49, kitRoomPageButton(2, page));
+        gui.setItem(50, kitRoomPageButton(3, page));
+        gui.setItem(51, kitRoomPageButton(4, page));
+
+        gui.setItem(52, glassPane());
+
+        if (player.hasPermission("updraftduels.kit.editkitroom")) {
+            gui.setItem(53, new ItemBuilder(Material.BARRIER)
+                    .amount(page + 1)
+                    .name("&cEDIT MENU")
+                    .lore("&cShift right click to save")
+                    .build());
+        } else {
+            gui.setItem(53, new ItemBuilder(Material.OAK_DOOR)
+                    .name("&cBACK")
                     .build());
         }
 
-        fillWithGlass(gui, items.size());
         player.openInventory(gui);
     }
 
+    private ItemStack kitRoomPageButton(int pageIndex, int currentPage) {
+        Material material = (pageIndex == currentPage) ? Material.LIME_DYE : Material.GRAY_DYE;
+        String prefix = (pageIndex == currentPage) ? "&a" : "&7";
+        return new ItemBuilder(material)
+                .name(prefix + "Page " + (pageIndex + 1))
+                .build();
+    }
+
+    private ItemStack glassPane() {
+        return new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).name(" ").build();
+    }
+
     private void fillWithGlass(Inventory gui, int startSlot) {
-        ItemStack glass = new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).name(" ").build();
         for (int i = startSlot; i < gui.getSize(); i++) {
             if (gui.getItem(i) == null || gui.getItem(i).getType() == Material.AIR) {
-                gui.setItem(i, glass);
+                gui.setItem(i, glassPane());
             }
         }
     }
@@ -464,19 +386,79 @@ public class GUIManager {
     }
 
     public void openKitsGUI(Player player) {
-        Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(KITS_TITLE));
+        Inventory gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(KITS_TITLE));
 
-        gui.setItem(11, new ItemBuilder(Material.ENDER_CHEST)
-                .name("&aPersonal Kits")
-                .lore("&7Browse your own kits")
+        for (int i = 0; i < 54; i++) {
+            gui.setItem(i, glassPane());
+        }
+
+        for (int i = 9; i < 18; i++) {
+            int kitSlot = i - 8;
+            Kit kit = plugin.getKitManager().getKitBySlot(player.getUniqueId(), kitSlot);
+            if (kit != null) {
+                gui.setItem(i, new ItemBuilder(Material.CHEST)
+                        .name("&bKit " + kitSlot)
+                        .lore("&7Left click to load", "&7Right click to edit")
+                        .build());
+            } else {
+                gui.setItem(i, new ItemBuilder(Material.CHEST)
+                        .name("&bKit " + kitSlot)
+                        .lore("&7Click to create")
+                        .build());
+            }
+        }
+
+        for (int i = 18; i < 27; i++) {
+            gui.setItem(i, new ItemBuilder(Material.KNOWLEDGE_BOOK)
+                    .name("&bKit " + (i - 17))
+                    .lore("&7Click to edit")
+                    .build());
+        }
+
+        for (int i = 27; i < 36; i++) {
+            gui.setItem(i, new ItemBuilder(Material.BOOK)
+                    .name("&bKit " + (i - 26))
+                    .lore("&7Click to edit")
+                    .build());
+        }
+
+        gui.setItem(37, glassPane());
+        gui.setItem(38, glassPane());
+        gui.setItem(39, glassPane());
+        gui.setItem(40, glassPane());
+        gui.setItem(41, glassPane());
+        gui.setItem(42, glassPane());
+        gui.setItem(43, glassPane());
+
+        gui.setItem(37, new ItemBuilder(Material.NETHER_STAR)
+                .name("&bKIT ROOM")
                 .build());
 
-        gui.setItem(15, new ItemBuilder(Material.CHEST)
-                .name("&bPublic Kits")
-                .lore("&7Browse pre made kits")
+        gui.setItem(38, new ItemBuilder(Material.BOOKSHELF)
+                .name("&ePREMADE KITS")
                 .build());
 
-        fillWithGlass(gui, 0);
+        gui.setItem(39, new ItemBuilder(Material.OAK_SIGN)
+                .name("&bINFO")
+                .lore("&7Click a kit slot to load your kit",
+                        "&7Right click or click the book to edit",
+                        "&7Shift click to import your inventory")
+                .build());
+
+        gui.setItem(41, new ItemBuilder(Material.REDSTONE_BLOCK)
+                .name("&cCLEAR INVENTORY")
+                .lore("&7Shift click")
+                .build());
+
+        gui.setItem(42, new ItemBuilder(Material.COMPASS)
+                .name("&bSHARE KITS")
+                .lore("&7/kits share <slot>")
+                .build());
+
+        gui.setItem(43, new ItemBuilder(Material.EXPERIENCE_BOTTLE)
+                .name("&bREPAIR ITEMS")
+                .build());
+
         player.openInventory(gui);
     }
 

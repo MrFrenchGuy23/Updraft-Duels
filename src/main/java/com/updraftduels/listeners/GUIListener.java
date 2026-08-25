@@ -91,45 +91,48 @@ public class GUIListener implements Listener {
                 event.setCancelled(true);
                 return;
             }
-            if (event.isShiftClick() || event.getClick().isCreativeAction() || event.getClick().isKeyboardClick()) {
-                event.setCancelled(true);
-                return;
-            }
             int slot = event.getSlot();
-            if (slot >= 36 && slot <= 53) {
-                event.setCancelled(true);
-            }
-            if (slot >= 36 && slot <= 39) {
-                return;
-            }
-            if (slot == 46) {
-                event.setCancelled(true);
-                Inventory topInv = event.getView().getTopInventory();
-                for (int i = 0; i < 36; i++) {
-                    ItemStack s = topInv.getItem(i);
-                    if (s != null && s.getType() != Material.AIR && s.getItemMeta() instanceof Damageable damageable) {
-                        damageable.setDamage(0);
-                        s.setItemMeta(damageable);
-                    }
-                }
-                player.sendMessage(ColorUtil.colorizePrefix("&aAll items repaired!"));
-            } else if (slot == 47) {
-                event.setCancelled(true);
-                Inventory topInv = event.getView().getTopInventory();
-                for (int i = 0; i < 36; i++) {
-                    topInv.setItem(i, null);
-                }
-                player.sendMessage(ColorUtil.colorizePrefix("&cAll items cleared!"));
-            } else if (slot == 48) {
+
+            if (slot == 53) {
                 event.setCancelled(true);
                 kitSaveOnClose.add(player.getUniqueId());
                 player.closeInventory();
-            } else if (slot == 50) {
-                event.setCancelled(true);
-                player.closeInventory();
-            } else if (event.getClick().isShiftClick()) {
-                event.setCancelled(true);
+                return;
             }
+
+            if (slot == 51) {
+                event.setCancelled(true);
+                ItemStack[] inv = player.getInventory().getContents();
+                Inventory topInv = event.getView().getTopInventory();
+                for (int i = 0; i < 36; i++) {
+                    topInv.setItem(i, inv[i] != null ? inv[i].clone() : null);
+                }
+                player.sendMessage(ColorUtil.colorizePrefix("&aImported inventory into kit editor!"));
+                return;
+            }
+
+            if (slot == 52) {
+                event.setCancelled(true);
+                if (event.isShiftClick()) {
+                    Inventory topInv = event.getView().getTopInventory();
+                    for (int i = 0; i < 41; i++) {
+                        topInv.setItem(i, null);
+                    }
+                    player.sendMessage(ColorUtil.colorizePrefix("&cKit cleared!"));
+                }
+                return;
+            }
+
+            if (slot >= 45 && slot <= 49) {
+                event.setCancelled(true);
+                return;
+            }
+
+            if (slot >= 41 && slot <= 53) {
+                event.setCancelled(true);
+                return;
+            }
+
             return;
         }
 
@@ -138,13 +141,13 @@ public class GUIListener implements Listener {
                 return;
             }
             event.setCancelled(true);
-            handleKitRoomClick(player, event.getSlot(), event.getCurrentItem(), title);
+            handleKitRoomClick(player, event.getSlot(), event.getCurrentItem(), title, event.getClick());
             return;
         }
 
         if (title.equals(ColorUtil.colorize(GUIManager.KITS_TITLE))) {
             event.setCancelled(true);
-            handleKitsClick(player, event.getSlot(), event.getCurrentItem());
+            handleKitsClick(player, event.getSlot(), event.getCurrentItem(), event.getClick());
             return;
         }
 
@@ -584,8 +587,8 @@ public class GUIListener implements Listener {
         }
 
         Inventory topInv = event.getView().getTopInventory();
-        ItemStack[] contents = new ItemStack[36];
-        for (int i = 0; i < 36; i++) {
+        ItemStack[] contents = new ItemStack[41];
+        for (int i = 0; i < 41; i++) {
             ItemStack s = topInv.getItem(i);
             contents[i] = s != null && s.getType() != Material.AIR ? s.clone() : null;
         }
@@ -615,30 +618,47 @@ public class GUIListener implements Listener {
         }
     }
 
-    private void handleKitRoomClick(Player player, int slot, ItemStack item, String title) {
-        if (slot == 45) {
-            plugin.getGuiManager().openKitRoomGUI(player);
-            return;
-        }
-
-        boolean isCategoryView = !title.equals(ColorUtil.colorize(GUIManager.KIT_ROOM_TITLE));
-
-        if (!isCategoryView) {
-            if (slot == 10) {
-                plugin.getGuiManager().openKitRoomCategoryGUI(player, "combat");
-            } else if (slot == 12) {
-                plugin.getGuiManager().openKitRoomCategoryGUI(player, "food");
-            } else if (slot == 14) {
-                plugin.getGuiManager().openKitRoomCategoryGUI(player, "utility");
-            } else if (slot == 16) {
-                plugin.getGuiManager().openKitRoomCategoryGUI(player, "ingredients");
+    private void handleKitRoomClick(Player player, int slot, ItemStack item, String title, org.bukkit.event.inventory.ClickType clickType) {
+        if (slot == 53) {
+            if (player.hasPermission("updraftduels.kit.editkitroom") && clickType.isShiftClick() && clickType.isRightClick()) {
+                Inventory topInv = player.getOpenInventory().getTopInventory();
+                int currentPage = 0;
+                ItemStack editButton = topInv.getItem(53);
+                if (editButton != null && editButton.getAmount() > 0) {
+                    currentPage = editButton.getAmount() - 1;
+                }
+                ItemStack[] kitroom = new ItemStack[45];
+                for (int i = 0; i < 45; i++) {
+                    ItemStack s = topInv.getItem(i);
+                    kitroom[i] = s != null ? s.clone() : null;
+                }
+                plugin.getKitRoomManager().setPage(currentPage, kitroom);
+                plugin.getKitRoomManager().savePageToDatabase(currentPage);
+                player.sendMessage(ColorUtil.colorizePrefix("&aSaved kit room page " + (currentPage + 1) + "!"));
             }
             return;
         }
 
-        if (item == null || item.getType() == Material.AIR || item.getType() == Material.BLACK_STAINED_GLASS_PANE) return;
-        player.getInventory().addItem(item.clone());
-        player.sendMessage(ColorUtil.colorizePrefix("&aAdded &f" + item.getType().name().replace("_", " ").toLowerCase() + " &ato your inventory."));
+        if (slot >= 47 && slot <= 51) {
+            int pageIndex = slot - 47;
+            plugin.getGuiManager().openKitRoomGUI(player, pageIndex);
+            return;
+        }
+
+        if (slot == 45) {
+            player.setHealth(20.0);
+            player.setFoodLevel(20);
+            player.setSaturation(20.0f);
+            player.sendMessage(ColorUtil.colorizePrefix("&aRefilled health and hunger!"));
+            return;
+        }
+
+        if (slot >= 0 && slot < 45 && item != null && item.getType() != Material.AIR && item.getType() != Material.BLACK_STAINED_GLASS_PANE) {
+            if (!player.hasPermission("updraftduels.kit.editkitroom")) {
+                player.getInventory().addItem(item.clone());
+                player.sendMessage(ColorUtil.colorizePrefix("&aAdded &f" + item.getType().name().replace("_", " ").toLowerCase() + " &ato your inventory."));
+            }
+        }
     }
 
     private void handleSettingsClick(Player player, int slot) {
@@ -806,13 +826,64 @@ public class GUIListener implements Listener {
         plugin.getPartyCommand().challengeParty(player, parties.get(slot));
     }
 
-    private void handleKitsClick(Player player, int slot, ItemStack item) {
-        if (slot == 11) {
-            plugin.getGuiManager().openPersonalKitsGUI(player);
+    private void handleKitsClick(Player player, int slot, ItemStack item, org.bukkit.event.inventory.ClickType clickType) {
+        if (slot == 37) {
+            plugin.getGuiManager().openKitRoomGUI(player);
             return;
         }
-        if (slot == 15) {
+        if (slot == 38) {
             plugin.getGuiManager().openPublicKitsGUI(player);
+            return;
+        }
+        if (slot == 41) {
+            if (clickType.isShiftClick()) {
+                player.getInventory().clear();
+                player.sendMessage(ColorUtil.colorizePrefix("&cInventory cleared!"));
+            }
+            return;
+        }
+        if (slot == 43) {
+            for (ItemStack s : player.getInventory().getContents()) {
+                if (s != null && s.getType() != Material.AIR && s.getItemMeta() instanceof Damageable damageable) {
+                    damageable.setDamage(0);
+                    s.setItemMeta(damageable);
+                }
+            }
+            for (ItemStack s : player.getInventory().getArmorContents()) {
+                if (s != null && s.getType() != Material.AIR && s.getItemMeta() instanceof Damageable damageable) {
+                    damageable.setDamage(0);
+                    s.setItemMeta(damageable);
+                }
+            }
+            player.sendMessage(ColorUtil.colorizePrefix("&aAll items repaired!"));
+            return;
+        }
+
+        if (slot >= 9 && slot < 18) {
+            int kitSlot = slot - 8;
+            Kit kit = plugin.getKitManager().getKitBySlot(player.getUniqueId(), kitSlot);
+            if (kit == null) {
+                player.closeInventory();
+                player.sendMessage(ColorUtil.colorizePrefix("&eHold the items you want in your kit, then type &f/kit create " + kitSlot));
+                return;
+            }
+            if (clickType.isLeftClick()) {
+                equipKit(player, kit);
+            } else if (clickType.isRightClick()) {
+                plugin.getGuiManager().openKitEditorGUI(player, kit);
+            }
+            return;
+        }
+
+        if (slot >= 18 && slot < 36) {
+            int kitSlot = slot - 17;
+            Kit kit = plugin.getKitManager().getKitBySlot(player.getUniqueId(), kitSlot);
+            if (kit != null) {
+                plugin.getGuiManager().openKitEditorGUI(player, kit);
+            } else {
+                player.closeInventory();
+                player.sendMessage(ColorUtil.colorizePrefix("&eHold the items you want in your kit, then type &f/kit create " + kitSlot));
+            }
             return;
         }
     }

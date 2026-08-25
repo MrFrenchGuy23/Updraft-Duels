@@ -104,6 +104,9 @@ permissions:
   updraftduels.kit.managepublic:
     description: Manage pre-made kits
     default: op
+  updraftduels.kit.editkitroom:
+    description: Edit the kit room contents
+    default: op
   updraftduels.party:
     description: Use party system
     default: true

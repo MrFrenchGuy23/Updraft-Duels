@@ -169,6 +169,10 @@ public class DatabaseManager {
                 "end_time BIGINT, " +
                 "active BOOLEAN DEFAULT TRUE)");
 
+        stmt.executeUpdate("CREATE TABLE IF NOT EXISTS kit_data (" +
+                "id TEXT PRIMARY KEY, " +
+                "data TEXT)");
+
         try {
             stmt.executeUpdate("ALTER TABLE duel_stats ADD COLUMN playtime BIGINT DEFAULT 0");
         } catch (SQLException ignored) {
@@ -756,6 +760,52 @@ public class DatabaseManager {
                 e.printStackTrace();
             }
             return history;
+        }, gracefulExecutor);
+    }
+
+    public CompletableFuture<Void> saveKitDataByID(String id, String data) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                PreparedStatement ps = connection.prepareStatement(
+                        insertOrReplace() + " INTO kit_data (id, data) VALUES (?, ?)");
+                ps.setString(1, id);
+                ps.setString(2, data);
+                ps.executeUpdate();
+                ps.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }, gracefulExecutor);
+    }
+
+    public String getKitDataByID(String id) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("SELECT data FROM kit_data WHERE id = ?");
+            ps.setString(1, id);
+            ResultSet rs = ps.executeQuery();
+            String data = "error";
+            if (rs.next()) {
+                data = rs.getString("data");
+            }
+            rs.close();
+            ps.close();
+            return data;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "error";
+        }
+    }
+
+    public CompletableFuture<Void> deleteKitDataByID(String id) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                PreparedStatement ps = connection.prepareStatement("DELETE FROM kit_data WHERE id = ?");
+                ps.setString(1, id);
+                ps.executeUpdate();
+                ps.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }, gracefulExecutor);
     }
 }
