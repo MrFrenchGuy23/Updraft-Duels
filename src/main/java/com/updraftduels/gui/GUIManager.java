@@ -190,7 +190,15 @@ public class GUIManager {
     }
 
     private ItemStack glassPane() {
+        return new ItemBuilder(Material.GRAY_STAINED_GLASS_PANE).name(" ").build();
+    }
+
+    private ItemStack glassPaneDark() {
         return new ItemBuilder(Material.BLACK_STAINED_GLASS_PANE).name(" ").build();
+    }
+
+    private ItemStack glassPaneAccent() {
+        return new ItemBuilder(Material.LIGHT_BLUE_STAINED_GLASS_PANE).name(" ").build();
     }
 
     private void fillWithGlass(Inventory gui, int startSlot) {
@@ -201,17 +209,49 @@ public class GUIManager {
         }
     }
 
+    private void fillWithGlassDark(Inventory gui, int startSlot) {
+        for (int i = startSlot; i < gui.getSize(); i++) {
+            if (gui.getItem(i) == null || gui.getItem(i).getType() == Material.AIR) {
+                gui.setItem(i, glassPaneDark());
+            }
+        }
+    }
+
+    private void fillBorder(Inventory gui) {
+        int size = gui.getSize();
+        for (int i = 0; i < size; i++) {
+            if (i < 9 || i >= size - 9 || i % 9 == 0 || i % 9 == 8) {
+                if (gui.getItem(i) == null || gui.getItem(i).getType() == Material.AIR) {
+                    gui.setItem(i, glassPaneDark());
+                }
+            }
+        }
+    }
+
     private ItemStack backButton() {
         return new ItemBuilder(Material.ARROW)
-                .name("&7Back")
-                .lore("&7Return to previous menu")
+                .name("&7&lBack")
+                .lore("", "&7Click to return")
                 .build();
     }
 
     private ItemStack closeButton() {
         return new ItemBuilder(Material.BARRIER)
-                .name("&cClose")
+                .name("&c&lClose")
+                .lore("", "&7Click to close")
                 .build();
+    }
+
+    private String LoreSeparator() {
+        return "&8&m                              ";
+    }
+
+    private String loreLine(String text) {
+        return "&7" + text;
+    }
+
+    private String valueLine(String text) {
+        return "&f" + text;
     }
 
     public List<Kit> getVisiblePublicKits(Player player) {
@@ -226,13 +266,13 @@ public class GUIManager {
         Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(DUEL_KIT_TYPE_TITLE));
 
         gui.setItem(11, new ItemBuilder(Material.CHEST)
-                .name("&fPublic Kits")
-                .lore("&7Choose from public kits")
+                .name("&f&lPublic Kits")
+                .lore("", "&7Choose from public kits", "&7created by admins", "", "&8&m                              ")
                 .build());
 
         gui.setItem(15, new ItemBuilder(Material.ENDER_CHEST)
-                .name("&fPersonal Kits")
-                .lore("&7Use your own saved kits")
+                .name("&f&lPersonal Kits")
+                .lore("", "&7Use your own saved kits", "&7for this duel", "", "&8&m                              ")
                 .build());
 
         gui.setItem(22, closeButton());
@@ -251,8 +291,9 @@ public class GUIManager {
             Material material = Material.matchMaterial(kit.getIconMaterial());
             if (material == null) material = Material.CHEST;
             gui.setItem(slot++, new ItemBuilder(material)
-                    .name("&f" + kit.getName())
-                    .lore("&7Prefix: &f" + (kit.getPrefix().isEmpty() ? "None" : kit.getPrefix()))
+                    .name("&f&l" + kit.getName())
+                    .lore("", "&7Prefix: &f" + (kit.getPrefix().isEmpty() ? "None" : kit.getPrefix()),
+                            "", "&8&m                              ")
                     .hideVanillaLore()
                     .build());
         }
@@ -273,8 +314,9 @@ public class GUIManager {
             Material material = Material.matchMaterial(kit.getIconMaterial());
             if (material == null) material = Material.CHEST;
             gui.setItem(slot++, new ItemBuilder(material)
-                    .name("&f" + kit.getName())
-                    .lore("&7Prefix: &f" + (kit.getPrefix().isEmpty() ? "None" : kit.getPrefix()))
+                    .name("&f&l" + kit.getName())
+                    .lore("", "&7Prefix: &f" + (kit.getPrefix().isEmpty() ? "None" : kit.getPrefix()),
+                            "", "&8&m                              ")
                     .hideVanillaLore()
                     .build());
         }
@@ -289,28 +331,28 @@ public class GUIManager {
         Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(DUEL_ROUNDS_TITLE));
 
         gui.setItem(10, new ItemBuilder(Material.IRON_SWORD)
-                .name("&f1 Round")
-                .lore("&7A quick single round")
+                .name("&f&l1 Round")
+                .lore("", "&7A quick single round", "", "&8&m                              ")
                 .build());
         gui.setItem(11, new ItemBuilder(Material.STONE_SWORD)
-                .name("&f2 Rounds")
-                .lore("&7Two rounds")
+                .name("&f&l2 Rounds")
+                .lore("", "&7Two rounds", "", "&8&m                              ")
                 .build());
         gui.setItem(12, new ItemBuilder(Material.DIAMOND_SWORD)
-                .name("&f4 Rounds")
-                .lore("&7Four rounds")
+                .name("&f&l4 Rounds")
+                .lore("", "&7Four rounds", "", "&8&m                              ")
                 .build());
         gui.setItem(13, new ItemBuilder(Material.NETHERITE_SWORD)
-                .name("&f6 Rounds")
-                .lore("&7Six rounds")
+                .name("&f&l6 Rounds")
+                .lore("", "&7Six rounds", "", "&8&m                              ")
                 .build());
         gui.setItem(14, new ItemBuilder(Material.MACE)
-                .name("&f10 Rounds")
-                .lore("&7Ten rounds")
+                .name("&f&l10 Rounds")
+                .lore("", "&7Ten rounds", "", "&8&m                              ")
                 .build());
         gui.setItem(15, new ItemBuilder(Material.WRITABLE_BOOK)
-                .name("&dCustom")
-                .lore("&7Type a number in chat")
+                .name("&d&lCustom")
+                .lore("", "&7Type a number in chat", "", "&8&m                              ")
                 .build());
 
         gui.setItem(18, backButton());
@@ -359,7 +401,7 @@ public class GUIManager {
                 boolean isActive = queueSize > 0 || fightingCount > 0;
 
                 ItemBuilder builder = new ItemBuilder(material)
-                        .name("&f" + gamemode)
+                        .name("&f&l" + gamemode)
                         .lore(buildQueueLore(gamemode))
                         .hideVanillaLore();
 
@@ -380,11 +422,13 @@ public class GUIManager {
 
     private List<String> buildQueueLore(String gamemode) {
         List<String> lore = new ArrayList<>();
+        lore.add("");
         lore.add("&7Fighting: &f" + plugin.getQueueManager().getGamemodeFightingCount(gamemode));
         lore.add("&7Queuing: &f" + plugin.getQueueManager().getGamemodeQueueSize(gamemode));
         List<com.updraftduels.model.DuelPlayerStats> top = plugin.getQueueManager().getGamemodeTopQueued(gamemode, 5);
         if (!top.isEmpty()) {
             lore.add("");
+            lore.add("&8&m                              ");
             lore.add("&e&lTop Players");
             for (int i = 0; i < top.size(); i++) {
                 com.updraftduels.model.DuelPlayerStats s = top.get(i);
@@ -392,6 +436,8 @@ public class GUIManager {
                 lore.add("&7" + (i + 1) + ". " + rank + " &f" + s.getName());
             }
         }
+        lore.add("");
+        lore.add("&8&m                              ");
         return lore;
     }
 
@@ -407,28 +453,28 @@ public class GUIManager {
             Kit kit = plugin.getKitManager().getKitBySlot(player.getUniqueId(), kitSlot);
             if (kit != null) {
                 gui.setItem(i, new ItemBuilder(Material.CHEST)
-                        .name("&bKit " + kitSlot)
-                        .lore("&7Left click to load", "&7Right click to edit")
+                        .name("&b&lKit " + kitSlot)
+                        .lore("", "&7Left click to load", "&7Right click to edit", "", "&8&m                              ")
                         .build());
             } else {
                 gui.setItem(i, new ItemBuilder(Material.CHEST)
-                        .name("&bKit " + kitSlot)
-                        .lore("&7Click to create")
+                        .name("&7&lKit " + kitSlot)
+                        .lore("", "&7Click to create", "", "&8&m                              ")
                         .build());
             }
         }
 
         for (int i = 18; i < 27; i++) {
             gui.setItem(i, new ItemBuilder(Material.KNOWLEDGE_BOOK)
-                    .name("&bKit " + (i - 17))
-                    .lore("&7Click to edit")
+                    .name("&b&lKit " + (i - 17))
+                    .lore("", "&7Click to edit", "", "&8&m                              ")
                     .build());
         }
 
         for (int i = 27; i < 36; i++) {
             gui.setItem(i, new ItemBuilder(Material.BOOK)
-                    .name("&bKit " + (i - 26))
-                    .lore("&7Click to edit")
+                    .name("&b&lKit " + (i - 26))
+                    .lore("", "&7Click to edit", "", "&8&m                              ")
                     .build());
         }
 
@@ -441,32 +487,33 @@ public class GUIManager {
         gui.setItem(43, glassPane());
 
         gui.setItem(37, new ItemBuilder(Material.NETHER_STAR)
-                .name("&bKIT ROOM")
+                .name("&b&lKIT ROOM")
+                .lore("", "&7Open the kit room", "&7to manage your kits", "", "&8&m                              ")
                 .build());
 
         gui.setItem(38, new ItemBuilder(Material.BOOKSHELF)
-                .name("&ePREMADE KITS")
+                .name("&e&lPREMADE KITS")
+                .lore("", "&7Browse premade kits", "&7for each gamemode", "", "&8&m                              ")
                 .build());
 
         gui.setItem(39, new ItemBuilder(Material.OAK_SIGN)
-                .name("&bINFO")
-                .lore("&7Click a kit slot to load your kit",
-                        "&7Right click or click the book to edit",
-                        "&7Shift click to import your inventory")
+                .name("&7&lINFO")
+                .lore("", "&7Left click to load", "&7Right click to edit", "&7Shift click to import", "", "&8&m                              ")
                 .build());
 
         gui.setItem(41, new ItemBuilder(Material.REDSTONE_BLOCK)
-                .name("&cCLEAR INVENTORY")
-                .lore("&7Shift click")
+                .name("&c&lCLEAR INVENTORY")
+                .lore("", "&7Shift click to clear", "", "&8&m                              ")
                 .build());
 
         gui.setItem(42, new ItemBuilder(Material.COMPASS)
-                .name("&bSHARE KITS")
-                .lore("&7/kits share <slot>")
+                .name("&b&lSHARE KITS")
+                .lore("", "&7/kits share <slot>", "", "&8&m                              ")
                 .build());
 
         gui.setItem(43, new ItemBuilder(Material.EXPERIENCE_BOTTLE)
-                .name("&bREPAIR ITEMS")
+                .name("&b&lREPAIR ITEMS")
+                .lore("", "&7Click to repair all", "&7items in your inventory", "", "&8&m                              ")
                 .build());
 
         player.openInventory(gui);
@@ -546,22 +593,22 @@ public class GUIManager {
                 ItemStack head = new ItemStack(Material.PLAYER_HEAD);
                 if (head.getItemMeta() instanceof org.bukkit.inventory.meta.SkullMeta skullMeta) {
                     skullMeta.setOwningPlayer(target);
-                    skullMeta.setDisplayName(ColorUtil.colorize("&b" + target.getName()));
+                    skullMeta.setDisplayName(ColorUtil.colorize("&b&l" + target.getName()));
                     skullMeta.setLore(profileHeadLore(stats));
                     head.setItemMeta(skullMeta);
                 }
                 gui.setItem(4, head);
 
                 ItemStack[] statsItems = {
-                        statItem(Material.EMERALD, "&aWins", stats.getWins()),
-                        statItem(Material.REDSTONE, "&cLosses", stats.getLosses()),
-                        statItem(Material.GOLDEN_APPLE, "&6Win Rate", String.format("%.1f%%", stats.getWinRate())),
-                        statItem(Material.NETHER_STAR, "&bELO", stats.getElo()),
-                        statItem(Material.DIAMOND, "&fRank", stats.getRankTier()),
-                        statItem(Material.IRON_SWORD, "&eKills", stats.getKills()),
-                        statItem(Material.FIRE_CHARGE, "&dWin Streak", stats.getWinStreak()),
-                        statItem(Material.BLAZE_POWDER, "&cBest Streak", stats.getBestWinStreak()),
-                        statItem(Material.BOOK, "&7Games Played", stats.getGamesPlayed())
+                        statItem(Material.EMERALD_BLOCK, "&a&lWins", stats.getWins()),
+                        statItem(Material.REDSTONE_BLOCK, "&c&lLosses", stats.getLosses()),
+                        statItem(Material.GOLDEN_APPLE, "&6&lWin Rate", String.format("%.1f%%", stats.getWinRate())),
+                        statItem(Material.NETHER_STAR, "&b&lELO", stats.getElo()),
+                        statItem(Material.DIAMOND_BLOCK, "&f&lRank", stats.getRankTier()),
+                        statItem(Material.IRON_SWORD, "&e&lKills", stats.getKills()),
+                        statItem(Material.FIRE_CHARGE, "&d&lWin Streak", stats.getWinStreak()),
+                        statItem(Material.BLAZE_POWDER, "&c&lBest Streak", stats.getBestWinStreak()),
+                        statItem(Material.BOOK, "&7&lGames Played", stats.getGamesPlayed())
                 };
                 for (int i = 0; i < statsItems.length; i++) {
                     gui.setItem(9 + i, statsItems[i]);
@@ -576,7 +623,7 @@ public class GUIManager {
     private ItemStack statItem(Material material, String name, Object value) {
         return new ItemBuilder(material)
                 .name(name)
-                .lore("&7" + value)
+                .lore("", "&7" + value, "", "&8&m                              ")
                 .build();
     }
 
@@ -587,13 +634,14 @@ public class GUIManager {
         lore.add("&7ELO: &f" + stats.getElo());
         lore.add(rankProgress(stats.getElo()));
         lore.add("");
+        lore.add("&8&m                              ");
         lore.add("&7Wins: &f" + stats.getWins());
-        lore.add("&7Losses: &f" + stats.getLosses());
+        lore.add("&7Losses: &c" + stats.getLosses());
         lore.add("&7Win Rate: &f" + String.format("%.1f%%", stats.getWinRate()));
-        lore.add("&7Kills: &f" + stats.getKills());
-        lore.add("&7Deaths: &f" + stats.getDeaths());
-        lore.add("&7Win Streak: &f" + stats.getWinStreak());
-        lore.add("&7Best Streak: &f" + stats.getBestWinStreak());
+        lore.add("&7Kills: &a" + stats.getKills());
+        lore.add("&7Deaths: &c" + stats.getDeaths());
+        lore.add("&7Win Streak: &d" + stats.getWinStreak());
+        lore.add("&7Best Streak: &6" + stats.getBestWinStreak());
         lore.add("&7Games Played: &f" + stats.getGamesPlayed());
         return lore.stream().map(ColorUtil::colorize).toList();
     }
@@ -633,78 +681,83 @@ public class GUIManager {
             case BOTH -> "&bBoth";
         };
         gui.setItem(10, new ItemBuilder(mode == QueueManager.MatchmakingMode.COMPETITIVE ? Material.NETHERITE_INGOT : Material.GOLD_INGOT)
-                .name("&6Matchmaking: " + modeName)
-                .lore("",
-                        "&7Casual: No ELO changes",
-                        "&7Competitive: ELO on the line",
-                        "&7Both: Queue accepts all modes")
+                .name("&6&lMatchmaking")
+                .lore("", "&7Current: " + modeName, "",
+                        "&7Casual: No ELO changes", "&7Competitive: ELO on the line", "&7Both: Queue accepts all modes",
+                        "", "&8&m                              ")
                 .build());
 
         boolean autoGG = plugin.isAutoGG(player.getUniqueId());
-        gui.setItem(11, new ItemBuilder(autoGG ? Material.GOLD_INGOT : Material.REDSTONE)
-                .name("&fAuto-GG: " + (autoGG ? "&aON" : "&cOFF"))
-                .lore("",
-                        "&7Automatically send \"GG\" at the end of each duel.")
+        gui.setItem(11, new ItemBuilder(autoGG ? Material.LIME_DYE : Material.GRAY_DYE)
+                .name("&f&lAuto-GG")
+                .lore("", "&7Status: " + (autoGG ? "&aON" : "&cOFF"), "",
+                        "&7Automatically send \"GG\"", "&7at the end of each duel.",
+                        "", "&8&m                              ")
                 .build());
 
         boolean autoRequeue = plugin.isAutoRequeue(player.getUniqueId());
-        gui.setItem(12, new ItemBuilder(autoRequeue ? Material.ENDER_PEARL : Material.SLIME_BALL)
-                .name("&fAuto Requeue: " + (autoRequeue ? "&aON" : "&cOFF"))
-                .lore("",
-                        "&7Automatically rejoin queue after a duel ends.")
+        gui.setItem(12, new ItemBuilder(autoRequeue ? Material.LIME_DYE : Material.GRAY_DYE)
+                .name("&f&lAuto Requeue")
+                .lore("", "&7Status: " + (autoRequeue ? "&aON" : "&cOFF"), "",
+                        "&7Automatically rejoin queue", "&7after a duel ends.",
+                        "", "&8&m                              ")
                 .build());
 
         boolean partyInvites = plugin.isPartyInvites(player.getUniqueId());
-        gui.setItem(13, new ItemBuilder(partyInvites ? Material.POPPY : Material.WITHER_ROSE)
-                .name("&fParty Invites: " + (partyInvites ? "&aON" : "&cOFF"))
-                .lore("",
-                        "&7Allow other players to send you party invites.")
+        gui.setItem(13, new ItemBuilder(partyInvites ? Material.LIME_DYE : Material.GRAY_DYE)
+                .name("&f&lParty Invites")
+                .lore("", "&7Status: " + (partyInvites ? "&aON" : "&cOFF"), "",
+                        "&7Allow other players to send", "&7you party invites.",
+                        "", "&8&m                              ")
                 .build());
 
         boolean spectatorEnabled = plugin.isSpectators(player.getUniqueId());
-        gui.setItem(14, new ItemBuilder(spectatorEnabled ? Material.ENDER_EYE : Material.CACTUS)
-                .name("&fSpectators: " + (spectatorEnabled ? "&aON" : "&cOFF"))
-                .lore("",
-                        "&7Allow others to spectate your duels.")
+        gui.setItem(14, new ItemBuilder(spectatorEnabled ? Material.LIME_DYE : Material.GRAY_DYE)
+                .name("&f&lSpectators")
+                .lore("", "&7Status: " + (spectatorEnabled ? "&aON" : "&cOFF"), "",
+                        "&7Allow others to spectate", "&7your duels.",
+                        "", "&8&m                              ")
                 .build());
 
         boolean sbEnabled = plugin.isScoreboard(player.getUniqueId());
-        gui.setItem(15, new ItemBuilder(sbEnabled ? Material.MAP : Material.GLASS_PANE)
-                .name("&fScoreboard: " + (sbEnabled ? "&aON" : "&cOFF"))
-                .lore("",
-                        "&7Toggle the in-game scoreboard display.")
+        gui.setItem(15, new ItemBuilder(sbEnabled ? Material.LIME_DYE : Material.GRAY_DYE)
+                .name("&f&lScoreboard")
+                .lore("", "&7Status: " + (sbEnabled ? "&aON" : "&cOFF"), "",
+                        "&7Toggle the in-game", "&7scoreboard display.",
+                        "", "&8&m                              ")
                 .build());
 
         boolean mentions = plugin.isChatMentions(player.getUniqueId());
-        gui.setItem(16, new ItemBuilder(mentions ? Material.NAME_TAG : Material.BELL)
-                .name("&fChat Mentions: " + (mentions ? "&aON" : "&cOFF"))
-                .lore("",
-                        "&7Receive a sound when someone mentions you in chat.")
+        gui.setItem(16, new ItemBuilder(mentions ? Material.LIME_DYE : Material.GRAY_DYE)
+                .name("&f&lChat Mentions")
+                .lore("", "&7Status: " + (mentions ? "&aON" : "&cOFF"), "",
+                        "&7Receive a sound when someone", "&7mentions you in chat.",
+                        "", "&8&m                              ")
                 .build());
 
         boolean duelReqs = plugin.isDuelRequests(player.getUniqueId());
-        gui.setItem(17, new ItemBuilder(duelReqs ? Material.WRITTEN_BOOK : Material.BOOK)
-                .name("&fDuel Requests: " + (duelReqs ? "&aON" : "&cOFF"))
-                .lore("",
-                        "&7Allow other players to send you duel requests.")
+        gui.setItem(17, new ItemBuilder(duelReqs ? Material.LIME_DYE : Material.GRAY_DYE)
+                .name("&f&lDuel Requests")
+                .lore("", "&7Status: " + (duelReqs ? "&aON" : "&cOFF"), "",
+                        "&7Allow other players to send", "&7you duel requests.",
+                        "", "&8&m                              ")
                 .build());
 
         boolean pingLimitEnabled = plugin.getConfig().getBoolean("ping-limit.enabled", false);
         int maxPing = plugin.getConfig().getInt("ping-limit.max-ping", 200);
-        gui.setItem(28, new ItemBuilder(pingLimitEnabled ? Material.EMERALD : Material.REDSTONE)
-                .name("&fPing Limit: " + (pingLimitEnabled ? "&aON" : "&cOFF"))
-                .lore("",
+        gui.setItem(28, new ItemBuilder(pingLimitEnabled ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK)
+                .name("&f&lPing Limit")
+                .lore("", "&7Status: " + (pingLimitEnabled ? "&aON" : "&cOFF"), "",
                         "&7Max ping: &f" + maxPing + "ms",
-                        "&7Players with higher ping won't be matched.",
-                        "",
-                        "&7Click to toggle")
+                        "&7Players with higher ping", "&7won't be matched.",
+                        "", "&8&m                              ")
                 .build());
 
         gui.setItem(31, new ItemBuilder(Material.COMPASS)
-                .name("&fMax Ping: &e" + maxPing + "ms")
-                .lore("",
-                        "&7Click to cycle ping limit:",
-                        "&7100ms &7| &f200ms &7| &7300ms &7| &7500ms &7| &7Off")
+                .name("&f&lMax Ping: &e" + maxPing + "ms")
+                .lore("", "&7Click to cycle ping limit:", "",
+                        "&7100ms &7| &f200ms &7| &7300ms &7| &7500ms &7| &7Off",
+                        "", "&8&m                              ")
                 .build());
 
         gui.setItem(49, closeButton());
@@ -724,11 +777,12 @@ public class GUIManager {
             if (material == null) material = Material.MAP;
             boolean isSelected = ruleset.getId().equals(selected);
             gui.setItem(slot++, new ItemBuilder(material)
-                    .name("&f" + ruleset.getDisplayName())
-                    .lore("&7" + ruleset.getDescription(),
+                    .name((isSelected ? "&a" : "&f") + "&l" + ruleset.getDisplayName())
+                    .lore("", "&7" + ruleset.getDescription(),
                             "",
-                            isSelected ? "&aSelected" : "&7Click to select",
-                            "&8Shift-click for details")
+                            isSelected ? "&a&lSELECTED" : "&7Click to select",
+                            "&8Shift-click for details",
+                            "", "&8&m                              ")
                     .build());
         }
 
@@ -740,11 +794,12 @@ public class GUIManager {
         Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(RULESET_DETAILS_TITLE));
 
         gui.setItem(4, new ItemBuilder(Material.BOOK)
-                .name("&f" + ruleset.getDisplayName())
+                .name("&f&l" + ruleset.getDisplayName())
                 .lore("",
                         "&7" + ruleset.getDescription(),
                         "",
-                        "&7ID: &f" + ruleset.getId())
+                        "&7ID: &f" + ruleset.getId(),
+                        "", "&8&m                              ")
                 .build());
 
         ItemStack[] flags = {
@@ -769,8 +824,8 @@ public class GUIManager {
 
     private ItemStack flagItem(Material material, String label, boolean enabled) {
         return new ItemBuilder(material)
-                .name((enabled ? "&a" : "&c") + label)
-                .lore(enabled ? "&aEnabled" : "&cDisabled")
+                .name((enabled ? "&a" : "&c") + "&l" + label)
+                .lore("", enabled ? "&a&lEnabled" : "&c&lDisabled", "", "&8&m                              ")
                 .build();
     }
 
@@ -785,10 +840,11 @@ public class GUIManager {
 
         String partyName = party.getName() != null ? party.getName() : "Party";
         gui.setItem(4, new ItemBuilder(Material.WHITE_BANNER)
-                .name("&9" + partyName)
+                .name("&9&l" + partyName)
                 .lore("",
                         "&7Members: &f" + party.getMembers().size(),
-                        "&7Ready: &f" + party.getReadyMembers().size() + "&7/" + party.getMembers().size())
+                        "&7Ready: &f" + party.getReadyMembers().size() + "&7/" + party.getMembers().size(),
+                        "", "&8&m                              ")
                 .build());
 
         int slot = 10;
@@ -800,11 +856,12 @@ public class GUIManager {
             String skullOwner = name;
             boolean ready = party.getReadyMembers().contains(memberUUID);
             ItemBuilder builder = new ItemBuilder(Material.PLAYER_HEAD)
-                    .name("&f" + name)
+                    .name("&f&l" + name)
                     .lore("",
-                            party.isLeader(memberUUID) ? "&bLeader" : "&7Member",
-                            ready ? "&aReady" : "&7Not ready")
-                    .lore("", "&7Click to kick");
+                            party.isLeader(memberUUID) ? "&b&lLeader" : "&7Member",
+                            ready ? "&a&lReady" : "&7Not ready",
+                            "", "&7Click to kick",
+                            "", "&8&m                              ");
             builder.meta(meta -> {
                 if (meta instanceof org.bukkit.inventory.meta.SkullMeta skull) {
                     if (member != null) skull.setOwningPlayer(member);
@@ -820,26 +877,29 @@ public class GUIManager {
             String name = Bukkit.getOfflinePlayer(inviteeUUID).getName();
             if (name == null) name = inviteeUUID.toString().substring(0, 8);
             gui.setItem(inviteSlot++, new ItemBuilder(Material.GRAY_DYE)
-                    .name("&7" + name)
-                    .lore("&7Pending invite")
+                    .name("&7&l" + name)
+                    .lore("", "&7Pending invite", "", "&8&m                              ")
                     .build());
         }
 
         boolean isLeader = party.isLeader(player.getUniqueId());
         gui.setItem(49, new ItemBuilder(Material.BARRIER)
-                .name("&cLeave Party")
+                .name("&c&lLeave Party")
+                .lore("", "&7Click to leave", "", "&8&m                              ")
                 .build());
         if (isLeader) {
             gui.setItem(50, new ItemBuilder(Material.REDSTONE_BLOCK)
-                    .name("&cDisband Party")
+                    .name("&c&lDisband Party")
+                    .lore("", "&7Click to disband", "", "&8&m                              ")
                     .build());
         }
-        gui.setItem(51, new ItemBuilder(Material.EMERALD)
-                .name("&aReady")
+        gui.setItem(51, new ItemBuilder(Material.EMERALD_BLOCK)
+                .name("&a&lReady")
                 .lore("",
                         "&7Mark yourself ready",
                         "",
-                        party.getReadyMembers().contains(player.getUniqueId()) ? "&aYou are ready" : "&7Not ready")
+                        party.getReadyMembers().contains(player.getUniqueId()) ? "&a&lYou are ready" : "&7&lNot ready",
+                        "", "&8&m                              ")
                 .build());
 
         fillWithGlass(gui, 0);
@@ -859,9 +919,10 @@ public class GUIManager {
             String leaderName = nameOf(party.getLeaderUUID());
 
             gui.setItem(slot++, new ItemBuilder(Material.PLAYER_HEAD)
-                    .name("&f" + leaderName)
-                    .lore("&7Status: " + (inFight ? "&cIn Fight" : "&aAvailable"),
-                            "&7Players: &f" + party.getSize())
+                    .name("&f&l" + leaderName)
+                    .lore("", "&7Status: " + (inFight ? "&c&lIn Fight" : "&a&lAvailable"),
+                            "&7Players: &f" + party.getSize(),
+                            "", "&8&m                              ")
                     .hideVanillaLore()
                     .build());
         }
@@ -876,16 +937,16 @@ public class GUIManager {
         Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(LEADERBOARD_TITLE));
 
         gui.setItem(10, new ItemBuilder(Material.DIAMOND_SWORD)
-                .name("&fKills")
-                .lore("&7Top 10 by kills")
+                .name("&f&lKills")
+                .lore("", "&7Top 10 by kills", "", "&8&m                              ")
                 .build());
         gui.setItem(12, new ItemBuilder(Material.SKELETON_SKULL)
-                .name("&fDeaths")
-                .lore("&7Top 10 by deaths")
+                .name("&f&lDeaths")
+                .lore("", "&7Top 10 by deaths", "", "&8&m                              ")
                 .build());
         gui.setItem(14, new ItemBuilder(Material.CLOCK)
-                .name("&fPlaytime")
-                .lore("&7Top 10 by playtime")
+                .name("&f&lPlaytime")
+                .lore("", "&7Top 10 by playtime", "", "&8&m                              ")
                 .build());
 
         fillWithGlass(gui, 0);
@@ -923,7 +984,7 @@ public class GUIManager {
                     };
                     gui.setItem(slot++, new ItemBuilder(medal)
                             .name("&f#" + place + " " + stats.getName())
-                            .lore(value)
+                            .lore("", value, "", "&8&m                              ")
                             .build());
                     place++;
                 }
@@ -939,23 +1000,23 @@ public class GUIManager {
         Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(TOURNAMENT_FORMAT_TITLE));
 
         gui.setItem(10, new ItemBuilder(Material.PLAYER_HEAD)
-                .name("&f1v1")
-                .lore("&7Solo tournament")
+                .name("&f&l1v1")
+                .lore("", "&7Solo tournament", "", "&8&m                              ")
                 .hideVanillaLore()
                 .build());
         gui.setItem(11, new ItemBuilder(Material.SKELETON_SKULL)
-                .name("&f2v2")
-                .lore("&7Duos tournament")
+                .name("&f&l2v2")
+                .lore("", "&7Duos tournament", "", "&8&m                              ")
                 .hideVanillaLore()
                 .build());
         gui.setItem(12, new ItemBuilder(Material.ZOMBIE_HEAD)
-                .name("&f3v3")
-                .lore("&7Trios tournament")
+                .name("&f&l3v3")
+                .lore("", "&7Trios tournament", "", "&8&m                              ")
                 .hideVanillaLore()
                 .build());
         gui.setItem(13, new ItemBuilder(Material.CREEPER_HEAD)
-                .name("&f4v4")
-                .lore("&7Squads tournament")
+                .name("&f&l4v4")
+                .lore("", "&7Squads tournament", "", "&8&m                              ")
                 .hideVanillaLore()
                 .build());
 
@@ -971,16 +1032,17 @@ public class GUIManager {
         }        Inventory gui = Bukkit.createInventory(null, 54, ColorUtil.colorize(BRACKET_TITLE));
 
         String state = switch (tournament.getState()) {
-            case RECRUITING -> "&aRecruiting";
-            case IN_PROGRESS -> "&eIn Progress";
-            case FINISHED -> "&cFinished";
+            case RECRUITING -> "&a&lRecruiting";
+            case IN_PROGRESS -> "&e&lIn Progress";
+            case FINISHED -> "&c&lFinished";
         };
         gui.setItem(4, new ItemBuilder(Material.NETHER_STAR)
-                .name("&5" + tournament.getName())
+                .name("&5&l" + tournament.getName())
                 .lore("",
                         "&7State: " + state,
                         "&7Round: &f" + tournament.getCurrentRound() + "&7/" + tournament.getTotalRounds(),
-                        "&7Players: &f" + tournament.getParticipants().size())
+                        "&7Players: &f" + tournament.getParticipants().size(),
+                        "", "&8&m                              ")
                 .build());
 
         int slot = 9;
@@ -991,10 +1053,11 @@ public class GUIManager {
             String winner = match.getWinner() != null ? nameOf(match.getWinner()) : "&7-";
 
             ItemBuilder builder = new ItemBuilder(match.isPlayed() ? Material.GOLDEN_APPLE : Material.MAP)
-                    .name("&6Round " + match.getRound())
+                    .name("&6&lRound " + match.getRound())
                     .lore("",
                             "&f" + p1 + " &7vs &f" + p2,
-                            "&7Winner: " + (match.isPlayed() ? "&a" + winner : "&7-"));
+                            "&7Winner: " + (match.isPlayed() ? "&a" + winner : "&7-"),
+                            "", "&8&m                              ");
             if (match.isPlayed()) builder.glow();
             gui.setItem(slot++, builder.build());
         }
@@ -1032,8 +1095,10 @@ public class GUIManager {
             if (slot >= size) break;
             Duel duel = plugin.getDuelManager().getDuelOf(target.getUniqueId());
             ItemBuilder builder = new ItemBuilder(Material.PLAYER_HEAD)
-                    .name("&b" + target.getName())
-                    .lore(duel != null ? "&7Duel in &f" + duel.getArenaName() + " &7(" + duel.getFormattedDuration() + ")" : "&7Not in a duel");
+                    .name("&b&l" + target.getName())
+                    .lore("", duel != null ? "&7Duel in &f" + duel.getArenaName() + " &7(" + duel.getFormattedDuration() + ")" : "&7Not in a duel",
+                            "", "&7Click to spectate",
+                            "", "&8&m                              ");
             builder.meta(meta -> {
                 if (meta instanceof org.bukkit.inventory.meta.SkullMeta skull) {
                     skull.setOwningPlayer(target);
@@ -1059,11 +1124,12 @@ public class GUIManager {
             int votes = session.getVoteCount(arena);
             boolean votedThis = arena.equals(playerVote);
             ItemBuilder builder = new ItemBuilder(VOTE_WOOL[i])
-                    .name("&f" + arena)
+                    .name("&f&l" + arena)
                     .lore("",
                             "&7Votes: &f" + votes,
                             "",
-                            votedThis ? "&aYour vote" : "&7Click to vote");
+                            votedThis ? "&a&lYour vote" : "&7Click to vote",
+                            "", "&8&m                              ");
             if (votedThis) builder.glow();
             gui.setItem(i, builder.build());
         }
@@ -1082,23 +1148,27 @@ public class GUIManager {
         Inventory gui = Bukkit.createInventory(null, 27, ColorUtil.colorize(COSMETICS_TITLE));
 
         gui.setItem(10, new ItemBuilder(Material.LIGHTNING_ROD)
-                .name("&fKill Effect")
-                .lore("&7Selected: &f" + formatMaterialName(plugin.getCosmeticsManager().getKillEffect(player.getUniqueId())))
+                .name("&f&lKill Effect")
+                .lore("", "&7Selected: &f" + formatMaterialName(plugin.getCosmeticsManager().getKillEffect(player.getUniqueId())),
+                        "", "&8&m                              ")
                 .build());
 
         gui.setItem(12, new ItemBuilder(Material.FIREWORK_ROCKET)
-                .name("&fVictory Animation")
-                .lore("&7Selected: &f" + formatMaterialName(plugin.getCosmeticsManager().getVictoryAnimation(player.getUniqueId())))
+                .name("&f&lVictory Animation")
+                .lore("", "&7Selected: &f" + formatMaterialName(plugin.getCosmeticsManager().getVictoryAnimation(player.getUniqueId())),
+                        "", "&8&m                              ")
                 .build());
 
         gui.setItem(14, new ItemBuilder(Material.ENDER_PEARL)
-                .name("&fTrail")
-                .lore("&7Selected: &f" + formatMaterialName(plugin.getCosmeticsManager().getTrail(player.getUniqueId())))
+                .name("&f&lTrail")
+                .lore("", "&7Selected: &f" + formatMaterialName(plugin.getCosmeticsManager().getTrail(player.getUniqueId())),
+                        "", "&8&m                              ")
                 .build());
 
         gui.setItem(16, new ItemBuilder(Material.WRITTEN_BOOK)
-                .name("&fDeath Message")
-                .lore("&7Selected: &f" + formatMaterialName(plugin.getCosmeticsManager().getDeathMessage(player.getUniqueId())))
+                .name("&f&lDeath Message")
+                .lore("", "&7Selected: &f" + formatMaterialName(plugin.getCosmeticsManager().getDeathMessage(player.getUniqueId())),
+                        "", "&8&m                              ")
                 .build());
 
         fillWithGlass(gui, 0);
@@ -1142,8 +1212,9 @@ public class GUIManager {
             if (slot >= 45) break;
             boolean selected = option.equalsIgnoreCase(current);
             ItemBuilder builder = new ItemBuilder(iconForCosmeticOption(option))
-                    .name((selected ? "&a" : "&f") + formatMaterialName(option))
-                    .lore(selected ? "&aSelected" : "&7Click to select");
+                    .name((selected ? "&a" : "&f") + "&l" + formatMaterialName(option))
+                    .lore("", selected ? "&a&lSELECTED" : "&7Click to select",
+                            "", "&8&m                              ");
             if (selected) builder.glow();
             gui.setItem(slot++, builder.build());
         }

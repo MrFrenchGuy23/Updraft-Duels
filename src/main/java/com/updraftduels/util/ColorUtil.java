@@ -50,4 +50,40 @@ public final class ColorUtil {
         if (text == null) return "";
         return ChatColor.stripColor(colorize(text));
     }
+
+    public static String gradient(String text, Color start, Color end) {
+        if (text == null || text.isEmpty()) return "";
+        int length = text.length();
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            float ratio = (float) i / (length - 1);
+            int r = (int) (start.getRed() + (end.getRed() - start.getRed()) * ratio);
+            int g = (int) (start.getGreen() + (end.getGreen() - start.getGreen()) * ratio);
+            int b = (int) (start.getBlue() + (end.getBlue() - start.getBlue()) * ratio);
+            Color c = new Color(Math.min(255, Math.max(0, r)), Math.min(255, Math.max(0, g)), Math.min(255, Math.max(0, b)));
+            net.md_5.bungee.api.ChatColor bungee = net.md_5.bungee.api.ChatColor.of(c);
+            result.append(bungee).append(text.charAt(i));
+        }
+        return result.toString();
+    }
+
+    public static String gradient(String text, String hexStart, String hexEnd) {
+        return gradient(text, Color.decode(hexStart), Color.decode(hexEnd));
+    }
+
+    public static String separator(int length) {
+        StringBuilder sb = new StringBuilder();
+        Color dark = Color.decode("#1a1a2e");
+        Color mid = Color.decode("#16213e");
+        for (int i = 0; i < length; i++) {
+            float ratio = (float) i / (length - 1);
+            int r = (int) (dark.getRed() + (mid.getRed() - dark.getRed()) * ratio);
+            int g = (int) (dark.getGreen() + (mid.getGreen() - dark.getGreen()) * ratio);
+            int b = (int) (dark.getBlue() + (mid.getBlue() - dark.getBlue()) * ratio);
+            Color c = new Color(Math.min(255, Math.max(0, r)), Math.min(255, Math.max(0, g)), Math.min(255, Math.max(0, b)));
+            net.md_5.bungee.api.ChatColor bungee = net.md_5.bungee.api.ChatColor.of(c);
+            sb.append(bungee).append("-");
+        }
+        return sb.toString();
+    }
 }
